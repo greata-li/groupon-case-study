@@ -113,6 +113,24 @@
   }
 }
 
+/* ── Context-specific surface tones ── */
+
+/* Merchant: warm off-white */
+.surface-merchant {
+  background-color: #fafaf8;
+}
+/* Admin: cool off-white */
+.surface-admin {
+  background-color: #f8f9fa;
+}
+/* Subtle inset for inputs — slightly darker than surroundings */
+.input-inset {
+  background-color: rgba(0,0,0,0.02);
+}
+.input-inset:focus {
+  background-color: #fff;
+}
+
 /* ── Smooth page transitions ── */
 @keyframes fadeInUp {
   from {
