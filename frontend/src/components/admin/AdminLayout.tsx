@@ -1,5 +1,5 @@
 import { NavLink, Outlet, Link } from 'react-router-dom';
-import { LayoutDashboard, FlaskConical, Database, ArrowLeft, Workflow } from 'lucide-react';
+import { LayoutDashboard, FlaskConical, Database, ArrowLeft, Sparkles } from 'lucide-react';
 
 const navItems = [
   { to: '/admin', label: 'Endpoints', icon: LayoutDashboard, end: true },
@@ -9,54 +9,44 @@ const navItems = [
 
 export function AdminLayout() {
   return (
-    <div className="min-h-screen surface-admin">
-      {/* Header — dense, functional */}
-      <header className="border-b border-[rgba(0,0,0,0.08)] bg-white">
-        <div className="mx-auto flex h-12 max-w-7xl items-center px-6">
-          {/* Left: back link */}
+    <div className="min-h-screen bg-[#fafaf8]">
+      {/* Header */}
+      <header className="border-b border-gray-200 bg-white">
+        <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-6">
           <Link
             to="/"
-            className="flex items-center gap-1.5 rounded-md border border-[rgba(0,0,0,0.08)] px-2.5 py-1 text-xs font-medium text-[#4b5563] transition-colors hover:bg-[rgba(0,0,0,0.02)] hover:text-[#111827]"
+            className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
           >
-            <ArrowLeft className="h-3 w-3" />
+            <ArrowLeft className="h-3.5 w-3.5" />
             Merchant View
           </Link>
-
-          <div className="mx-3 h-4 w-px bg-[rgba(0,0,0,0.08)]" />
-
-          {/* Center: title with pipeline icon */}
+          <div className="mx-1 h-5 w-px bg-gray-200" />
           <div className="flex items-center gap-2">
-            <Workflow className="h-4 w-4 text-groupon-green" />
-            <span className="font-heading text-sm font-bold text-[#111827]">
+            <Sparkles className="h-4 w-4 text-groupon-green" />
+            <h1 className="font-heading text-base font-bold text-gray-900">
               Pipeline Admin
-            </span>
-          </div>
-
-          {/* Right: pipeline status */}
-          <div className="ml-auto flex items-center gap-2">
-            <div className="h-1.5 w-1.5 rounded-full bg-groupon-green" />
-            <span className="text-[11px] font-medium text-[#9ca3af]">4 endpoints active</span>
+            </h1>
           </div>
         </div>
       </header>
 
-      {/* Nav tabs — tight, functional */}
-      <nav className="border-b border-[rgba(0,0,0,0.08)] bg-white">
-        <div className="mx-auto flex max-w-7xl px-6">
+      {/* Nav */}
+      <nav className="border-b border-gray-200 bg-white">
+        <div className="mx-auto flex max-w-7xl gap-1 px-6">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.to === '/admin'}
               className={({ isActive }) =>
-                `flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-[13px] font-medium transition-colors ${
+                `flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
                   isActive
                     ? 'border-groupon-green text-groupon-green'
-                    : 'border-transparent text-[#9ca3af] hover:text-[#4b5563]'
+                    : 'border-transparent text-gray-400 hover:text-gray-600'
                 }`
               }
             >
-              <item.icon className="h-3.5 w-3.5" />
+              <item.icon className="h-4 w-4" />
               {item.label}
             </NavLink>
           ))}
@@ -64,7 +54,7 @@ export function AdminLayout() {
       </nav>
 
       {/* Content */}
-      <main className="mx-auto max-w-7xl px-6 py-5">
+      <main className="mx-auto max-w-7xl px-6 py-6">
         <Outlet />
       </main>
     </div>
