@@ -24,7 +24,7 @@ export function Welcome() {
             <h1 className="font-heading text-[2.75rem] font-extrabold leading-[1.1] tracking-[-0.03em] text-gray-900 md:text-[3.5rem]">
               Get your first deal live
               <br />
-              in <span className="font-serif text-groupon-green" style={{ fontStyle: 'italic', fontStretch: 'normal' }}>5 minutes</span>
+              in <span className="text-groupon-green">5 minutes</span>
             </h1>
 
             <p className="mt-5 text-lg leading-relaxed text-gray-500 md:text-xl">

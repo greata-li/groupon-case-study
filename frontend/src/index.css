@@ -1,18 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/bricolage-grotesque";
-@import "@fontsource-variable/dm-sans";
-@import "@fontsource/instrument-serif";
+@import "@fontsource-variable/plus-jakarta-sans";
 
 @custom-variant dark (&:is(.dark *));
 
 /* ── Groupon Design System ── */
 
 @theme inline {
-  --font-heading: 'Bricolage Grotesque Variable', sans-serif;
-  --font-sans: 'DM Sans Variable', sans-serif;
-  --font-serif: 'Instrument Serif', serif;
+  --font-heading: 'Plus Jakarta Sans Variable', sans-serif;
+  --font-sans: 'Plus Jakarta Sans Variable', sans-serif;
 
   /* Groupon brand palette */
   --color-groupon-green: #53A318;
