@@ -1,0 +1,14 @@
+{
+  "id": "service_suggester",
+  "name": "Service Suggester",
+  "description": "Suggests common services and typical price ranges for a business based on its description and location. Lightweight call used during the intake flow to reduce typing.",
+  "model": "claude-haiku-4-5-20251001",
+  "provider": "anthropic",
+  "temperature": 0.3,
+  "max_tokens": 512,
+  "system_prompt": "You suggest services for a small business based on their description.\n\nGiven a business description and location, return a JSON array of suggested services the merchant likely offers.\n\nReturn ONLY valid JSON with this exact structure:\n{\n  \"suggestions\": [\n    { \"name\": \"Service Name\", \"typical_price_min\": 30, \"typical_price_max\": 70 },\n    { \"name\": \"Another Service\", \"typical_price_min\": 50, \"typical_price_max\": 100 }\n  ]\n}\n\nRules:\n- Suggest 4-8 services that are common for this type of business\n- Include a bundle/combo option if the business offers 2+ services\n- Price ranges should reflect the local market (e.g., Chicago prices differ from rural prices)\n- Order by most common/popular first\n- Service names should be specific (\"Brazilian Wax\" not \"Waxing\")\n- Keep names concise (under 30 characters)",
+  "sample_input": {
+    "business_description": "Waxing and lash services, two-chair studio, 12 years experience",
+    "location": "Chicago"
+  }
+}

@@ -1,5 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Settings, FlaskConical, Database } from 'lucide-react';
+import { NavLink, Outlet, Link } from 'react-router-dom';
+import { LayoutDashboard, FlaskConical, Database, ArrowLeft, Sparkles } from 'lucide-react';
 
 const navItems = [
   { to: '/admin', label: 'Endpoints', icon: LayoutDashboard, end: true },
@@ -9,18 +9,29 @@ const navItems = [
 
 export function AdminLayout() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#fafaf8]">
       {/* Header */}
-      <header className="border-b bg-card">
+      <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-6">
-          <Settings className="h-5 w-5 text-muted-foreground" />
-          <h1 className="text-lg font-semibold">AI Deal Creator — Admin</h1>
-          <span className="ml-auto text-sm text-muted-foreground">Pipeline Management</span>
+          <Link
+            to="/"
+            className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Merchant View
+          </Link>
+          <div className="mx-1 h-5 w-px bg-gray-200" />
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-groupon-green" />
+            <h1 className="font-heading text-base font-bold text-gray-900">
+              Pipeline Admin
+            </h1>
+          </div>
         </div>
       </header>
 
       {/* Nav */}
-      <nav className="border-b bg-card">
+      <nav className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-7xl gap-1 px-6">
           {navItems.map((item) => (
             <NavLink
@@ -30,8 +41,8 @@ export function AdminLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
                   isActive
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                    ? 'border-groupon-green text-groupon-green'
+                    : 'border-transparent text-gray-400 hover:text-gray-600'
                 }`
               }
             >

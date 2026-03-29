@@ -20,6 +20,7 @@ async def run_endpoint(endpoint_id: str, config: dict, input_data: dict) -> dict
         "business_classifier": run_business_classifier,
         "market_intelligence": run_market_intelligence,
         "deal_generator": run_deal_generator,
+        "service_suggester": run_service_suggester,
     }
 
     handler = handlers.get(endpoint_id)
@@ -80,6 +81,25 @@ async def run_market_intelligence(config: dict, input_data: dict) -> dict:
         "location": input_data.get("location", ""),
         "services": input_data.get("services", []),
         "prices": input_data.get("prices", []),
+    })
+
+    raw_output = await call_claude(config, user_message)
+
+    try:
+        return json.loads(raw_output)
+    except json.JSONDecodeError:
+        return {"raw_response": raw_output, "parse_error": True}
+
+
+async def run_service_suggester(config: dict, input_data: dict) -> dict:
+    """
+    Service Suggester
+    Input: business description + location
+    Output: suggested services with typical price ranges
+    """
+    user_message = json.dumps({
+        "business_description": input_data.get("business_description", ""),
+        "location": input_data.get("location", ""),
     })
 
     raw_output = await call_claude(config, user_message)

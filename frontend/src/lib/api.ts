@@ -143,6 +143,36 @@ export async function updateBenchmarks(data: BenchmarkData): Promise<BenchmarkDa
   return res.json();
 }
 
+// --- Service Suggestions ---
+
+export interface ServiceSuggestion {
+  name: string;
+  typical_price_min: number;
+  typical_price_max: number;
+}
+
+export interface SuggestServicesResult {
+  endpoint_id: string;
+  model: string;
+  latency_ms: number;
+  output: {
+    suggestions: ServiceSuggestion[];
+  };
+}
+
+export async function suggestServices(
+  businessDescription: string,
+  location: string,
+): Promise<SuggestServicesResult> {
+  const res = await fetch(`${API_BASE}/pipeline/suggest-services`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ business_description: businessDescription, location }),
+  });
+  if (!res.ok) throw new Error(`Suggestions failed: ${res.statusText}`);
+  return res.json();
+}
+
 // --- Merchant Pipeline ---
 
 export async function generateDeal(intake: MerchantIntake): Promise<PipelineResult> {

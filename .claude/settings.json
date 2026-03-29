@@ -20,7 +20,8 @@
       "Bash(python -c \"from main import app; print\\(''Backend imports OK''\\)\")",
       "Bash(curl -s http://localhost:8000/api/health)",
       "Bash(curl -s http://localhost:5173/api/health)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "Bash(tasklist)"
     ]
   }
 }

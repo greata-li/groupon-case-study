@@ -90,8 +90,13 @@ class MerchantIntake(BaseModel):
     business_name: str
     business_description: str
     location: str
-    services: str  # free-text: "Brazilian wax $65, Lash lift $85"
+    services: str  # free-text or structured: "Brazilian wax $65, Lash lift $85"
     additional_info: str = ""
+
+
+class SuggestServicesRequest(BaseModel):
+    business_description: str
+    location: str
 
 
 # --- Admin Routes: Endpoint Configs ---
@@ -161,6 +166,31 @@ async def test_endpoint(request: TestRunRequest):
     from app.endpoints.pipeline import run_endpoint
 
     result = await run_endpoint(request.endpoint_id, config, request.input_data)
+    return result
+
+
+# --- Merchant: Service Suggestions ---
+
+@app.post("/api/pipeline/suggest-services")
+async def suggest_services(request: SuggestServicesRequest):
+    """
+    Lightweight call during intake: suggests services based on business description.
+    Used between Step 2 and Step 4 to pre-populate the service picker.
+    """
+    from app.endpoints.pipeline import run_endpoint
+
+    configs = app.state.endpoint_configs
+    if "service_suggester" not in configs:
+        raise HTTPException(status_code=404, detail="Service suggester not configured")
+
+    result = await run_endpoint(
+        "service_suggester",
+        configs["service_suggester"],
+        {
+            "business_description": request.business_description,
+            "location": request.location,
+        },
+    )
     return result
 
 

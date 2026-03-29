@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Play, Loader2, Clock, Cpu, AlertCircle } from 'lucide-react';
+import { Play, Loader2, Clock, Cpu, AlertCircle, Info, Lightbulb } from 'lucide-react';
 
 export function TestPanel() {
   const [endpoints, setEndpoints] = useState<Record<string, EndpointConfig>>({});
@@ -68,28 +68,44 @@ export function TestPanel() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12 text-muted-foreground">
+      <div className="flex items-center justify-center py-12 text-gray-400">
         Loading...
       </div>
     );
   }
 
+  const selectedEndpoint = selectedId ? endpoints[selectedId] : null;
+
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Test Panel</h2>
-        <p className="text-muted-foreground">
-          Run any pipeline endpoint with sample input. Compare outputs across runs.
+        <h2 className="font-heading text-2xl font-bold tracking-tight">Test Panel</h2>
+        <p className="mt-1 text-sm text-gray-500">
+          Run any pipeline endpoint with custom input to see its output. Use this to iterate on prompts.
         </p>
+      </div>
+
+      {/* How to use guide */}
+      <div className="flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+        <div className="text-sm text-amber-700">
+          <p className="font-medium">How to use</p>
+          <ol className="mt-1 list-inside list-decimal space-y-0.5 text-amber-600">
+            <li>Select an endpoint from the dropdown (each comes with sample input)</li>
+            <li>Edit the JSON input to test different scenarios</li>
+            <li>Click "Run Test" to see the AI output, model used, and response time</li>
+            <li>Results stack below so you can compare across runs</li>
+          </ol>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-6">
         {/* Left: Input */}
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Endpoint</Label>
+            <Label className="font-heading text-sm font-bold">1. Select Endpoint</Label>
             <Select value={selectedId} onValueChange={handleEndpointChange}>
-              <SelectTrigger>
+              <SelectTrigger className="rounded-lg">
                 <SelectValue placeholder="Select endpoint" />
               </SelectTrigger>
               <SelectContent>
@@ -102,33 +118,45 @@ export function TestPanel() {
             </Select>
           </div>
 
-          {selectedId && endpoints[selectedId] && (
-            <div className="flex gap-2">
-              <Badge variant="secondary">{endpoints[selectedId].model}</Badge>
-              <Badge variant="outline">temp: {endpoints[selectedId].temperature}</Badge>
+          {selectedEndpoint && (
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary" className="text-xs">
+                <Cpu className="mr-1 h-3 w-3" />
+                {selectedEndpoint.model}
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                temp {selectedEndpoint.temperature}
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                {selectedEndpoint.max_tokens} tokens
+              </Badge>
             </div>
           )}
 
           <div className="space-y-2">
-            <Label>Input JSON</Label>
+            <Label className="font-heading text-sm font-bold">2. Edit Input (JSON)</Label>
             <Textarea
-              className="min-h-[300px] font-mono text-sm"
+              className="min-h-[300px] rounded-lg font-mono text-sm"
               value={testInput}
               onChange={(e) => setTestInput(e.target.value)}
             />
           </div>
 
-          <Button onClick={handleTest} disabled={testing || !selectedId} className="w-full">
+          <Button
+            onClick={handleTest}
+            disabled={testing || !selectedId}
+            className="w-full rounded-lg bg-groupon-green font-bold text-white hover:bg-groupon-green-dark"
+          >
             {testing ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
               <Play className="mr-2 h-4 w-4" />
             )}
-            Run Test
+            3. Run Test
           </Button>
 
           {error && (
-            <div className="flex items-center gap-2 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
               <AlertCircle className="h-4 w-4" />
               {error}
             </div>
@@ -137,35 +165,41 @@ export function TestPanel() {
 
         {/* Right: Results */}
         <div className="space-y-4">
-          <Label className="text-base font-semibold">
-            Results {results.length > 0 && `(${results.length})`}
+          <Label className="font-heading text-sm font-bold">
+            4. Results {results.length > 0 && `(${results.length} runs)`}
           </Label>
 
           {testing && (
-            <Card>
+            <Card className="border-groupon-green/20">
               <CardContent className="flex items-center justify-center py-8">
-                <div className="flex items-center gap-3 text-muted-foreground">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Running...
+                <div className="flex items-center gap-3 text-gray-500">
+                  <Loader2 className="h-5 w-5 animate-spin text-groupon-green" />
+                  Running {selectedEndpoint?.name}...
                 </div>
               </CardContent>
             </Card>
           )}
 
           {results.length === 0 && !testing && (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                No test results yet. Select an endpoint and click "Run Test."
+            <Card className="border-dashed border-gray-200">
+              <CardContent className="py-10 text-center">
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100">
+                  <Play className="h-5 w-5 text-gray-400" />
+                </div>
+                <p className="text-sm font-medium text-gray-500">No results yet</p>
+                <p className="mt-1 text-xs text-gray-400">
+                  Select an endpoint and click "Run Test" to see output here
+                </p>
               </CardContent>
             </Card>
           )}
 
           {results.map((result, i) => (
-            <Card key={i}>
+            <Card key={i} className="border-gray-100">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium">
-                    {result.endpoint_id}
+                  <CardTitle className="font-heading text-sm">
+                    {result.endpoint_id.replace(/_/g, ' ')}
                   </CardTitle>
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary" className="flex items-center gap-1 text-xs">
@@ -181,7 +215,7 @@ export function TestPanel() {
               </CardHeader>
               <Separator />
               <CardContent className="pt-3">
-                <pre className="max-h-[250px] overflow-auto rounded-md bg-muted p-3 text-xs">
+                <pre className="max-h-[250px] overflow-auto rounded-lg bg-gray-50 p-3 text-xs text-gray-600">
                   {JSON.stringify(result.output, null, 2)}
                 </pre>
               </CardContent>
