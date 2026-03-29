@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read(*)",
+      "Edit(*)",
+      "Write(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "NotebookEdit(*)",
+      "Bash(pip --version)",
+      "Bash(npm --version)",
+      "Bash(python -m venv venv)",
+      "Bash(source venv/Scripts/activate)",
+      "Bash(pip install:*)",
+      "Bash(npm create:*)",
+      "Bash(npx shadcn@latest init -d)",
+      "Bash(npx shadcn@latest add card table tabs textarea badge separator select dialog label input -y)",
+      "Bash(npx shadcn@latest add card table tabs textarea badge separator select dialog label input --overwrite)",
+      "Bash(python -c \"from main import app; print\\(''Backend imports OK''\\)\")",
+      "Bash(curl -s http://localhost:8000/api/health)",
+      "Bash(curl -s http://localhost:5173/api/health)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)"
+    ]
+  }
+}

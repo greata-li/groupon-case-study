@@ -1,0 +1,116 @@
+{
+  "_meta": {
+    "description": "Synthetic market intelligence data for the Groupon AI Deal Creator prototype. In production, this would pull from Groupon's actual deal performance database.",
+    "last_updated": "2026-03-28",
+    "data_source": "Synthetic — based on assumed industry benchmarks",
+    "coverage": "Beauty & Spas category, Chicago market"
+  },
+  "categories": {
+    "beauty_and_spas": {
+      "name": "Beauty & Spas",
+      "subcategories": {
+        "waxing": {
+          "name": "Waxing",
+          "avg_discount_pct": 38,
+          "discount_range": { "min": 30, "max": 45 },
+          "top_performing_range": { "min": 35, "max": 42 },
+          "avg_deal_price": 42,
+          "avg_original_price": 68,
+          "conversion_rate_avg": 0.12,
+          "common_services": [
+            { "name": "Brazilian Wax", "avg_price": 65, "avg_deal_price": 39 },
+            { "name": "Full Leg Wax", "avg_price": 75, "avg_deal_price": 45 },
+            { "name": "Bikini Wax", "avg_price": 45, "avg_deal_price": 27 },
+            { "name": "Eyebrow Wax", "avg_price": 20, "avg_deal_price": 12 }
+          ],
+          "title_patterns": [
+            "[Service] at [Business] (Up to X% Off)",
+            "One or Two [Service] Sessions at [Business]",
+            "[Service] Package at [Business] — [Location]"
+          ],
+          "fine_print_templates": [
+            "New customers only. By appointment only. Valid [days]. Limit 1 per person. Not valid with other offers. Gratuity not included.",
+            "Valid for new clients only. Must book appointment in advance. Expires 90 days after purchase."
+          ]
+        },
+        "eyelash_services": {
+          "name": "Eyelash Services",
+          "avg_discount_pct": 35,
+          "discount_range": { "min": 25, "max": 40 },
+          "top_performing_range": { "min": 30, "max": 38 },
+          "avg_deal_price": 55,
+          "avg_original_price": 85,
+          "conversion_rate_avg": 0.10,
+          "common_services": [
+            { "name": "Lash Lift", "avg_price": 85, "avg_deal_price": 55 },
+            { "name": "Lash Lift + Tint", "avg_price": 110, "avg_deal_price": 70 },
+            { "name": "Classic Lash Extensions", "avg_price": 150, "avg_deal_price": 95 },
+            { "name": "Lash Fill", "avg_price": 65, "avg_deal_price": 42 }
+          ],
+          "title_patterns": [
+            "Lash Lift and Tint at [Business] (Up to X% Off)",
+            "Full Set of Eyelash Extensions at [Business]",
+            "Lash Services at [Business] — [Location]"
+          ],
+          "fine_print_templates": [
+            "New customers only. Patch test may be required 48 hours before appointment. By appointment only. Limit 1 per person.",
+            "Valid for new clients only. Must book appointment in advance. Expires 90 days after purchase. Not valid with other offers."
+          ]
+        }
+      },
+      "market_insights": {
+        "chicago": {
+          "market_size": "Large — high density of beauty businesses",
+          "competition_level": "High",
+          "avg_deals_per_subcategory": 45,
+          "peak_purchase_days": ["Monday", "Tuesday"],
+          "peak_redemption_days": ["Tuesday", "Wednesday", "Thursday"],
+          "price_sensitivity": "moderate",
+          "bundle_performance": {
+            "bundle_vs_single_lift": 1.25,
+            "description": "Bundles outperform single services by 25% in purchase volume"
+          },
+          "scheduling_insights": {
+            "midweek_fill_rate_improvement": 0.40,
+            "description": "Tuesday/Wednesday deals fill 40% more slots than weekend-only deals"
+          },
+          "top_performing_price_range": {
+            "min": 30,
+            "max": 60,
+            "description": "Deals priced $30-$60 have the highest conversion rate in Beauty & Spas"
+          }
+        }
+      }
+    }
+  },
+  "assumptions": [
+    {
+      "id": 1,
+      "assumption": "35-40% discount is optimal for beauty/spa services in Chicago",
+      "basis": "Industry average for beauty category on deal platforms",
+      "impact_if_wrong": "Merchants may see lower volume (too shallow) or margin loss (too deep)",
+      "validation": "A/B test discount recommendations by subcategory"
+    },
+    {
+      "id": 2,
+      "assumption": "Bundles outperform single services by 25%",
+      "basis": "Common marketplace pattern — higher perceived value drives conversion",
+      "impact_if_wrong": "Bundle recommendations may not lift performance as expected",
+      "validation": "Compare bundle vs single service deal performance in production data"
+    },
+    {
+      "id": 3,
+      "assumption": "Midweek deals fill more slots for appointment-based businesses",
+      "basis": "Appointment businesses have lower midweek utilization, Groupon drives incremental traffic",
+      "impact_if_wrong": "Scheduling recommendations may not match merchant availability",
+      "validation": "Analyze redemption patterns by day of week"
+    },
+    {
+      "id": 4,
+      "assumption": "$30-$60 is the sweet spot for Beauty & Spas conversion",
+      "basis": "Consumer price sensitivity research on deal platforms",
+      "impact_if_wrong": "Price recommendations may push merchants outside their optimal range",
+      "validation": "Analyze conversion rate by deal price bucket"
+    }
+  ]
+}
