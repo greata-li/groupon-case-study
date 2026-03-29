@@ -12,10 +12,10 @@ export function AdminLayout() {
     <div className="min-h-screen bg-[#fafaf8]">
       {/* Header */}
       <header className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-6">
+        <div className="mx-auto flex h-12 max-w-7xl items-center gap-4 px-6">
           <Link
             to="/"
-            className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+            className="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-1 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Merchant View

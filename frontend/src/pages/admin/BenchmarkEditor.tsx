@@ -25,6 +25,7 @@ import {
   FileJson,
   Info,
   Database,
+  X,
 } from 'lucide-react';
 
 export function BenchmarkEditor() {
@@ -35,6 +36,7 @@ export function BenchmarkEditor() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [showGuide, setShowGuide] = useState(true);
 
   useEffect(() => {
     fetchBenchmarks()
@@ -111,19 +113,26 @@ export function BenchmarkEditor() {
         </div>
       </div>
 
-      {/* Context */}
-      <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
-        <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
-        <div className="text-sm text-blue-700">
-          <p className="font-medium">What is this data?</p>
-          <p className="mt-1 text-blue-600">
-            This is synthetic market data that simulates what Groupon's actual deal performance
-            database would provide. The Market Intelligence endpoint uses this data to recommend
-            discount depths, pricing, and deal structure. In production, this would pull from real
-            deal performance metrics.
-          </p>
+      {/* Dismissable context */}
+      {showGuide && (
+        <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+          <div className="flex-1 text-sm text-blue-700">
+            <p className="font-medium">What is this data?</p>
+            <p className="mt-1 text-blue-600">
+              Synthetic market data simulating Groupon's deal performance database.
+              The Market Intelligence endpoint reads this at runtime to recommend pricing.
+              In production, this pulls from real metrics.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowGuide(false)}
+            className="shrink-0 rounded-md p-1 text-blue-400 transition-colors hover:bg-blue-100 hover:text-blue-600"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
-      </div>
+      )}
 
       {/* Meta badges */}
       {data?._meta && (
@@ -171,11 +180,11 @@ export function BenchmarkEditor() {
                       {a.id}
                     </TableCell>
                     <TableCell className="text-sm font-medium">{a.assumption}</TableCell>
-                    <TableCell className="text-xs text-gray-500">{a.basis}</TableCell>
-                    <TableCell className="text-xs text-gray-500">
+                    <TableCell className="text-sm text-gray-500">{a.basis}</TableCell>
+                    <TableCell className="text-sm text-gray-500">
                       {a.impact_if_wrong}
                     </TableCell>
-                    <TableCell className="text-xs text-gray-500">{a.validation}</TableCell>
+                    <TableCell className="text-sm text-gray-500">{a.validation}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -211,7 +220,7 @@ export function BenchmarkEditor() {
             </div>
           )}
           <Textarea
-            className="min-h-[500px] rounded-lg font-mono text-sm"
+            className="min-h-[400px] rounded-lg font-mono text-xs leading-relaxed"
             value={rawJson}
             onChange={(e) => handleJsonChange(e.target.value)}
           />

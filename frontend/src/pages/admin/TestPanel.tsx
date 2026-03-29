@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Play, Loader2, Clock, Cpu, AlertCircle, Info, Lightbulb } from 'lucide-react';
+import { Play, Loader2, Clock, Cpu, AlertCircle, Info, Lightbulb, X } from 'lucide-react';
 
 export function TestPanel() {
   const [endpoints, setEndpoints] = useState<Record<string, EndpointConfig>>({});
@@ -28,6 +28,7 @@ export function TestPanel() {
   const [testing, setTesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showGuide, setShowGuide] = useState(true);
 
   useEffect(() => {
     fetchEndpoints()
@@ -85,19 +86,25 @@ export function TestPanel() {
         </p>
       </div>
 
-      {/* How to use guide */}
-      <div className="flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50/50 p-4">
-        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-        <div className="text-sm text-amber-700">
-          <p className="font-medium">How to use</p>
-          <ol className="mt-1 list-inside list-decimal space-y-0.5 text-amber-600">
-            <li>Select an endpoint from the dropdown (each comes with sample input)</li>
-            <li>Edit the JSON input to test different scenarios</li>
-            <li>Click "Run Test" to see the AI output, model used, and response time</li>
-            <li>Results stack below so you can compare across runs</li>
-          </ol>
+      {/* Dismissable how-to guide */}
+      {showGuide && (
+        <div className="flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+          <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+          <div className="flex-1 text-sm text-amber-700">
+            <p className="font-medium">How to use</p>
+            <p className="mt-1 text-amber-600">
+              Select an endpoint (each comes with sample input), edit the JSON, then click
+              "Run Test." Results stack so you can compare across prompt iterations.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowGuide(false)}
+            className="shrink-0 rounded-md p-1 text-amber-400 transition-colors hover:bg-amber-100 hover:text-amber-600"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-2 gap-6">
         {/* Left: Input */}

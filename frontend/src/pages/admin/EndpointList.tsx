@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Cpu, Thermometer, MessageSquare, Info } from 'lucide-react';
+import { ArrowRight, Cpu, Thermometer, MessageSquare, Info, X } from 'lucide-react';
 
 const PIPELINE_ORDER = [
   'business_classifier',
@@ -23,6 +23,7 @@ export function EndpointList() {
   const [endpoints, setEndpoints] = useState<Record<string, EndpointConfig>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showGuide, setShowGuide] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,7 +49,6 @@ export function EndpointList() {
     );
   }
 
-  // Sort endpoints by pipeline order, then alphabetically for any extras
   const endpointList = Object.values(endpoints).sort((a, b) => {
     const aIdx = PIPELINE_ORDER.indexOf(a.id);
     const bIdx = PIPELINE_ORDER.indexOf(b.id);
@@ -59,19 +59,26 @@ export function EndpointList() {
   });
 
   return (
-    <div className="space-y-6">
-      {/* Context banner */}
-      <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
-        <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
-        <div className="text-sm text-blue-700">
-          <p className="font-medium">How the pipeline works</p>
-          <p className="mt-1 text-blue-600">
-            When a merchant creates a deal, their input flows through these endpoints in order.
-            Each endpoint has a configurable prompt, model, and parameters. Edit any endpoint to
-            change how the AI behaves — no code changes required.
-          </p>
+    <div className="space-y-5">
+      {/* Dismissable context banner */}
+      {showGuide && (
+        <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/50 p-4">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+          <div className="flex-1 text-sm text-blue-700">
+            <p className="font-medium">How the pipeline works</p>
+            <p className="mt-1 text-blue-600">
+              Merchant input flows through these endpoints in order. Each has a configurable
+              prompt, model, and parameters — no code changes required.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowGuide(false)}
+            className="shrink-0 rounded-md p-1 text-blue-400 transition-colors hover:bg-blue-100 hover:text-blue-600"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
-      </div>
+      )}
 
       <div>
         <h2 className="font-heading text-2xl font-bold tracking-tight">Pipeline Endpoints</h2>
@@ -80,49 +87,54 @@ export function EndpointList() {
         </p>
       </div>
 
-      {/* Pipeline flow visualization */}
-      <div className="grid gap-3">
+      {/* Pipeline flow with connectors */}
+      <div className="space-y-0">
         {endpointList.map((endpoint, index) => (
-          <Card
-            key={endpoint.id}
-            className="cursor-pointer border-gray-100 transition-all hover:border-groupon-green/20 hover:shadow-md"
-            onClick={() => navigate(`/admin/endpoint/${endpoint.id}`)}
-          >
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-groupon-green/10 text-sm font-bold text-groupon-green">
-                    {index + 1}
+          <div key={endpoint.id}>
+            <Card
+              className="cursor-pointer border-gray-100 transition-all hover:border-groupon-green/20 hover:shadow-md"
+              onClick={() => navigate(`/admin/endpoint/${endpoint.id}`)}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-groupon-green/10 text-sm font-bold text-groupon-green">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <CardTitle className="font-heading text-base">{endpoint.name}</CardTitle>
+                      <CardDescription className="mt-0.5 text-xs">
+                        {endpoint.description}
+                      </CardDescription>
+                    </div>
                   </div>
-                  <div>
-                    <CardTitle className="font-heading text-base">{endpoint.name}</CardTitle>
-                    <CardDescription className="mt-0.5 text-xs">
-                      {endpoint.description}
-                    </CardDescription>
-                  </div>
+                  <Button variant="ghost" size="sm" className="text-gray-400">
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Button variant="ghost" size="sm" className="text-gray-400">
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="flex items-center gap-1.5 text-xs">
-                  <Cpu className="h-3 w-3" />
-                  {endpoint.model}
-                </Badge>
-                <Badge variant="outline" className="flex items-center gap-1.5 text-xs">
-                  <Thermometer className="h-3 w-3" />
-                  temp {endpoint.temperature}
-                </Badge>
-                <Badge variant="outline" className="flex items-center gap-1.5 text-xs">
-                  <MessageSquare className="h-3 w-3" />
-                  {endpoint.max_tokens} tokens
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="flex items-center gap-1.5 text-xs">
+                    <Cpu className="h-3 w-3" />
+                    {endpoint.model}
+                  </Badge>
+                  <Badge variant="outline" className="flex items-center gap-1.5 text-xs">
+                    <Thermometer className="h-3 w-3" />
+                    temp {endpoint.temperature}
+                  </Badge>
+                  <Badge variant="outline" className="flex items-center gap-1.5 text-xs">
+                    <MessageSquare className="h-3 w-3" />
+                    {endpoint.max_tokens} tokens
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+            {/* Pipeline flow connector */}
+            {index < endpointList.length - 1 && (
+              <div className="ml-[30px] h-3 border-l-2 border-dashed border-gray-200" />
+            )}
+          </div>
         ))}
       </div>
     </div>
