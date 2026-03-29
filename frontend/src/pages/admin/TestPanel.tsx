@@ -6,8 +6,11 @@ import {
   type TestResult,
 } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
@@ -15,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Play, Loader2, Clock, Cpu, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Play, Loader2, Clock, Cpu, AlertCircle, Info, Lightbulb } from 'lucide-react';
 
 export function TestPanel() {
   const [endpoints, setEndpoints] = useState<Record<string, EndpointConfig>>({});
@@ -65,7 +68,7 @@ export function TestPanel() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16 text-[13px] text-[#9ca3af]">
+      <div className="flex items-center justify-center py-12 text-gray-400">
         Loading...
       </div>
     );
@@ -74,143 +77,149 @@ export function TestPanel() {
   const selectedEndpoint = selectedId ? endpoints[selectedId] : null;
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
+    <div className="space-y-6">
       <div>
-        <h2 className="font-heading text-xl font-bold tracking-tight text-[#111827]">
-          Test Panel
-        </h2>
-        <p className="mt-0.5 text-[13px] text-[#6b7280]">
-          Run any endpoint with custom input. Each comes pre-loaded with sample data.
-          Results stack so you can compare across prompt iterations.
+        <h2 className="font-heading text-2xl font-bold tracking-tight">Test Panel</h2>
+        <p className="mt-1 text-sm text-gray-500">
+          Run any pipeline endpoint with custom input to see its output. Use this to iterate on prompts.
         </p>
       </div>
 
-      <div className="grid grid-cols-[1fr_1fr] gap-5">
-        {/* Left: Configuration */}
+      {/* How to use guide */}
+      <div className="flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+        <div className="text-sm text-amber-700">
+          <p className="font-medium">How to use</p>
+          <ol className="mt-1 list-inside list-decimal space-y-0.5 text-amber-600">
+            <li>Select an endpoint from the dropdown (each comes with sample input)</li>
+            <li>Edit the JSON input to test different scenarios</li>
+            <li>Click "Run Test" to see the AI output, model used, and response time</li>
+            <li>Results stack below so you can compare across runs</li>
+          </ol>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-6">
+        {/* Left: Input */}
         <div className="space-y-4">
-          {/* Endpoint selector */}
-          <div className="rounded-lg border border-[rgba(0,0,0,0.06)] bg-white p-4">
-            <label className="mb-2 block text-[12px] font-semibold uppercase tracking-wider text-[#9ca3af]">
-              Endpoint
-            </label>
+          <div className="space-y-2">
+            <Label className="font-heading text-sm font-bold">1. Select Endpoint</Label>
             <Select value={selectedId} onValueChange={handleEndpointChange}>
-              <SelectTrigger className="rounded-md border-[rgba(0,0,0,0.08)] bg-[rgba(0,0,0,0.02)] text-[13px]">
+              <SelectTrigger className="rounded-lg">
                 <SelectValue placeholder="Select endpoint" />
               </SelectTrigger>
               <SelectContent>
                 {Object.values(endpoints).map((ep) => (
-                  <SelectItem key={ep.id} value={ep.id} className="text-[13px]">
+                  <SelectItem key={ep.id} value={ep.id}>
                     {ep.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-
-            {selectedEndpoint && (
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                <Badge variant="secondary" className="rounded-md bg-[#f3f4f6] px-2 py-0.5 text-[11px] font-medium text-[#4b5563]">
-                  <Cpu className="mr-1 h-3 w-3" />
-                  {selectedEndpoint.model.replace('claude-', '').replace('-20251001', '').replace('-20250514', '')}
-                </Badge>
-                <Badge variant="secondary" className="rounded-md bg-[#f3f4f6] px-2 py-0.5 text-[11px] font-medium text-[#4b5563]">
-                  temp {selectedEndpoint.temperature}
-                </Badge>
-                <Badge variant="secondary" className="rounded-md bg-[#f3f4f6] px-2 py-0.5 text-[11px] font-medium text-[#4b5563]">
-                  {selectedEndpoint.max_tokens} tokens
-                </Badge>
-              </div>
-            )}
           </div>
 
-          {/* Input */}
-          <div className="rounded-lg border border-[rgba(0,0,0,0.06)] bg-white p-4">
-            <label className="mb-2 block text-[12px] font-semibold uppercase tracking-wider text-[#9ca3af]">
-              Input JSON
-            </label>
+          {selectedEndpoint && (
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary" className="text-xs">
+                <Cpu className="mr-1 h-3 w-3" />
+                {selectedEndpoint.model}
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                temp {selectedEndpoint.temperature}
+              </Badge>
+              <Badge variant="outline" className="text-xs">
+                {selectedEndpoint.max_tokens} tokens
+              </Badge>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label className="font-heading text-sm font-bold">2. Edit Input (JSON)</Label>
             <Textarea
-              className="min-h-[280px] rounded-md border-[rgba(0,0,0,0.08)] bg-[rgba(0,0,0,0.02)] font-mono text-[12px] leading-relaxed focus:bg-white"
+              className="min-h-[300px] rounded-lg font-mono text-sm"
               value={testInput}
               onChange={(e) => setTestInput(e.target.value)}
             />
           </div>
 
-          {/* Run button */}
           <Button
             onClick={handleTest}
             disabled={testing || !selectedId}
-            className="w-full rounded-md bg-groupon-green text-[13px] font-semibold text-white hover:bg-groupon-green-dark disabled:opacity-40"
+            className="w-full rounded-lg bg-groupon-green font-bold text-white hover:bg-groupon-green-dark"
           >
             {testing ? (
-              <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <Play className="mr-2 h-3.5 w-3.5" />
+              <Play className="mr-2 h-4 w-4" />
             )}
-            Run Test
+            3. Run Test
           </Button>
 
           {error && (
-            <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-[12px] text-red-600">
-              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+              <AlertCircle className="h-4 w-4" />
               {error}
             </div>
           )}
         </div>
 
         {/* Right: Results */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[12px] font-semibold uppercase tracking-wider text-[#9ca3af]">
-              Results
-            </span>
-            {results.length > 0 && (
-              <span className="text-[11px] text-[#d1d5db]">{results.length} runs</span>
-            )}
-          </div>
+        <div className="space-y-4">
+          <Label className="font-heading text-sm font-bold">
+            4. Results {results.length > 0 && `(${results.length} runs)`}
+          </Label>
 
           {testing && (
-            <div className="flex items-center gap-2 rounded-lg border border-groupon-green/20 bg-groupon-green-light/30 px-4 py-6 text-[13px] text-[#4b5563]">
-              <Loader2 className="h-4 w-4 animate-spin text-groupon-green" />
-              Running {selectedEndpoint?.name}...
-            </div>
+            <Card className="border-groupon-green/20">
+              <CardContent className="flex items-center justify-center py-8">
+                <div className="flex items-center gap-3 text-gray-500">
+                  <Loader2 className="h-5 w-5 animate-spin text-groupon-green" />
+                  Running {selectedEndpoint?.name}...
+                </div>
+              </CardContent>
+            </Card>
           )}
 
           {results.length === 0 && !testing && (
-            <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-[rgba(0,0,0,0.08)] py-16">
-              <Play className="mb-2 h-5 w-5 text-[#d1d5db]" />
-              <p className="text-[13px] text-[#9ca3af]">No results yet</p>
-              <p className="mt-0.5 text-[11px] text-[#d1d5db]">
-                Run a test to see output here
-              </p>
-            </div>
+            <Card className="border-dashed border-gray-200">
+              <CardContent className="py-10 text-center">
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100">
+                  <Play className="h-5 w-5 text-gray-400" />
+                </div>
+                <p className="text-sm font-medium text-gray-500">No results yet</p>
+                <p className="mt-1 text-xs text-gray-400">
+                  Select an endpoint and click "Run Test" to see output here
+                </p>
+              </CardContent>
+            </Card>
           )}
 
           {results.map((result, i) => (
-            <div key={i} className="overflow-hidden rounded-lg border border-[rgba(0,0,0,0.06)] bg-white">
-              {/* Result header */}
-              <div className="flex items-center justify-between border-b border-[rgba(0,0,0,0.04)] px-4 py-2.5">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-groupon-green" />
-                  <span className="text-[13px] font-medium text-[#111827]">
+            <Card key={i} className="border-gray-100">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="font-heading text-sm">
                     {result.endpoint_id.replace(/_/g, ' ')}
-                  </span>
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+                      <Cpu className="h-3 w-3" />
+                      {result.model}
+                    </Badge>
+                    <Badge variant="outline" className="flex items-center gap-1 text-xs">
+                      <Clock className="h-3 w-3" />
+                      {result.latency_ms}ms
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Badge variant="secondary" className="rounded bg-[#f3f4f6] px-1.5 py-0 text-[10px] font-medium text-[#6b7280]">
-                    <Cpu className="mr-0.5 h-2.5 w-2.5" />
-                    {result.model.replace('claude-', '').replace('-20251001', '').replace('-20250514', '')}
-                  </Badge>
-                  <Badge variant="secondary" className="rounded bg-[#f3f4f6] px-1.5 py-0 text-[10px] font-medium text-[#6b7280]">
-                    <Clock className="mr-0.5 h-2.5 w-2.5" />
-                    {result.latency_ms}ms
-                  </Badge>
-                </div>
-              </div>
-              {/* Result body */}
-              <pre className="max-h-[240px] overflow-auto px-4 py-3 font-mono text-[11px] leading-relaxed text-[#4b5563]">
-                {JSON.stringify(result.output, null, 2)}
-              </pre>
-            </div>
+              </CardHeader>
+              <Separator />
+              <CardContent className="pt-3">
+                <pre className="max-h-[250px] overflow-auto rounded-lg bg-gray-50 p-3 text-xs text-gray-600">
+                  {JSON.stringify(result.output, null, 2)}
+                </pre>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
