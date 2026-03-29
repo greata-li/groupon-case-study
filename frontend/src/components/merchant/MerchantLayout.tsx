@@ -2,14 +2,14 @@ import { Outlet, Link } from 'react-router-dom';
 
 export function MerchantLayout() {
   return (
-    <div className="min-h-screen surface-merchant">
+    <div className="min-h-screen bg-[#fafaf8]">
       {/* Slim prototype indicator */}
       <div className="bg-groupon-purple py-1.5 text-center text-xs font-medium text-white/70">
         Prototype Demo
       </div>
 
       {/* Groupon merchant header */}
-      <header className="border-b border-[rgba(0,0,0,0.06)] bg-white">
+      <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
           <Link to="/" className="flex items-baseline gap-2">
             <span className="font-heading text-[1.65rem] font-extrabold tracking-[-0.02em] text-groupon-green">
@@ -37,7 +37,7 @@ export function MerchantLayout() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[rgba(0,0,0,0.06)] bg-white py-8">
+      <footer className="border-t border-gray-200 bg-white py-8">
         <div className="mx-auto max-w-6xl px-6 text-center">
           <span className="font-heading text-lg font-bold text-groupon-green">GROUPON</span>
           <p className="mt-1 text-xs text-gray-400">
