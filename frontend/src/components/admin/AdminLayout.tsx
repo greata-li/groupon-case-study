@@ -13,20 +13,19 @@ export function AdminLayout() {
       {/* Header */}
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex h-12 max-w-7xl items-center gap-4 px-6">
-          <Link
-            to="/"
-            className="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-1 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Merchant View
-          </Link>
-          <div className="mx-1 h-5 w-px bg-gray-200" />
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-groupon-green" />
             <h1 className="font-heading text-base font-bold text-gray-900">
               Pipeline Admin
             </h1>
           </div>
+          <Link
+            to="/"
+            className="ml-auto flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-1 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Merchant View
+          </Link>
         </div>
       </header>
 
