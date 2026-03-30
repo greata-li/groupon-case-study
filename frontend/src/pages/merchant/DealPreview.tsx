@@ -37,12 +37,13 @@ interface DealPreviewProps {
 
 export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
   const navigate = useNavigate();
-  const [deal, setDeal] = useState<GeneratedDeal>(result.deal);
+  // Normalize the deal — fill missing fields with sensible defaults so the page never crashes
+  const [deal, setDeal] = useState<GeneratedDeal>(() => normalizeDeal(result.deal));
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [showPipeline, setShowPipeline] = useState(false);
 
-  // Contact details (optional, added before publishing)
+  // Contact details
   const [contactPhone, setContactPhone] = useState('');
   const [contactAddress, setContactAddress] = useState(intake.location);
   const [contactWebsite, setContactWebsite] = useState('');
@@ -61,13 +62,19 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
     setEditingField(null);
   }
 
-  // Helper to render fine print regardless of format (string or structured)
+  // Fine print handling
   const finePrint = deal.fine_print;
   const isStructuredFinePrint = typeof finePrint === 'object' && finePrint !== null;
   const finePrintObj = isStructuredFinePrint ? (finePrint as FinePrint) : null;
   const finePrintText = isStructuredFinePrint
     ? formatStructuredFinePrint(finePrint as FinePrint)
-    : (finePrint as string);
+    : String(finePrint || '');
+
+  const services = deal.services || [];
+  const highlights = deal.highlights || [];
+  const confidence = deal.confidence || {};
+  const flags = deal.flags || [];
+  const voucher = deal.voucher_instructions;
 
   return (
     <div className="animate-fade-in-up mx-auto max-w-6xl px-6 py-8">
@@ -98,20 +105,20 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
       </div>
 
       {/* Groupon deal page layout */}
-      <div className="grid grid-cols-[1fr_380px] gap-8">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_380px]">
         {/* Left column — Deal content */}
         <div className="space-y-5">
           {/* Breadcrumb */}
           <div className="text-sm text-gray-400">
-            Home &rsaquo; {deal.category?.replace(' > ', ' \u203A ') ?? 'Beauty & Spas'}
+            Home &rsaquo; {(deal.category || 'Beauty & Spas').replace(' > ', ' \u203A ')}
           </div>
 
           {/* Title */}
           <EditableField
-            value={deal.title}
+            value={deal.title || 'Untitled Deal'}
             editing={editingField === 'title'}
-            confidence={deal.confidence?.title}
-            onStartEdit={() => startEdit('title', deal.title)}
+            confidence={confidence.title}
+            onStartEdit={() => startEdit('title', deal.title || '')}
             onSave={() => saveEdit('title')}
             onCancel={cancelEdit}
             editValue={editValue}
@@ -144,7 +151,9 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
               <div className="rounded-2xl bg-white p-5 shadow-lg shadow-gray-900/5">
                 <Camera className="h-8 w-8 text-gray-300" />
               </div>
-              <p className="text-sm font-medium text-gray-500">{deal.photo_guidance}</p>
+              <p className="text-sm font-medium text-gray-500">
+                {deal.photo_guidance || 'Upload a photo of your business to increase conversions'}
+              </p>
               <p className="text-xs text-gray-400">Photos will be added before publishing</p>
             </div>
             <div className="absolute right-4 top-4 flex gap-2">
@@ -158,11 +167,11 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
           </div>
 
           {/* Highlights */}
-          {deal.highlights && deal.highlights.length > 0 && (
+          {highlights.length > 0 && (
             <div className="rounded-xl border border-gray-100 bg-white p-5">
               <h3 className="font-heading text-base font-bold text-gray-900 mb-3">Highlights</h3>
               <ul className="space-y-2">
-                {deal.highlights.map((highlight, i) => (
+                {highlights.map((highlight, i) => (
                   <li key={i} className="flex items-start gap-2.5 text-[15px] text-gray-600">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-groupon-green" />
                     {highlight}
@@ -187,10 +196,10 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
             <h3 className="font-heading text-lg font-bold text-gray-900">About This Deal</h3>
             <div className="mt-3">
               <EditableField
-                value={deal.description}
+                value={deal.description || 'No description generated.'}
                 editing={editingField === 'description'}
-                confidence={deal.confidence?.description}
-                onStartEdit={() => startEdit('description', deal.description)}
+                confidence={confidence.description}
+                onStartEdit={() => startEdit('description', deal.description || '')}
                 onSave={() => saveEdit('description')}
                 onCancel={cancelEdit}
                 editValue={editValue}
@@ -204,33 +213,41 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
           </div>
 
           {/* Per-option details */}
-          {deal.services.some((s) => s.description) && (
+          {services.length > 0 && services.some((s) => s.description) && (
             <div>
               <h3 className="font-heading text-base font-bold text-gray-900 mb-3">
                 What's Included
               </h3>
               <div className="space-y-3">
-                {deal.services.map((service, i) => (
-                  service.description && (
-                    <div key={i} className="rounded-lg border border-gray-100 bg-gray-50/50 p-4">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-semibold text-gray-900 text-sm">{service.name}</span>
-                        <span className="text-sm font-bold text-groupon-green">${service.deal_price}</span>
+                {services.map(
+                  (service, i) =>
+                    service.description && (
+                      <div
+                        key={i}
+                        className="rounded-lg border border-gray-100 bg-gray-50/50 p-4"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-semibold text-gray-900 text-sm">
+                            {service.name}
+                          </span>
+                          <span className="text-sm font-bold text-groupon-green">
+                            ${service.deal_price}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-500">{service.description}</p>
+                        {service.voucher_cap && (
+                          <span className="mt-2 inline-block text-xs text-gray-400">
+                            Monthly cap: {service.voucher_cap} vouchers
+                          </span>
+                        )}
                       </div>
-                      <p className="text-sm text-gray-500">{service.description}</p>
-                      {service.voucher_cap && (
-                        <span className="mt-2 inline-block text-xs text-gray-400">
-                          Monthly cap: {service.voucher_cap} vouchers
-                        </span>
-                      )}
-                    </div>
-                  )
-                ))}
+                    ),
+                )}
               </div>
             </div>
           )}
 
-          {/* Fine Print — structured display */}
+          {/* Fine Print */}
           <div className="rounded-xl bg-gray-50 p-5">
             <h3 className="font-heading text-base font-bold text-gray-900 mb-3">Fine Print</h3>
 
@@ -247,19 +264,31 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
                   />
                   <FinePrintItem
                     label="Appointment"
-                    value={finePrintObj.appointment_required ? 'Required' : 'Not required'}
+                    value={
+                      finePrintObj.appointment_required ? 'Required' : 'Not required'
+                    }
                   />
                   <FinePrintItem
                     label="Eligibility"
-                    value={finePrintObj.new_customers_only ? 'New customers only' : 'All customers'}
+                    value={
+                      finePrintObj.new_customers_only
+                        ? 'New customers only'
+                        : 'All customers'
+                    }
                   />
                 </div>
-                {finePrintObj.restrictions.length > 0 && (
+                {finePrintObj.restrictions && finePrintObj.restrictions.length > 0 && (
                   <div>
-                    <span className="text-xs font-medium text-gray-500 mb-1.5 block">Restrictions</span>
+                    <span className="text-xs font-medium text-gray-500 mb-1.5 block">
+                      Restrictions
+                    </span>
                     <div className="flex flex-wrap gap-1.5">
                       {finePrintObj.restrictions.map((r, i) => (
-                        <Badge key={i} variant="outline" className="text-xs text-gray-500 border-gray-200">
+                        <Badge
+                          key={i}
+                          variant="outline"
+                          className="text-xs text-gray-500 border-gray-200"
+                        >
                           {r}
                         </Badge>
                       ))}
@@ -268,13 +297,14 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
                 )}
                 {finePrintObj.cancellation_policy && (
                   <p className="text-sm text-gray-500">
-                    <span className="font-medium">Cancellation:</span> {finePrintObj.cancellation_policy}
+                    <span className="font-medium">Cancellation:</span>{' '}
+                    {finePrintObj.cancellation_policy}
                   </p>
                 )}
               </div>
             ) : (
               <EditableField
-                value={finePrintText}
+                value={finePrintText || 'No fine print generated.'}
                 editing={editingField === 'fine_print'}
                 onStartEdit={() => startEdit('fine_print', finePrintText)}
                 onSave={() => saveEdit('fine_print')}
@@ -290,7 +320,7 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
           </div>
 
           {/* Voucher Instructions */}
-          {deal.voucher_instructions && (
+          {voucher && (
             <div className="rounded-xl border border-gray-100 bg-white p-5">
               <h3 className="font-heading text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
                 <Ticket className="h-4 w-4 text-gray-400" />
@@ -299,20 +329,20 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
               <div className="space-y-2 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <MapPinned className="h-4 w-4 text-gray-400" />
-                  {deal.voucher_instructions.redemption_method === 'physical_location'
+                  {voucher.redemption_method === 'physical_location'
                     ? 'Visit the business location'
-                    : deal.voucher_instructions.redemption_method === 'online'
+                    : voucher.redemption_method === 'online'
                       ? 'Redeem online'
                       : 'Provider will travel to you'}
                 </div>
-                {deal.voucher_instructions.appointment_required && (
+                {voucher.appointment_required && (
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-gray-400" />
                     Appointment required
                   </div>
                 )}
-                {deal.voucher_instructions.instructions && (
-                  <p className="text-gray-500 mt-2">{deal.voucher_instructions.instructions}</p>
+                {voucher.instructions && (
+                  <p className="text-gray-500 mt-2">{voucher.instructions}</p>
                 )}
               </div>
             </div>
@@ -335,7 +365,7 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
               Complete Before Publishing
             </h3>
             <p className="text-xs text-gray-500 mb-4">
-              These details are needed for your live deal listing. You can add them now or come back later.
+              These details are needed for your live deal listing.
             </p>
             <div className="space-y-3">
               <div>
@@ -389,48 +419,54 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
               </div>
 
               <div className="p-4 space-y-3">
-                {deal.services.map((service, i) => (
-                  <div
-                    key={i}
-                    className={`rounded-xl border-2 p-4 transition-all ${
-                      i === 0
-                        ? 'border-groupon-green bg-groupon-green-light/30'
-                        : 'border-gray-100 hover:border-gray-200'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`h-5 w-5 rounded-full border-2 ${
-                            i === 0
-                              ? 'border-groupon-green bg-groupon-green'
-                              : 'border-gray-300'
-                          }`}
-                        >
-                          {i === 0 && (
-                            <div className="flex h-full items-center justify-center">
-                              <div className="h-2 w-2 rounded-full bg-white" />
-                            </div>
-                          )}
+                {services.length > 0 ? (
+                  services.map((service, i) => (
+                    <div
+                      key={i}
+                      className={`rounded-xl border-2 p-4 transition-all ${
+                        i === 0
+                          ? 'border-groupon-green bg-groupon-green-light/30'
+                          : 'border-gray-100 hover:border-gray-200'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`h-5 w-5 rounded-full border-2 ${
+                              i === 0
+                                ? 'border-groupon-green bg-groupon-green'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {i === 0 && (
+                              <div className="flex h-full items-center justify-center">
+                                <div className="h-2 w-2 rounded-full bg-white" />
+                              </div>
+                            )}
+                          </div>
+                          <span className="font-semibold text-gray-900">{service.name}</span>
                         </div>
-                        <span className="font-semibold text-gray-900">{service.name}</span>
+                      </div>
+                      <div className="mt-3 ml-8">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-sm text-gray-400 line-through">
+                            ${service.original_price}
+                          </span>
+                          <span className="font-heading text-2xl font-extrabold text-groupon-green">
+                            ${service.deal_price}
+                          </span>
+                        </div>
+                        <Badge className="mt-1.5 bg-groupon-green/10 text-groupon-green border-0 font-bold">
+                          {service.discount_pct}% Off
+                        </Badge>
                       </div>
                     </div>
-                    <div className="mt-3 ml-8">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-sm text-gray-400 line-through">
-                          ${service.original_price}
-                        </span>
-                        <span className="font-heading text-2xl font-extrabold text-groupon-green">
-                          ${service.deal_price}
-                        </span>
-                      </div>
-                      <Badge className="mt-1.5 bg-groupon-green/10 text-groupon-green border-0 font-bold">
-                        {service.discount_pct}% Off
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-400 py-4 text-center">
+                    No service options generated. Try starting over with more detail.
+                  </p>
+                )}
               </div>
 
               <Separator />
@@ -455,29 +491,33 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
             </div>
 
             {/* Confidence */}
-            {deal.confidence && (
+            {Object.keys(confidence).length > 0 && (
               <div className="rounded-xl border border-gray-200 bg-white px-5 py-4">
                 <h4 className="mb-3 flex items-center gap-2 text-sm font-bold text-gray-900">
                   <Sparkles className="h-4 w-4 text-groupon-green" />
                   AI Confidence
                 </h4>
                 <div className="space-y-2.5">
-                  {Object.entries(deal.confidence).map(([field, score]) => (
-                    <ConfidenceBar key={field} field={field} score={score as number} />
+                  {Object.entries(confidence).map(([field, score]) => (
+                    <ConfidenceBar
+                      key={field}
+                      field={field}
+                      score={typeof score === 'number' ? score : 0}
+                    />
                   ))}
                 </div>
               </div>
             )}
 
             {/* Flags */}
-            {deal.flags && deal.flags.length > 0 && (
+            {flags.length > 0 && (
               <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
                 <div className="mb-2 flex items-center gap-2 text-sm font-bold text-amber-700">
                   <AlertTriangle className="h-4 w-4" />
                   Review Suggested
                 </div>
                 <ul className="space-y-1 text-sm text-amber-600">
-                  {deal.flags.map((flag, i) => (
+                  {flags.map((flag, i) => (
                     <li key={i} className="flex items-start gap-2">
                       <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-amber-400" />
                       {flag}
@@ -496,18 +536,27 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
           onClick={() => setShowPipeline(!showPipeline)}
           className="flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-gray-600"
         >
-          {showPipeline ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          {showPipeline ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
           Pipeline details — {result.total_latency_ms}ms total
         </button>
         {showPipeline && (
-          <div className="mt-4 grid grid-cols-3 gap-4">
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
             {Object.entries(result.pipeline_steps).map(([name, step]) => (
-              <div key={name} className="rounded-xl border border-gray-100 bg-gray-50/50 p-4">
+              <div
+                key={name}
+                className="rounded-xl border border-gray-100 bg-gray-50/50 p-4"
+              >
                 <div className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
                   {name.replace(/_/g, ' ')}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">{step.model}</Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {step.model}
+                  </Badge>
                   <span className="text-xs text-gray-400">{step.latency_ms}ms</span>
                 </div>
                 <pre className="mt-3 max-h-36 overflow-auto rounded-lg bg-white p-3 text-xs text-gray-500 border border-gray-100">
@@ -522,7 +571,25 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
   );
 }
 
-// --- Helper: format structured fine print as readable text ---
+// --- Normalize deal data so the UI never crashes on missing fields ---
+
+function normalizeDeal(raw: GeneratedDeal): GeneratedDeal {
+  return {
+    title: raw?.title || 'Deal Title',
+    description: raw?.description || '',
+    highlights: Array.isArray(raw?.highlights) ? raw.highlights : [],
+    services: Array.isArray(raw?.services) ? raw.services : [],
+    fine_print: raw?.fine_print || '',
+    voucher_instructions: raw?.voucher_instructions || undefined,
+    category: raw?.category || 'Uncategorized',
+    scheduling_recommendation: raw?.scheduling_recommendation || '',
+    photo_guidance: raw?.photo_guidance || '',
+    confidence: raw?.confidence || {},
+    flags: Array.isArray(raw?.flags) ? raw.flags : [],
+  };
+}
+
+// --- Helpers ---
 
 function formatStructuredFinePrint(fp: FinePrint): string {
   const parts: string[] = [];
@@ -530,12 +597,10 @@ function formatStructuredFinePrint(fp: FinePrint): string {
   parts.push(`Expires ${fp.expiry_days} days after purchase.`);
   parts.push(`Limit ${fp.max_per_person} per person.`);
   if (fp.appointment_required) parts.push('Appointment required.');
-  parts.push(...fp.restrictions.map((r) => `${r}.`));
+  if (fp.restrictions) parts.push(...fp.restrictions.map((r) => `${r}.`));
   if (fp.cancellation_policy) parts.push(fp.cancellation_policy);
   return parts.join(' ');
 }
-
-// --- Fine Print Item ---
 
 function FinePrintItem({ label, value }: { label: string; value: string }) {
   return (
