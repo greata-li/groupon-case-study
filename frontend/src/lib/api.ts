@@ -48,16 +48,36 @@ export interface MerchantIntake {
 
 export interface DealService {
   name: string;
+  description?: string;
   original_price: number;
   discount_pct: number;
   deal_price: number;
+  voucher_cap?: number;
+}
+
+export interface FinePrint {
+  expiry_days: number;
+  max_per_person: number;
+  appointment_required: boolean;
+  new_customers_only: boolean;
+  restrictions: string[];
+  cancellation_policy: string;
+  additional_terms?: string;
+}
+
+export interface VoucherInstructions {
+  redemption_method: string;
+  appointment_required: boolean;
+  instructions: string;
 }
 
 export interface GeneratedDeal {
   title: string;
   description: string;
-  fine_print: string;
+  highlights?: string[];
   services: DealService[];
+  fine_print: string | FinePrint;
+  voucher_instructions?: VoucherInstructions;
   category: string;
   scheduling_recommendation: string;
   photo_guidance: string;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { GeneratedDeal, PipelineResult, MerchantIntake } from '@/lib/api';
+import type { GeneratedDeal, PipelineResult, MerchantIntake, FinePrint } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,6 +21,12 @@ import {
   Camera,
   Share2,
   Heart,
+  Phone,
+  Globe,
+  MapPinned,
+  Ticket,
+  CheckCircle2,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface DealPreviewProps {
@@ -36,6 +42,11 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
   const [editValue, setEditValue] = useState('');
   const [showPipeline, setShowPipeline] = useState(false);
 
+  // Contact details (optional, added before publishing)
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactAddress, setContactAddress] = useState(intake.location);
+  const [contactWebsite, setContactWebsite] = useState('');
+
   function startEdit(field: string, value: string) {
     setEditingField(field);
     setEditValue(value);
@@ -50,6 +61,14 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
     setEditingField(null);
   }
 
+  // Helper to render fine print regardless of format (string or structured)
+  const finePrint = deal.fine_print;
+  const isStructuredFinePrint = typeof finePrint === 'object' && finePrint !== null;
+  const finePrintObj = isStructuredFinePrint ? (finePrint as FinePrint) : null;
+  const finePrintText = isStructuredFinePrint
+    ? formatStructuredFinePrint(finePrint as FinePrint)
+    : (finePrint as string);
+
   return (
     <div className="animate-fade-in-up mx-auto max-w-6xl px-6 py-8">
       {/* Editor banner */}
@@ -58,7 +77,7 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
           <Eye className="h-5 w-5 text-groupon-green" />
           <div>
             <span className="text-sm font-semibold text-gray-900">Deal Preview</span>
-            <span className="ml-2 text-sm text-gray-500">&mdash; Click any field to edit</span>
+            <span className="ml-2 text-sm text-gray-500">— Click any field to edit</span>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -121,14 +140,13 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
 
           {/* Image placeholder */}
           <div className="relative overflow-hidden rounded-xl border-2 border-dashed border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100/50">
-            <div className="flex h-80 flex-col items-center justify-center gap-3">
+            <div className="flex h-72 flex-col items-center justify-center gap-3">
               <div className="rounded-2xl bg-white p-5 shadow-lg shadow-gray-900/5">
                 <Camera className="h-8 w-8 text-gray-300" />
               </div>
               <p className="text-sm font-medium text-gray-500">{deal.photo_guidance}</p>
               <p className="text-xs text-gray-400">Photos will be added before publishing</p>
             </div>
-            {/* Groupon-style action icons */}
             <div className="absolute right-4 top-4 flex gap-2">
               <div className="rounded-full bg-white/90 p-2 shadow-sm">
                 <Share2 className="h-4 w-4 text-gray-500" />
@@ -139,7 +157,22 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
             </div>
           </div>
 
-          {/* Tabs — About / Fine Print */}
+          {/* Highlights */}
+          {deal.highlights && deal.highlights.length > 0 && (
+            <div className="rounded-xl border border-gray-100 bg-white p-5">
+              <h3 className="font-heading text-base font-bold text-gray-900 mb-3">Highlights</h3>
+              <ul className="space-y-2">
+                {deal.highlights.map((highlight, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-[15px] text-gray-600">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-groupon-green" />
+                    {highlight}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Tabs */}
           <div className="border-b border-gray-200">
             <div className="flex gap-6 text-sm font-medium">
               <span className="border-b-2 border-groupon-green py-3 text-groupon-green">About</span>
@@ -170,14 +203,80 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
             </div>
           </div>
 
-          {/* Fine Print */}
+          {/* Per-option details */}
+          {deal.services.some((s) => s.description) && (
+            <div>
+              <h3 className="font-heading text-base font-bold text-gray-900 mb-3">
+                What's Included
+              </h3>
+              <div className="space-y-3">
+                {deal.services.map((service, i) => (
+                  service.description && (
+                    <div key={i} className="rounded-lg border border-gray-100 bg-gray-50/50 p-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-semibold text-gray-900 text-sm">{service.name}</span>
+                        <span className="text-sm font-bold text-groupon-green">${service.deal_price}</span>
+                      </div>
+                      <p className="text-sm text-gray-500">{service.description}</p>
+                      {service.voucher_cap && (
+                        <span className="mt-2 inline-block text-xs text-gray-400">
+                          Monthly cap: {service.voucher_cap} vouchers
+                        </span>
+                      )}
+                    </div>
+                  )
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Fine Print — structured display */}
           <div className="rounded-xl bg-gray-50 p-5">
-            <h3 className="font-heading text-base font-bold text-gray-900">Fine Print</h3>
-            <div className="mt-2">
+            <h3 className="font-heading text-base font-bold text-gray-900 mb-3">Fine Print</h3>
+
+            {isStructuredFinePrint && finePrintObj ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <FinePrintItem
+                    label="Expires"
+                    value={`${finePrintObj.expiry_days} days after purchase`}
+                  />
+                  <FinePrintItem
+                    label="Limit"
+                    value={`${finePrintObj.max_per_person} per person`}
+                  />
+                  <FinePrintItem
+                    label="Appointment"
+                    value={finePrintObj.appointment_required ? 'Required' : 'Not required'}
+                  />
+                  <FinePrintItem
+                    label="Eligibility"
+                    value={finePrintObj.new_customers_only ? 'New customers only' : 'All customers'}
+                  />
+                </div>
+                {finePrintObj.restrictions.length > 0 && (
+                  <div>
+                    <span className="text-xs font-medium text-gray-500 mb-1.5 block">Restrictions</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {finePrintObj.restrictions.map((r, i) => (
+                        <Badge key={i} variant="outline" className="text-xs text-gray-500 border-gray-200">
+                          {r}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {finePrintObj.cancellation_policy && (
+                  <p className="text-sm text-gray-500">
+                    <span className="font-medium">Cancellation:</span> {finePrintObj.cancellation_policy}
+                  </p>
+                )}
+              </div>
+            ) : (
               <EditableField
-                value={deal.fine_print}
+                value={finePrintText}
                 editing={editingField === 'fine_print'}
-                onStartEdit={() => startEdit('fine_print', deal.fine_print)}
+                onStartEdit={() => startEdit('fine_print', finePrintText)}
                 onSave={() => saveEdit('fine_print')}
                 onCancel={cancelEdit}
                 editValue={editValue}
@@ -187,8 +286,37 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
                   <p className="text-sm leading-relaxed text-gray-500">{value}</p>
                 )}
               />
-            </div>
+            )}
           </div>
+
+          {/* Voucher Instructions */}
+          {deal.voucher_instructions && (
+            <div className="rounded-xl border border-gray-100 bg-white p-5">
+              <h3 className="font-heading text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                <Ticket className="h-4 w-4 text-gray-400" />
+                How to Redeem
+              </h3>
+              <div className="space-y-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <MapPinned className="h-4 w-4 text-gray-400" />
+                  {deal.voucher_instructions.redemption_method === 'physical_location'
+                    ? 'Visit the business location'
+                    : deal.voucher_instructions.redemption_method === 'online'
+                      ? 'Redeem online'
+                      : 'Provider will travel to you'}
+                </div>
+                {deal.voucher_instructions.appointment_required && (
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-gray-400" />
+                    Appointment required
+                  </div>
+                )}
+                {deal.voucher_instructions.instructions && (
+                  <p className="text-gray-500 mt-2">{deal.voucher_instructions.instructions}</p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Scheduling */}
           {deal.scheduling_recommendation && (
@@ -199,12 +327,62 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
               </span>
             </div>
           )}
+
+          {/* Complete Before Publishing */}
+          <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-5">
+            <h3 className="font-heading text-base font-bold text-gray-900 mb-1 flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-amber-500" />
+              Complete Before Publishing
+            </h3>
+            <p className="text-xs text-gray-500 mb-4">
+              These details are needed for your live deal listing. You can add them now or come back later.
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1">
+                  <Phone className="h-3.5 w-3.5 text-gray-400" />
+                  Phone Number
+                </label>
+                <Input
+                  placeholder="e.g., (312) 555-0123"
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                  className="rounded-lg text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1">
+                  <MapPin className="h-3.5 w-3.5 text-gray-400" />
+                  Full Business Address
+                </label>
+                <Input
+                  placeholder="e.g., 1234 N Milwaukee Ave, Chicago, IL 60622"
+                  value={contactAddress}
+                  onChange={(e) => setContactAddress(e.target.value)}
+                  className="rounded-lg text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-1">
+                  <Globe className="h-3.5 w-3.5 text-gray-400" />
+                  Business Website
+                  <span className="text-xs text-gray-400 font-normal">(optional)</span>
+                </label>
+                <Input
+                  placeholder="e.g., www.sofiasstudio.com"
+                  value={contactWebsite}
+                  onChange={(e) => setContactWebsite(e.target.value)}
+                  className="rounded-lg text-sm"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Right column — Pricing sidebar */}
         <div className="space-y-4">
-          {/* Pricing card */}
           <div className="sticky top-4 space-y-4">
+            {/* Pricing card */}
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg shadow-gray-900/[0.04]">
               <div className="border-b border-gray-100 px-5 py-4">
                 <h3 className="font-heading font-bold text-gray-900">Select Option:</h3>
@@ -319,14 +497,14 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
           className="flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-gray-600"
         >
           {showPipeline ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          Pipeline details &mdash; {result.total_latency_ms}ms total
+          Pipeline details — {result.total_latency_ms}ms total
         </button>
         {showPipeline && (
           <div className="mt-4 grid grid-cols-3 gap-4">
             {Object.entries(result.pipeline_steps).map(([name, step]) => (
               <div key={name} className="rounded-xl border border-gray-100 bg-gray-50/50 p-4">
                 <div className="mb-2 text-xs font-bold uppercase tracking-wider text-gray-400">
-                  {name.replace('_', ' ')}
+                  {name.replace(/_/g, ' ')}
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-xs">{step.model}</Badge>
@@ -340,6 +518,30 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// --- Helper: format structured fine print as readable text ---
+
+function formatStructuredFinePrint(fp: FinePrint): string {
+  const parts: string[] = [];
+  if (fp.new_customers_only) parts.push('New customers only.');
+  parts.push(`Expires ${fp.expiry_days} days after purchase.`);
+  parts.push(`Limit ${fp.max_per_person} per person.`);
+  if (fp.appointment_required) parts.push('Appointment required.');
+  parts.push(...fp.restrictions.map((r) => `${r}.`));
+  if (fp.cancellation_policy) parts.push(fp.cancellation_policy);
+  return parts.join(' ');
+}
+
+// --- Fine Print Item ---
+
+function FinePrintItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg bg-white px-3 py-2.5 border border-gray-100">
+      <span className="text-xs text-gray-400 block">{label}</span>
+      <span className="text-sm font-medium text-gray-700">{value}</span>
     </div>
   );
 }
@@ -420,7 +622,7 @@ function EditableField({
       </div>
       {confidence !== undefined && confidence < 0.8 && (
         <Badge variant="outline" className="mt-2 border-amber-300 text-amber-600 text-xs">
-          <Sparkles className="mr-1 h-3 w-3" /> AI suggestion &mdash; review recommended
+          <Sparkles className="mr-1 h-3 w-3" /> AI suggestion — review recommended
         </Badge>
       )}
     </div>
