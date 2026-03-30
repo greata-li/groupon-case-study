@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EndpointList } from '@/pages/admin/EndpointList';
@@ -7,18 +8,63 @@ import { BenchmarkEditor } from '@/pages/admin/BenchmarkEditor';
 import { MerchantLayout } from '@/components/merchant/MerchantLayout';
 import { Welcome } from '@/pages/merchant/Welcome';
 import { MerchantFlow } from '@/pages/merchant/MerchantFlow';
+import { MyDeals } from '@/pages/merchant/MyDeals';
+import { CustomerPreview } from '@/pages/merchant/CustomerPreview';
+import type { GeneratedDeal, MerchantIntake } from '@/lib/api';
+
+interface PublishedDeal {
+  deal: GeneratedDeal;
+  intake: MerchantIntake;
+  publishedAt: string;
+}
 
 function App() {
+  const [publishedDeals, setPublishedDeals] = useState<PublishedDeal[]>([]);
+  const [lastDeal, setLastDeal] = useState<{ deal: GeneratedDeal; intake: MerchantIntake } | null>(null);
+
+  function handleDealPublished(deal: GeneratedDeal, intake: MerchantIntake) {
+    const published: PublishedDeal = {
+      deal,
+      intake,
+      publishedAt: new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    };
+    setPublishedDeals((prev) => [published, ...prev]);
+    setLastDeal({ deal, intake });
+  }
+
   return (
     <BrowserRouter>
       <Routes>
-        {/* Merchant experience (Sofia's side) */}
+        {/* Merchant experience */}
         <Route element={<MerchantLayout />}>
           <Route path="/" element={<Welcome />} />
-          <Route path="/create" element={<MerchantFlow />} />
+          <Route
+            path="/create"
+            element={<MerchantFlow onPublish={handleDealPublished} />}
+          />
+          <Route
+            path="/deals"
+            element={<MyDeals deals={publishedDeals} />}
+          />
         </Route>
 
-        {/* Admin panel (PM's workbench) */}
+        {/* Customer preview — full page, no merchant layout */}
+        <Route
+          path="/preview-deal"
+          element={
+            lastDeal ? (
+              <CustomerPreview deal={lastDeal.deal} intake={lastDeal.intake} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        {/* Admin panel */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<EndpointList />} />
           <Route path="endpoint/:id" element={<EndpointDetail />} />
@@ -26,7 +72,6 @@ function App() {
           <Route path="benchmarks" element={<BenchmarkEditor />} />
         </Route>
 
-        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

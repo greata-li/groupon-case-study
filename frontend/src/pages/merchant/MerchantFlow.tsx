@@ -8,7 +8,11 @@ import { AlertTriangle, ArrowLeft } from 'lucide-react';
 
 type FlowStep = 'intake' | 'preview' | 'published' | 'error';
 
-export function MerchantFlow() {
+interface MerchantFlowProps {
+  onPublish?: (deal: GeneratedDeal, intake: MerchantIntake) => void;
+}
+
+export function MerchantFlow({ onPublish }: MerchantFlowProps) {
   const [step, setStep] = useState<FlowStep>('intake');
   const [result, setResult] = useState<PipelineResult | null>(null);
   const [intake, setIntake] = useState<MerchantIntake | null>(null);
@@ -16,7 +20,6 @@ export function MerchantFlow() {
   const [errorMsg, setErrorMsg] = useState<string>('');
 
   function handleResult(r: PipelineResult, i: MerchantIntake) {
-    // Validate that we got something usable
     if (!r?.deal || (typeof r.deal === 'object' && Object.keys(r.deal).length === 0)) {
       setErrorMsg(
         'The AI pipeline returned an empty result. This can happen with very short or generic input. Please try again with more detail about your business.',
@@ -32,6 +35,9 @@ export function MerchantFlow() {
   }
 
   function handlePublish() {
+    if (onPublish && result?.deal && intake) {
+      onPublish(result.deal, intake);
+    }
     setStep('published');
   }
 

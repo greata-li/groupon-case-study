@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, ArrowRight, PartyPopper, Sparkles } from 'lucide-react';
+import { CheckCircle2, ArrowRight, PartyPopper, Sparkles, Eye, LayoutDashboard } from 'lucide-react';
 import type { GeneratedDeal, MerchantIntake } from '@/lib/api';
 
 interface PublishedProps {
@@ -10,13 +10,13 @@ interface PublishedProps {
 
 export function Published({ deal, intake }: PublishedProps) {
   const navigate = useNavigate();
+  const services = deal?.services || [];
 
   return (
     <div className="flex min-h-[calc(100vh-12rem)] items-center justify-center px-6 py-12">
       <div className="w-full max-w-lg text-center animate-fade-in-up">
         {/* Celebration */}
         <div className="relative mx-auto mb-8 h-24 w-24">
-          {/* Animated rings */}
           <div className="absolute inset-0 rounded-full bg-groupon-green/10 animate-ping" style={{ animationDuration: '2s' }} />
           <div className="absolute inset-2 rounded-full bg-groupon-green/10 animate-ping" style={{ animationDuration: '2.5s', animationDelay: '0.2s' }} />
           <div className="relative flex h-full w-full items-center justify-center rounded-full bg-groupon-green">
@@ -41,28 +41,32 @@ export function Published({ deal, intake }: PublishedProps) {
             </div>
           </div>
           <div className="p-6">
-            <h3 className="font-heading text-lg font-bold text-gray-900">{deal.title}</h3>
+            <h3 className="font-heading text-lg font-bold text-gray-900">
+              {deal?.title || 'Your Deal'}
+            </h3>
             <p className="mt-1 text-sm text-gray-500">
-              {intake.business_name} &mdash; {intake.location}
+              {intake.business_name} — {intake.location}
             </p>
-            <div className="mt-4 space-y-2.5">
-              {deal.services.map((service, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-2.5"
-                >
-                  <span className="text-sm font-medium text-gray-700">{service.name}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-400 line-through">
-                      ${service.original_price}
-                    </span>
-                    <span className="font-heading font-extrabold text-groupon-green">
-                      ${service.deal_price}
-                    </span>
+            {services.length > 0 && (
+              <div className="mt-4 space-y-2.5">
+                {services.map((service, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-2.5"
+                  >
+                    <span className="text-sm font-medium text-gray-700">{service.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-400 line-through">
+                        ${service.original_price}
+                      </span>
+                      <span className="font-heading font-extrabold text-groupon-green">
+                        ${service.deal_price}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -89,10 +93,19 @@ export function Published({ deal, intake }: PublishedProps) {
         {/* Actions */}
         <div className="mt-8 flex flex-col gap-3">
           <Button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/deals')}
             className="w-full h-12 rounded-xl bg-groupon-green font-bold text-white shadow-md shadow-groupon-green/20 hover:bg-groupon-green-dark"
           >
-            Back to Home
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Go to My Deals
+          </Button>
+          <Button
+            onClick={() => navigate('/preview-deal')}
+            variant="outline"
+            className="w-full"
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            See How Customers See It
           </Button>
           <Button
             variant="ghost"

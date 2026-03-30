@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { validateStep, validatePhone, validateServicePrice } from '@/lib/validation';
 import {
   ArrowLeft,
   ArrowRight,
@@ -166,16 +167,45 @@ export function IntakeForm({ onResult }: IntakeFormProps) {
   }, [currentStep, fetchSuggestions, form.business_description, suggestionsRequested]);
 
   function handleNext() {
+    // Validate current step before advancing
+    const validationError = getStepValidationError();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setError(null);
+
     if (isLastStep) {
       handleGenerate();
     } else {
-      // Sync structured services to the text field before advancing past step 4
       if (step.field === 'services') {
         syncServicesToText();
       }
       setCurrentStep((s) => s + 1);
       setAnimKey((k) => k + 1);
     }
+  }
+
+  function getStepValidationError(): string | null {
+    if (step.type === 'input' || step.type === 'textarea') {
+      const val = (form[step.field as keyof MerchantIntake] || '') as string;
+      return validateStep(step.field, val);
+    }
+    if (step.type === 'service_picker') {
+      const filled = serviceEntries.filter((s) => s.name.trim());
+      if (filled.length === 0) return 'Please add at least one service';
+      for (const s of filled) {
+        const priceErr = validateServicePrice(s.price);
+        if (priceErr) return `${s.name}: ${priceErr}`;
+      }
+      return null;
+    }
+    if (step.type === 'contact') {
+      const phoneErr = validatePhone(form.phone || '');
+      if (phoneErr) return phoneErr;
+      return null;
+    }
+    return null;
   }
 
   function handleBack() {
