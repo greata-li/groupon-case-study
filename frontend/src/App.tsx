@@ -12,27 +12,11 @@ import { MyDeals } from '@/pages/merchant/MyDeals';
 import { CustomerPreview } from '@/pages/merchant/CustomerPreview';
 import type { GeneratedDeal, MerchantIntake } from '@/lib/api';
 
-interface PublishedDeal {
-  deal: GeneratedDeal;
-  intake: MerchantIntake;
-  publishedAt: string;
-}
-
 function App() {
-  const [publishedDeals, setPublishedDeals] = useState<PublishedDeal[]>([]);
+  // Last deal for the customer preview page
   const [lastDeal, setLastDeal] = useState<{ deal: GeneratedDeal; intake: MerchantIntake } | null>(null);
 
   function handleDealPublished(deal: GeneratedDeal, intake: MerchantIntake) {
-    const published: PublishedDeal = {
-      deal,
-      intake,
-      publishedAt: new Date().toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      }),
-    };
-    setPublishedDeals((prev) => [published, ...prev]);
     setLastDeal({ deal, intake });
   }
 
@@ -46,20 +30,17 @@ function App() {
             path="/create"
             element={<MerchantFlow onPublish={handleDealPublished} />}
           />
-          <Route
-            path="/deals"
-            element={<MyDeals deals={publishedDeals} />}
-          />
+          <Route path="/deals" element={<MyDeals />} />
         </Route>
 
-        {/* Customer preview — full page, no merchant layout */}
+        {/* Customer preview — full page */}
         <Route
           path="/preview-deal"
           element={
             lastDeal ? (
               <CustomerPreview deal={lastDeal.deal} intake={lastDeal.intake} />
             ) : (
-              <Navigate to="/" replace />
+              <Navigate to="/deals" replace />
             )
           }
         />

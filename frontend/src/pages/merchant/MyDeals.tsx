@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fetchDeals, deleteDeal, type PublishedDeal } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -7,19 +9,37 @@ import {
   Edit3,
   BarChart3,
   Clock,
-  CheckCircle2,
   TrendingUp,
   Users,
   DollarSign,
+  Trash2,
+  Loader2,
 } from 'lucide-react';
-import type { GeneratedDeal, MerchantIntake } from '@/lib/api';
 
-interface MyDealsProps {
-  deals: Array<{ deal: GeneratedDeal; intake: MerchantIntake; publishedAt: string }>;
-}
-
-export function MyDeals({ deals }: MyDealsProps) {
+export function MyDeals() {
   const navigate = useNavigate();
+  const [deals, setDeals] = useState<PublishedDeal[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDeals()
+      .then(setDeals)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function handleDelete(id: string) {
+    await deleteDeal(id);
+    setDeals((prev) => prev.filter((d) => d.id !== id));
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20 text-gray-400">
+        <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading deals...
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
@@ -64,11 +84,14 @@ export function MyDeals({ deals }: MyDealsProps) {
         </div>
       ) : (
         <div className="space-y-4">
-          {deals.map((item, i) => {
+          {deals.map((item) => {
             const services = item.deal?.services || [];
+            const publishDate = new Date(item.published_at).toLocaleDateString('en-US', {
+              month: 'short', day: 'numeric', year: 'numeric',
+            });
             return (
               <div
-                key={i}
+                key={item.id}
                 className="flex items-center gap-5 rounded-xl border border-gray-200 bg-white p-5 transition-all hover:shadow-md"
               >
                 {/* Image placeholder */}
@@ -83,16 +106,16 @@ export function MyDeals({ deals }: MyDealsProps) {
                       {item.deal?.title || 'Untitled Deal'}
                     </h3>
                     <Badge className="bg-groupon-green/10 text-groupon-green border-0 text-xs font-bold shrink-0">
-                      Active
+                      {item.status === 'active' ? 'Active' : item.status}
                     </Badge>
                   </div>
                   <p className="text-sm text-gray-500">
-                    {item.intake.business_name} — {item.intake.location}
+                    {item.intake?.business_name} — {item.intake?.location}
                   </p>
                   <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      Published {item.publishedAt}
+                      {publishDate}
                     </span>
                     <span>
                       {services.length} option{services.length !== 1 ? 's' : ''}
@@ -119,11 +142,11 @@ export function MyDeals({ deals }: MyDealsProps) {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => navigate('/create')}
-                    className="rounded-lg text-xs"
+                    onClick={() => handleDelete(item.id)}
+                    className="rounded-lg text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
                   >
-                    <Edit3 className="mr-1 h-3 w-3" />
-                    Edit
+                    <Trash2 className="mr-1 h-3 w-3" />
+                    Delete
                   </Button>
                 </div>
               </div>

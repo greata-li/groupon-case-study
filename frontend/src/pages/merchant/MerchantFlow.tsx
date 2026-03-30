@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { PipelineResult, MerchantIntake, GeneratedDeal } from '@/lib/api';
+import { publishDeal } from '@/lib/api';
 import { IntakeForm } from './IntakeForm';
 import { DealPreview } from './DealPreview';
 import { Published } from './Published';
@@ -49,9 +50,20 @@ export function MerchantFlow({ onPublish }: MerchantFlowProps) {
     setStep('preview');
   }
 
-  function handlePublish() {
-    if (onPublish && result?.deal && intake) {
-      onPublish(result.deal, intake);
+  async function handlePublish() {
+    if (result?.deal && intake) {
+      try {
+        await publishDeal(result.deal, intake, {
+          phone: intake.phone,
+          address: intake.address,
+          website: intake.website,
+        });
+      } catch {
+        // Save failed — still show published page locally
+      }
+      if (onPublish) {
+        onPublish(result.deal, intake);
+      }
     }
     setStep('published');
   }

@@ -208,3 +208,45 @@ export async function generateDeal(intake: MerchantIntake): Promise<PipelineResu
   if (!res.ok) throw new Error(`Pipeline failed: ${res.statusText}`);
   return res.json();
 }
+
+// --- Deals (persisted) ---
+
+export interface PublishedDeal {
+  id: string;
+  deal: GeneratedDeal;
+  intake: MerchantIntake;
+  contact: { phone?: string; address?: string; website?: string };
+  published_at: string;
+  status: string;
+}
+
+export async function publishDeal(
+  deal: GeneratedDeal,
+  intake: MerchantIntake,
+  contact?: { phone?: string; address?: string; website?: string },
+): Promise<PublishedDeal> {
+  const res = await fetch(`${API_BASE}/deals`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deal, intake, contact }),
+  });
+  if (!res.ok) throw new Error(`Publish failed: ${res.statusText}`);
+  return res.json();
+}
+
+export async function fetchDeals(): Promise<PublishedDeal[]> {
+  const res = await fetch(`${API_BASE}/deals`);
+  if (!res.ok) throw new Error(`Failed to fetch deals: ${res.statusText}`);
+  return res.json();
+}
+
+export async function fetchDeal(id: string): Promise<PublishedDeal> {
+  const res = await fetch(`${API_BASE}/deals/${id}`);
+  if (!res.ok) throw new Error(`Failed to fetch deal: ${res.statusText}`);
+  return res.json();
+}
+
+export async function deleteDeal(id: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/deals/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`Failed to delete deal: ${res.statusText}`);
+}

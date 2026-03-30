@@ -1,4 +1,6 @@
 import json
+import uuid
+from datetime import datetime
 from pathlib import Path
 from contextlib import asynccontextmanager
 
@@ -18,6 +20,7 @@ async def lifespan(app: FastAPI):
     # Load endpoint configs on startup
     app.state.endpoint_configs = load_all_configs()
     app.state.benchmark_data = load_benchmark_data()
+    app.state.deals = load_deals()
     yield
 
 
@@ -69,6 +72,23 @@ def save_benchmark_data(data: dict):
     benchmark_path = DATA_DIR / "benchmarks.json"
     with open(benchmark_path, "w") as f:
         json.dump(data, f, indent=2)
+
+
+DEALS_PATH = DATA_DIR / "deals.json"
+
+
+def load_deals() -> list:
+    """Load published deals from disk."""
+    if DEALS_PATH.exists():
+        with open(DEALS_PATH) as f:
+            return json.load(f)
+    return []
+
+
+def save_deals(deals: list):
+    """Save published deals to disk."""
+    with open(DEALS_PATH, "w") as f:
+        json.dump(deals, f, indent=2)
 
 
 # --- Models ---
@@ -271,8 +291,59 @@ async def generate_deal(intake: MerchantIntake):
     }
 
 
+# --- Deals (persisted to JSON file) ---
+
+class PublishDealRequest(BaseModel):
+    deal: dict
+    intake: dict
+    contact: dict | None = None
+
+
+@app.post("/api/deals")
+async def publish_deal(request: PublishDealRequest):
+    """Publish a deal — saves to disk so it persists across restarts."""
+    deal_record = {
+        "id": str(uuid.uuid4()),
+        "deal": request.deal,
+        "intake": request.intake,
+        "contact": request.contact or {},
+        "published_at": datetime.now().isoformat(),
+        "status": "active",
+    }
+    app.state.deals.insert(0, deal_record)
+    save_deals(app.state.deals)
+    return deal_record
+
+
+@app.get("/api/deals")
+async def list_deals():
+    """List all published deals."""
+    return app.state.deals
+
+
+@app.get("/api/deals/{deal_id}")
+async def get_deal(deal_id: str):
+    """Get a single deal by ID."""
+    for d in app.state.deals:
+        if d["id"] == deal_id:
+            return d
+    raise HTTPException(status_code=404, detail="Deal not found")
+
+
+@app.delete("/api/deals/{deal_id}")
+async def delete_deal(deal_id: str):
+    """Delete a deal."""
+    app.state.deals = [d for d in app.state.deals if d["id"] != deal_id]
+    save_deals(app.state.deals)
+    return {"deleted": deal_id}
+
+
 # --- Health ---
 
 @app.get("/api/health")
 async def health():
-    return {"status": "ok", "endpoints": list(app.state.endpoint_configs.keys())}
+    return {
+        "status": "ok",
+        "endpoints": list(app.state.endpoint_configs.keys()),
+        "deals_count": len(app.state.deals),
+    }
