@@ -7,11 +7,22 @@ and editable via the admin panel.
 
 import json
 import os
+import re
 import time
 
 import anthropic
 
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+
+def parse_json_response(raw: str) -> dict:
+    """Parse JSON from LLM response, handling markdown code fences."""
+    # Strip markdown code fences if present
+    cleaned = raw.strip()
+    cleaned = re.sub(r'^```(?:json)?\s*\n?', '', cleaned)
+    cleaned = re.sub(r'\n?```\s*$', '', cleaned)
+    cleaned = cleaned.strip()
+    return json.loads(cleaned)
 
 
 async def run_endpoint(endpoint_id: str, config: dict, input_data: dict) -> dict:
@@ -65,8 +76,8 @@ async def run_business_classifier(config: dict, input_data: dict) -> dict:
     raw_output = await call_claude(config, user_message)
 
     try:
-        return json.loads(raw_output)
-    except json.JSONDecodeError:
+        return parse_json_response(raw_output)
+    except (json.JSONDecodeError, ValueError):
         return {"raw_response": raw_output, "parse_error": True}
 
 
@@ -86,8 +97,8 @@ async def run_market_intelligence(config: dict, input_data: dict) -> dict:
     raw_output = await call_claude(config, user_message)
 
     try:
-        return json.loads(raw_output)
-    except json.JSONDecodeError:
+        return parse_json_response(raw_output)
+    except (json.JSONDecodeError, ValueError):
         return {"raw_response": raw_output, "parse_error": True}
 
 
@@ -105,8 +116,12 @@ async def run_service_suggester(config: dict, input_data: dict) -> dict:
     raw_output = await call_claude(config, user_message)
 
     try:
-        return json.loads(raw_output)
-    except json.JSONDecodeError:
+        parsed = parse_json_response(raw_output)
+        print(f"[service_suggester] Parse SUCCESS: {len(parsed.get('suggestions', []))} suggestions")
+        return parsed
+    except (json.JSONDecodeError, ValueError) as e:
+        print(f"[service_suggester] Parse FAILED: {e}")
+        print(f"[service_suggester] Raw output first 200 chars: {raw_output[:200]}")
         return {"raw_response": raw_output, "parse_error": True}
 
 
@@ -121,6 +136,6 @@ async def run_deal_generator(config: dict, input_data: dict) -> dict:
     raw_output = await call_claude(config, user_message)
 
     try:
-        return json.loads(raw_output)
-    except json.JSONDecodeError:
+        return parse_json_response(raw_output)
+    except (json.JSONDecodeError, ValueError):
         return {"raw_response": raw_output, "parse_error": True}

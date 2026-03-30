@@ -148,9 +148,23 @@ export function IntakeForm({ onResult }: IntakeFormProps) {
         form.business_description,
         form.location || 'United States',
       );
-      const output = result.output;
+      let output = result.output;
+
+      // If the LLM wrapped response in code fences, parse on the client side
+      if (output?.parse_error && output?.raw_response) {
+        try {
+          const raw = (output.raw_response as string)
+            .replace(/^```(?:json)?\s*\n?/, '')
+            .replace(/\n?```\s*$/, '')
+            .trim();
+          output = JSON.parse(raw);
+        } catch {
+          // couldn't parse — fall through
+        }
+      }
+
       if (output?.suggestions) {
-        setSuggestions(output.suggestions);
+        setSuggestions(output.suggestions as ServiceSuggestion[]);
       }
     } catch {
       // Silently fail — suggestions are a nicety, not required

@@ -20,7 +20,22 @@ export function MerchantFlow({ onPublish }: MerchantFlowProps) {
   const [errorMsg, setErrorMsg] = useState<string>('');
 
   function handleResult(r: PipelineResult, i: MerchantIntake) {
-    if (!r?.deal || (typeof r.deal === 'object' && Object.keys(r.deal).length === 0)) {
+    // If the deal came back with parse_error, try client-side extraction
+    let deal = r?.deal;
+    if (deal && (deal as any).parse_error && (deal as any).raw_response) {
+      try {
+        const raw = ((deal as any).raw_response as string)
+          .replace(/^```(?:json)?\s*\n?/, '')
+          .replace(/\n?```\s*$/, '')
+          .trim();
+        deal = JSON.parse(raw);
+        r = { ...r, deal: deal as GeneratedDeal };
+      } catch {
+        // couldn't recover
+      }
+    }
+
+    if (!deal || (typeof deal === 'object' && Object.keys(deal).length === 0)) {
       setErrorMsg(
         'The AI pipeline returned an empty result. This can happen with very short or generic input. Please try again with more detail about your business.',
       );
