@@ -44,6 +44,10 @@ export interface MerchantIntake {
   location: string;
   services: string;
   additional_info: string;
+  // Contact details — captured in intake, used for the live listing
+  phone?: string;
+  address?: string;
+  website?: string;
 }
 
 export interface DealService {

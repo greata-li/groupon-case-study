@@ -20,6 +20,7 @@ import {
   MapPin,
   DollarSign,
   MessageCircle,
+  Phone,
   Plus,
   X,
   Trash2,
@@ -77,6 +78,14 @@ const stepMeta = [
     type: 'textarea' as const,
     icon: MessageCircle,
   },
+  {
+    field: 'contact_details' as const,
+    label: 'How can customers reach you?',
+    placeholder: '',
+    hint: 'Your contact details will appear on your deal listing and vouchers.',
+    type: 'contact' as const,
+    icon: Phone,
+  },
 ];
 
 interface IntakeFormProps {
@@ -97,6 +106,9 @@ export function IntakeForm({ onResult }: IntakeFormProps) {
     location: '',
     services: '',
     additional_info: '',
+    phone: '',
+    address: '',
+    website: '',
   });
 
   // Structured services (used by the service picker in step 4)
@@ -115,10 +127,12 @@ export function IntakeForm({ onResult }: IntakeFormProps) {
   // Determine if user can advance
   const canAdvance = (() => {
     if (step.field === 'additional_info') return true;
+    if (step.field === 'contact_details') return true; // contact is optional to advance
     if (step.field === 'services') {
       return serviceEntries.some((s) => s.name.trim() && s.price.trim());
     }
-    return form[step.field].trim().length > 0;
+    if (step.field === 'contact_details') return true;
+    return (form[step.field as keyof MerchantIntake] || '').toString().trim().length > 0;
   })();
 
   // Fire service suggestions after Step 2 (business description) is completed
@@ -312,7 +326,7 @@ export function IntakeForm({ onResult }: IntakeFormProps) {
               {step.type === 'input' && (
                 <Input
                   autoFocus
-                  value={form[step.field]}
+                  value={(form[step.field as keyof MerchantIntake] || '') as string}
                   onChange={(e) =>
                     setForm({ ...form, [step.field]: e.target.value })
                   }
@@ -325,7 +339,7 @@ export function IntakeForm({ onResult }: IntakeFormProps) {
               {step.type === 'textarea' && (
                 <Textarea
                   autoFocus
-                  value={form[step.field]}
+                  value={(form[step.field as keyof MerchantIntake] || '') as string}
                   onChange={(e) =>
                     setForm({ ...form, [step.field]: e.target.value })
                   }
@@ -344,6 +358,45 @@ export function IntakeForm({ onResult }: IntakeFormProps) {
                   onAdd={addServiceEntry}
                   onAddSuggestion={addSuggestion}
                 />
+              )}
+
+              {step.type === 'contact' && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      Phone Number
+                    </label>
+                    <Input
+                      autoFocus
+                      value={form.phone || ''}
+                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                      placeholder="e.g., (312) 555-0123"
+                      className="h-12 rounded-xl border-gray-200 bg-gray-50/50 px-4 text-base transition-colors focus:border-groupon-green focus:bg-white focus:ring-groupon-green/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      Full Business Address
+                    </label>
+                    <Input
+                      value={form.address || ''}
+                      onChange={(e) => setForm({ ...form, address: e.target.value })}
+                      placeholder="e.g., 1234 N Milwaukee Ave, Chicago, IL 60622"
+                      className="h-12 rounded-xl border-gray-200 bg-gray-50/50 px-4 text-base transition-colors focus:border-groupon-green focus:bg-white focus:ring-groupon-green/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                      Business Website <span className="text-xs text-gray-400 font-normal">(optional)</span>
+                    </label>
+                    <Input
+                      value={form.website || ''}
+                      onChange={(e) => setForm({ ...form, website: e.target.value })}
+                      placeholder="e.g., www.sofiasstudio.com"
+                      className="h-12 rounded-xl border-gray-200 bg-gray-50/50 px-4 text-base transition-colors focus:border-groupon-green focus:bg-white focus:ring-groupon-green/20"
+                    />
+                  </div>
+                </div>
               )}
             </div>
 
