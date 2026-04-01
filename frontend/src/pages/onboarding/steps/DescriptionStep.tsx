@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { VoiceInput } from '@/components/ui/voice-input';
 import { Sparkles, PlusCircle, Loader2 } from 'lucide-react';
 
 interface DescriptionStepProps {
@@ -118,6 +119,12 @@ export function DescriptionStep({ data, onUpdate }: DescriptionStepProps) {
               )}
               Share More Details
             </Button>
+            <VoiceInput
+              onTranscript={(t) => {
+                const updated = (description + ' ' + t).trim().slice(0, 400);
+                onUpdate('business_description', updated);
+              }}
+            />
           </div>
           <span
             className={`text-xs font-medium tabular-nums ${

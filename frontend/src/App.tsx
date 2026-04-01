@@ -7,6 +7,7 @@ import { EndpointList } from '@/pages/admin/EndpointList';
 import { EndpointDetail } from '@/pages/admin/EndpointDetail';
 import { TestPanel } from '@/pages/admin/TestPanel';
 import { BenchmarkEditor } from '@/pages/admin/BenchmarkEditor';
+import { PipelineAnalytics } from '@/pages/admin/PipelineAnalytics';
 
 // Legacy merchant layout (landing page + old deal flow)
 import { MerchantLayout } from '@/components/merchant/MerchantLayout';
@@ -96,6 +97,7 @@ function App() {
           <Route path="endpoint/:id" element={<EndpointDetail />} />
           <Route path="test" element={<TestPanel />} />
           <Route path="benchmarks" element={<BenchmarkEditor />} />
+          <Route path="analytics" element={<PipelineAnalytics />} />
         </Route>
 
         {/* Fallback */}

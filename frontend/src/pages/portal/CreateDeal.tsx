@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { VoiceInput } from '@/components/ui/voice-input';
 import {
   CheckCircle2,
   ChevronRight,
@@ -738,6 +739,7 @@ export function CreateDeal() {
               <Info className="mr-1 h-3 w-3" />
               Share More Details
             </Button>
+            <VoiceInput onTranscript={(t) => updateForm({ highlights: (form.highlights ? form.highlights + ' ' : '') + t })} />
           </div>
         </div>
 
@@ -786,20 +788,30 @@ export function CreateDeal() {
                     placeholder="Describe this service in detail. What does the customer get? What's the experience like?"
                     rows={4}
                   />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleInspireMe('description', i)}
-                    disabled={inspiringField === `description-${i}`}
-                    className="mt-2 rounded-lg text-xs"
-                  >
-                    {inspiringField === `description-${i}` ? (
-                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                    ) : (
-                      <Sparkles className="mr-1 h-3 w-3" />
-                    )}
-                    Inspire Me
-                  </Button>
+                  <div className="mt-2 flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleInspireMe('description', i)}
+                      disabled={inspiringField === `description-${i}`}
+                      className="rounded-lg text-xs"
+                    >
+                      {inspiringField === `description-${i}` ? (
+                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                      ) : (
+                        <Sparkles className="mr-1 h-3 w-3" />
+                      )}
+                      Inspire Me
+                    </Button>
+                    <VoiceInput
+                      onTranscript={(t) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          descriptions: { ...prev.descriptions, [i]: (prev.descriptions[i] || '') + ' ' + t },
+                        }))
+                      }
+                    />
+                  </div>
                 </CardContent>
               </Card>
             ))}
