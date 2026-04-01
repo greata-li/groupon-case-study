@@ -30,6 +30,9 @@ import { Profile } from '@/pages/portal/Profile';
 import { Connections } from '@/pages/portal/Connections';
 import { CustomerPreview } from '@/pages/portal/CustomerPreview';
 
+// Onboarding
+import { OnboardingFlow } from '@/pages/onboarding/OnboardingFlow';
+
 import type { GeneratedDeal, MerchantIntake } from '@/lib/api';
 
 function App() {
@@ -61,6 +64,9 @@ function App() {
           <Route path="connections" element={<Connections />} />
           <Route path="preview/:id" element={<CustomerPreview />} />
         </Route>
+
+        {/* ── Business Onboarding (full-screen flow) ── */}
+        <Route path="/onboarding" element={<OnboardingFlow />} />
 
         {/* ── Landing page (Welcome) ── */}
         <Route element={<MerchantLayout />}>
