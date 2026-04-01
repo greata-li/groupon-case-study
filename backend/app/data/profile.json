@@ -1,0 +1,36 @@
+{
+  "business_name": "LI Consulting",
+  "business_description": "LI Consulting is a data analytics and technology consulting firm specializing in data wrangling, data extraction, and custom product development for businesses. The company provides both project-based solutions and ongoing consultation services to help clients optimize their data processes and software systems.",
+  "location": "Toronto",
+  "full_address": null,
+  "phone": "647-784-7978",
+  "website": "http://liconsulting.ca/",
+  "category": "Business Services > Data Analytics & Consulting",
+  "services": [
+    {
+      "name": "Data Analytics Consulting",
+      "price": 150
+    },
+    {
+      "name": "Data Wrangling & Extraction",
+      "price": 150
+    },
+    {
+      "name": "Custom Product Development",
+      "price": 150
+    },
+    {
+      "name": "Ongoing Software Consultation",
+      "price": 150
+    }
+  ],
+  "scheduling_insight": null,
+  "experience_years": null,
+  "business_type": "company",
+  "highlights": [
+    "Comprehensive data analytics and product development services",
+    "Flexible engagement models - both project-based and ongoing consultation",
+    "Remote service delivery across Canada with potential for global expansion"
+  ],
+  "onboarded": true
+}

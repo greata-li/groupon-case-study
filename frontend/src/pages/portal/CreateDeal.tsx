@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { enhanceText, publishDeal, type GeneratedDeal, type MerchantIntake, type DealService, type FinePrint, type VoucherInstructions } from '@/lib/api';
+import { enhanceText, publishDeal, fetchProfile, type GeneratedDeal, type MerchantIntake, type DealService, type FinePrint, type VoucherInstructions } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -166,6 +166,46 @@ export function CreateDeal() {
   const [inspiringField, setInspiringField] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [expandedBrowse, setExpandedBrowse] = useState<string | null>(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
+  // Load saved profile and pre-fill the form
+  useEffect(() => {
+    fetchProfile()
+      .then((profile) => {
+        if (!profile || typeof profile !== 'object') return;
+        const p = profile as Record<string, any>;
+        const updates: Partial<DealFormData> = {};
+
+        if (p.business_name) updates.businessName = p.business_name;
+        if (p.business_description) updates.businessDescription = p.business_description;
+        if (p.category) {
+          updates.selectedCategory = p.category;
+          updates.aiCategory = p.category;
+          updates.aiConfidence = p.category_confidence ? Math.round(p.category_confidence * 100) : 92;
+        }
+        if (p.phone) updates.redemptionPhone = p.phone;
+        if (p.full_address) updates.redemptionAddress = p.full_address;
+        if (p.location) updates.redemptionCity = p.location;
+
+        // Pre-fill services from profile
+        if (Array.isArray(p.services) && p.services.length > 0) {
+          updates.services = p.services.map((s: any) => ({
+            name: s.name || '',
+            regularPrice: s.price ? String(s.price) : '',
+            grouponPrice: '',
+            discountPct: 0,
+            voucherCap: '50',
+            description: '',
+          }));
+        }
+
+        setForm((prev) => ({ ...prev, ...updates }));
+        setProfileLoaded(true);
+      })
+      .catch(() => {
+        setProfileLoaded(true);
+      });
+  }, []);
 
   // ---- Helpers ----
   function updateForm(partial: Partial<DealFormData>) {
@@ -330,33 +370,71 @@ export function CreateDeal() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="font-heading text-lg font-bold text-gray-900">Initial Setup</h2>
-          <p className="text-sm text-gray-500 mt-1">Choose your booking platform and category.</p>
+          <h2 className="font-heading text-lg font-bold text-gray-900">Deal Setup</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            {form.businessName
+              ? `Creating a new deal for ${form.businessName}. Your profile info is pre-filled.`
+              : 'Confirm your details and choose a category for this deal.'}
+          </p>
         </div>
 
-        {/* Business info */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Business Name</Label>
-            <Input
-              value={form.businessName}
-              onChange={(e) => updateForm({ businessName: (e.target as HTMLInputElement).value })}
-              placeholder="Sofia's Glow Studio"
-              className="mt-1.5"
-            />
-          </div>
-          <div>
-            <Label>Business Description</Label>
-            <Input
-              value={form.businessDescription}
-              onChange={(e) => updateForm({ businessDescription: (e.target as HTMLInputElement).value })}
-              placeholder="Full-service beauty and wellness spa..."
-              className="mt-1.5"
-            />
-          </div>
-        </div>
+        {/* Profile summary — pre-filled from saved profile */}
+        {form.businessName && (
+          <Card className="border-groupon-green/20 bg-groupon-green-light/20">
+            <CardContent className="py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-groupon-green text-sm font-bold text-white">
+                    {form.businessName.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <span className="font-heading text-sm font-bold text-gray-900">{form.businessName}</span>
+                    {form.businessDescription && (
+                      <p className="text-xs text-gray-500 mt-0.5 max-w-md truncate">{form.businessDescription}</p>
+                    )}
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => navigate('/portal/profile')} className="text-xs rounded-lg">
+                  Edit Profile
+                </Button>
+              </div>
+              {form.services.length > 0 && form.services[0].name && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {form.services.filter(s => s.name).map((s, i) => (
+                    <Badge key={i} variant="secondary" className="text-xs">
+                      {s.name} {s.regularPrice && `· $${s.regularPrice}`}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Booking platform */}
+        {/* Booking platform — only show if not set */}
+        {!form.businessName && (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Business Name</Label>
+              <Input
+                value={form.businessName}
+                onChange={(e) => updateForm({ businessName: (e.target as HTMLInputElement).value })}
+                placeholder="Sofia's Glow Studio"
+                className="mt-1.5"
+              />
+            </div>
+            <div>
+              <Label>Business Description</Label>
+              <Input
+                value={form.businessDescription}
+                onChange={(e) => updateForm({ businessDescription: (e.target as HTMLInputElement).value })}
+                placeholder="Full-service beauty and wellness spa..."
+                className="mt-1.5"
+              />
+            </div>
+          </div>
+        )}
+
         <div>
           <Label>Booking Platform</Label>
           <div className="mt-2 flex flex-wrap gap-2">

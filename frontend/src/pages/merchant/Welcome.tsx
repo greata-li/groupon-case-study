@@ -35,7 +35,7 @@ export function Welcome() {
             {/* CTA */}
             <div className="mt-10 flex flex-col items-center gap-3">
               <Button
-                onClick={() => navigate('/create')}
+                onClick={() => navigate('/onboarding')}
                 size="lg"
                 className="group h-14 rounded-full bg-groupon-green px-10 text-base font-bold text-white shadow-lg shadow-groupon-green/20 transition-all hover:bg-groupon-green-dark hover:shadow-xl hover:shadow-groupon-green/30"
               >
