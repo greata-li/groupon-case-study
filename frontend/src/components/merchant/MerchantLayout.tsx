@@ -21,7 +21,7 @@ export function MerchantLayout() {
           <nav className="flex items-center gap-6 text-sm font-medium text-gray-500">
             <Link to="/" className="transition-colors hover:text-gray-900">Home</Link>
             <Link to="/create" className="transition-colors hover:text-gray-900">Create Deal</Link>
-            <Link to="/deals" className="transition-colors hover:text-gray-900">My Deals</Link>
+            <Link to="/portal" className="transition-colors hover:text-gray-900">Merchant Portal</Link>
             <Link
               to="/admin"
               className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs transition-colors hover:bg-gray-50"

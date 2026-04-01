@@ -1,20 +1,39 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+// Admin
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { EndpointList } from '@/pages/admin/EndpointList';
 import { EndpointDetail } from '@/pages/admin/EndpointDetail';
 import { TestPanel } from '@/pages/admin/TestPanel';
 import { BenchmarkEditor } from '@/pages/admin/BenchmarkEditor';
+
+// Merchant portal
+import { PortalLayout } from '@/components/merchant/PortalLayout';
+import { Home } from '@/pages/portal/Home';
+import { Campaigns } from '@/pages/portal/Campaigns';
+import { Booking } from '@/pages/portal/Booking';
+import { VoucherList } from '@/pages/portal/VoucherList';
+import { BulkRedeem } from '@/pages/portal/BulkRedeem';
+import { CustomerReviews } from '@/pages/portal/CustomerReviews';
+import { Payments } from '@/pages/portal/Payments';
+import { Reports } from '@/pages/portal/Reports';
+import { Connections } from '@/pages/portal/Connections';
+import { Support } from '@/pages/portal/Support';
+
+// Merchant flows (keep old layout for welcome + deal creation)
 import { MerchantLayout } from '@/components/merchant/MerchantLayout';
 import { Welcome } from '@/pages/merchant/Welcome';
 import { MerchantFlow } from '@/pages/merchant/MerchantFlow';
-import { MyDeals } from '@/pages/merchant/MyDeals';
 import { CustomerPreview } from '@/pages/merchant/CustomerPreview';
+
 import type { GeneratedDeal, MerchantIntake } from '@/lib/api';
 
 function App() {
-  // Last deal for the customer preview page
-  const [lastDeal, setLastDeal] = useState<{ deal: GeneratedDeal; intake: MerchantIntake } | null>(null);
+  const [lastDeal, setLastDeal] = useState<{
+    deal: GeneratedDeal;
+    intake: MerchantIntake;
+  } | null>(null);
 
   function handleDealPublished(deal: GeneratedDeal, intake: MerchantIntake) {
     setLastDeal({ deal, intake });
@@ -23,24 +42,43 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Merchant experience */}
+        {/* Landing / Welcome */}
         <Route element={<MerchantLayout />}>
           <Route path="/" element={<Welcome />} />
+        </Route>
+
+        {/* Deal creation flow (standalone, no sidebar) */}
+        <Route element={<MerchantLayout />}>
           <Route
             path="/create"
             element={<MerchantFlow onPublish={handleDealPublished} />}
           />
-          <Route path="/deals" element={<MyDeals />} />
         </Route>
 
-        {/* Customer preview — full page */}
+        {/* Merchant Portal (sidebar layout) */}
+        <Route path="/portal" element={<PortalLayout />}>
+          <Route index element={<Navigate to="/portal/home" replace />} />
+          <Route path="home" element={<Home />} />
+          <Route path="campaigns" element={<Campaigns />} />
+          <Route path="create" element={<MerchantFlow onPublish={handleDealPublished} />} />
+          <Route path="booking" element={<Booking />} />
+          <Route path="vouchers" element={<VoucherList />} />
+          <Route path="bulk-redeem" element={<BulkRedeem />} />
+          <Route path="reviews" element={<CustomerReviews />} />
+          <Route path="payments" element={<Payments />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="support" element={<Support />} />
+          <Route path="connections" element={<Connections />} />
+        </Route>
+
+        {/* Customer preview (full page, no layout) */}
         <Route
           path="/preview-deal"
           element={
             lastDeal ? (
               <CustomerPreview deal={lastDeal.deal} intake={lastDeal.intake} />
             ) : (
-              <Navigate to="/deals" replace />
+              <Navigate to="/portal/campaigns" replace />
             )
           }
         />
@@ -53,6 +91,7 @@ function App() {
           <Route path="benchmarks" element={<BenchmarkEditor />} />
         </Route>
 
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

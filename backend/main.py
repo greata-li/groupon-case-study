@@ -291,6 +291,70 @@ async def generate_deal(intake: MerchantIntake):
     }
 
 
+# --- Business Profile (persisted to JSON file) ---
+
+PROFILE_PATH = DATA_DIR / "profile.json"
+
+
+def load_profile() -> dict:
+    if PROFILE_PATH.exists():
+        with open(PROFILE_PATH) as f:
+            return json.load(f)
+    return {}
+
+
+def save_profile(profile: dict):
+    with open(PROFILE_PATH, "w") as f:
+        json.dump(profile, f, indent=2)
+
+
+@app.get("/api/profile")
+async def get_profile():
+    return load_profile()
+
+
+@app.put("/api/profile")
+async def update_profile(profile: dict):
+    save_profile(profile)
+    return profile
+
+
+# --- AI Text Enhancement ---
+
+class EnhanceTextRequest(BaseModel):
+    text: str
+    field_type: str  # "highlights" | "description" | "business_description"
+    context: dict = {}  # business name, category, etc.
+
+
+@app.post("/api/pipeline/enhance-text")
+async def enhance_text(request: EnhanceTextRequest):
+    """AI 'Inspire Me' / 'Share More Details' — enhances or generates text for any field."""
+    from app.endpoints.pipeline import call_claude
+
+    prompts = {
+        "highlights": "Write 3-5 punchy highlight bullet points for a Groupon deal. Business context: {context}. Current text (improve or generate from scratch if empty): {text}. Return ONLY a JSON array of strings.",
+        "description": "Write a compelling 2-3 sentence description for a Groupon deal option. Business context: {context}. Current text (improve or expand if provided, generate if empty): {text}. Return ONLY the description text, no JSON.",
+        "business_description": "Write a professional 2-3 sentence business description for a Groupon merchant page. Business context: {context}. Current text (improve if provided, generate if empty): {text}. Return ONLY the description text, no JSON.",
+    }
+
+    prompt_template = prompts.get(request.field_type, prompts["description"])
+    user_message = prompt_template.format(
+        context=json.dumps(request.context),
+        text=request.text or "(empty — generate from scratch)",
+    )
+
+    config = {
+        "model": "claude-haiku-4-5-20251001",
+        "max_tokens": 512,
+        "temperature": 0.6,
+        "system_prompt": "You are a marketing copywriter for Groupon. Write warm, professional, conversion-focused copy. Be concise.",
+    }
+
+    raw = await call_claude(config, user_message)
+    return {"enhanced_text": raw, "field_type": request.field_type}
+
+
 # --- Deals (persisted to JSON file) ---
 
 class PublishDealRequest(BaseModel):

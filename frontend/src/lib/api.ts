@@ -250,3 +250,41 @@ export async function deleteDeal(id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/deals/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(`Failed to delete deal: ${res.statusText}`);
 }
+
+// --- Profile ---
+
+export async function fetchProfile(): Promise<Record<string, unknown>> {
+  const res = await fetch(`${API_BASE}/profile`);
+  if (!res.ok) throw new Error(`Failed to fetch profile: ${res.statusText}`);
+  return res.json();
+}
+
+export async function updateProfile(profile: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const res = await fetch(`${API_BASE}/profile`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(profile),
+  });
+  if (!res.ok) throw new Error(`Failed to update profile: ${res.statusText}`);
+  return res.json();
+}
+
+// --- Enhance Text (Inspire Me) ---
+
+export interface EnhanceTextResult {
+  enhanced_text: string;
+}
+
+export async function enhanceText(
+  text: string,
+  fieldType: string,
+  context: Record<string, unknown>,
+): Promise<EnhanceTextResult> {
+  const res = await fetch(`${API_BASE}/pipeline/enhance-text`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text, field_type: fieldType, context }),
+  });
+  if (!res.ok) throw new Error(`Enhance failed: ${res.statusText}`);
+  return res.json();
+}
