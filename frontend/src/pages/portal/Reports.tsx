@@ -1,8 +1,6 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -11,314 +9,190 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  FileText,
-  Download,
-  Plus,
-  Loader2,
-  FileBarChart,
-} from 'lucide-react';
+import { Download, FileText, BarChart3 } from 'lucide-react';
 
-type ReportTab = 'vouchers' | 'payments';
-
-interface Report {
+interface MockReport {
   id: string;
   name: string;
-  type: ReportTab;
-  timeRange: string;
-  filters: string;
-  status: 'Ready' | 'Processing' | 'Failed';
-  requestedBy: string;
-  createdAt: string;
+  dateRange: string;
+  generatedAt: string;
+  type: 'vouchers' | 'payments';
+  format: string;
+  size: string;
+}
+
+const MOCK_REPORTS: MockReport[] = [
+  {
+    id: '1',
+    name: 'Voucher Summary - March 2026',
+    dateRange: 'Mar 1 - Mar 31, 2026',
+    generatedAt: '2026-03-31T18:00:00Z',
+    type: 'vouchers',
+    format: 'CSV',
+    size: '12 KB',
+  },
+  {
+    id: '2',
+    name: 'Payment Report - March 2026',
+    dateRange: 'Mar 1 - Mar 31, 2026',
+    generatedAt: '2026-03-31T18:00:00Z',
+    type: 'payments',
+    format: 'CSV',
+    size: '8 KB',
+  },
+  {
+    id: '3',
+    name: 'Voucher Summary - February 2026',
+    dateRange: 'Feb 1 - Feb 28, 2026',
+    generatedAt: '2026-02-28T18:00:00Z',
+    type: 'vouchers',
+    format: 'CSV',
+    size: '9 KB',
+  },
+  {
+    id: '4',
+    name: 'Payment Report - February 2026',
+    dateRange: 'Feb 1 - Feb 28, 2026',
+    generatedAt: '2026-02-28T18:00:00Z',
+    type: 'payments',
+    format: 'CSV',
+    size: '6 KB',
+  },
+  {
+    id: '5',
+    name: 'Voucher Summary - January 2026',
+    dateRange: 'Jan 1 - Jan 31, 2026',
+    generatedAt: '2026-01-31T18:00:00Z',
+    type: 'vouchers',
+    format: 'CSV',
+    size: '14 KB',
+  },
+];
+
+function filterReports(reports: MockReport[], type: string) {
+  if (type === 'all') return reports;
+  return reports.filter((r) => r.type === type);
+}
+
+function renderTable(reports: MockReport[]) {
+  if (reports.length === 0) {
+    return (
+      <div className="py-16 text-center">
+        <FileText className="mx-auto h-10 w-10 text-gray-300 mb-3" />
+        <p className="text-sm font-medium text-gray-900">No reports available</p>
+        <p className="text-xs text-gray-500 mt-1">Reports will appear here once generated.</p>
+      </div>
+    );
+  }
+
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Report Name</TableHead>
+          <TableHead>Date Range</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead>Format</TableHead>
+          <TableHead>Size</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {reports.map((report) => (
+          <TableRow key={report.id}>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-gray-400" />
+                <span className="text-sm font-medium text-gray-900">{report.name}</span>
+              </div>
+            </TableCell>
+            <TableCell className="text-sm text-gray-500">{report.dateRange}</TableCell>
+            <TableCell>
+              <Badge
+                variant="secondary"
+                className={`text-xs capitalize ${
+                  report.type === 'vouchers'
+                    ? 'bg-blue-50 text-blue-600 border-0'
+                    : 'bg-groupon-green/10 text-groupon-green border-0'
+                }`}
+              >
+                {report.type}
+              </Badge>
+            </TableCell>
+            <TableCell className="text-sm text-gray-500">{report.format}</TableCell>
+            <TableCell className="text-sm text-gray-500">{report.size}</TableCell>
+            <TableCell className="text-right">
+              <Button variant="ghost" size="icon-sm" title="Download">
+                <Download className="h-4 w-4" />
+              </Button>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
 }
 
 export function Reports() {
-  const [activeTab, setActiveTab] = useState<ReportTab>('vouchers');
-  const [reports, setReports] = useState<Report[]>([]);
-  const [showExportDialog, setShowExportDialog] = useState(false);
-  const [exportType, setExportType] = useState<ReportTab>('vouchers');
-  const [exportRange, setExportRange] = useState('30');
-  const [exportStatus, setExportStatus] = useState('all');
-  const [isExporting, setIsExporting] = useState(false);
-
-  function handleExport() {
-    setIsExporting(true);
-
-    const rangeLabel =
-      exportRange === '30'
-        ? 'Last 30 days'
-        : exportRange === '90'
-          ? 'Last 90 days'
-          : 'All time';
-    const filterLabel =
-      exportStatus === 'all' ? 'No filters' : `Status: ${exportStatus}`;
-
-    setTimeout(() => {
-      const newReport: Report = {
-        id: `rpt-${Date.now()}`,
-        name: `${exportType === 'vouchers' ? 'Voucher' : 'Payment'} Report - ${new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`,
-        type: exportType,
-        timeRange: rangeLabel,
-        filters: filterLabel,
-        status: 'Ready',
-        requestedBy: 'Sofia Rodriguez',
-        createdAt: new Date().toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true,
-        }),
-      };
-
-      setReports((prev) => [newReport, ...prev]);
-      setIsExporting(false);
-      setShowExportDialog(false);
-    }, 1500);
-  }
-
-  function filteredReports(): Report[] {
-    return reports.filter((r) => r.type === activeTab);
-  }
-
-  const filtered = filteredReports();
-
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
-      {/* Header */}
+    <div className="p-6 max-w-5xl animate-fade-in-up">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-heading text-2xl font-bold text-gray-900">
-            Exported Reports
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Download and manage your exported data reports.
-          </p>
+          <h1 className="font-heading text-xl font-bold text-gray-900">Reports</h1>
+          <p className="mt-1 text-sm text-gray-500">View and export your business reports.</p>
         </div>
-        <Button
-          className="rounded-xl bg-groupon-green font-bold text-white hover:bg-groupon-green-dark"
-          onClick={() => {
-            setExportType(activeTab);
-            setShowExportDialog(true);
-          }}
-        >
-          <Plus className="mr-1.5 h-4 w-4" />
-          Export Report
+        <Button className="rounded-lg bg-groupon-green font-bold text-white hover:bg-groupon-green-dark">
+          <Download className="mr-2 h-4 w-4" />
+          Generate New Report
         </Button>
       </div>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as ReportTab)}>
-        <TabsList variant="line" className="mb-4">
-          <TabsTrigger value="vouchers">Vouchers</TabsTrigger>
-          <TabsTrigger value="payments">Payments</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={activeTab}>
-          {filtered.length === 0 ? (
-            <Card>
-              <CardContent>
-                <div className="text-center py-16">
-                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100">
-                    <FileBarChart className="h-6 w-6 text-gray-400" />
-                  </div>
-                  <h3 className="font-heading text-lg font-bold text-gray-900">
-                    Nothing here yet
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-500 max-w-sm mx-auto">
-                    Your exported reports will appear here once generated. Click
-                    "Export Report" to create your first report.
-                  </p>
-                  <Button
-                    className="mt-6 rounded-xl bg-groupon-green font-bold text-white hover:bg-groupon-green-dark"
-                    onClick={() => {
-                      setExportType(activeTab);
-                      setShowExportDialog(true);
-                    }}
-                  >
-                    <Plus className="mr-1.5 h-4 w-4" />
-                    Export Report
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Report Name</TableHead>
-                    <TableHead>Time Range</TableHead>
-                    <TableHead>Filters</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Requested By</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map((report) => (
-                    <TableRow key={report.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-gray-400 shrink-0" />
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">
-                              {report.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {report.createdAt}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm text-gray-600">
-                        {report.timeRange}
-                      </TableCell>
-                      <TableCell className="text-sm text-gray-500">
-                        {report.filters}
-                      </TableCell>
-                      <TableCell>
-                        {report.status === 'Ready' && (
-                          <Badge className="bg-groupon-green/10 text-groupon-green border-0 text-xs font-semibold">
-                            Ready
-                          </Badge>
-                        )}
-                        {report.status === 'Processing' && (
-                          <Badge className="bg-blue-50 text-blue-700 border-0 text-xs font-semibold">
-                            Processing
-                          </Badge>
-                        )}
-                        {report.status === 'Failed' && (
-                          <Badge className="bg-red-50 text-red-600 border-0 text-xs font-semibold">
-                            Failed
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm text-gray-600">
-                        {report.requestedBy}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {report.status === 'Ready' && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="rounded-lg text-xs"
-                          >
-                            <Download className="mr-1.5 h-3 w-3" />
-                            Download
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
-
-      {/* Export Dialog */}
-      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Export Report</DialogTitle>
-            <DialogDescription>
-              Configure your report settings and click export to generate.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Report Type</Label>
-              <Select value={exportType} onValueChange={(v) => setExportType(v as ReportTab)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="vouchers">Vouchers</SelectItem>
-                  <SelectItem value="payments">Payments</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Time Range</Label>
-              <Select value={exportRange} onValueChange={setExportRange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30">Last 30 days</SelectItem>
-                  <SelectItem value="90">Last 90 days</SelectItem>
-                  <SelectItem value="all">All time</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Status Filter</Label>
-              <Select value={exportStatus} onValueChange={setExportStatus}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  {exportType === 'vouchers' ? (
-                    <>
-                      <SelectItem value="sold">Sold</SelectItem>
-                      <SelectItem value="redeemed">Redeemed</SelectItem>
-                      <SelectItem value="expired">Expired</SelectItem>
-                    </>
-                  ) : (
-                    <>
-                      <SelectItem value="processed">Processed</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="rounded-xl border border-gray-200 bg-white p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <BarChart3 className="h-4 w-4 text-gray-400" />
+            <span className="text-xs text-gray-500">Total Reports</span>
           </div>
+          <p className="font-heading text-2xl font-extrabold text-gray-900">{MOCK_REPORTS.length}</p>
+        </div>
+        <div className="rounded-xl border border-gray-200 bg-white p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <FileText className="h-4 w-4 text-blue-400" />
+            <span className="text-xs text-gray-500">Voucher Reports</span>
+          </div>
+          <p className="font-heading text-2xl font-extrabold text-gray-900">
+            {MOCK_REPORTS.filter((r) => r.type === 'vouchers').length}
+          </p>
+        </div>
+        <div className="rounded-xl border border-gray-200 bg-white p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <FileText className="h-4 w-4 text-groupon-green" />
+            <span className="text-xs text-gray-500">Payment Reports</span>
+          </div>
+          <p className="font-heading text-2xl font-extrabold text-gray-900">
+            {MOCK_REPORTS.filter((r) => r.type === 'payments').length}
+          </p>
+        </div>
+      </div>
 
-          <DialogFooter>
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-lg"
-              onClick={() => setShowExportDialog(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              className="rounded-lg bg-groupon-green text-white hover:bg-groupon-green-dark text-xs font-semibold"
-              size="sm"
-              onClick={handleExport}
-              disabled={isExporting}
-            >
-              {isExporting && <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />}
-              Export
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Tabs */}
+      <Tabs defaultValue="all">
+        <TabsList variant="line">
+          <TabsTrigger value="all">All ({MOCK_REPORTS.length})</TabsTrigger>
+          <TabsTrigger value="vouchers">
+            Vouchers ({MOCK_REPORTS.filter((r) => r.type === 'vouchers').length})
+          </TabsTrigger>
+          <TabsTrigger value="payments">
+            Payments ({MOCK_REPORTS.filter((r) => r.type === 'payments').length})
+          </TabsTrigger>
+        </TabsList>
+        <div className="mt-4 rounded-xl border border-gray-200 bg-white">
+          <TabsContent value="all">{renderTable(filterReports(MOCK_REPORTS, 'all'))}</TabsContent>
+          <TabsContent value="vouchers">{renderTable(filterReports(MOCK_REPORTS, 'vouchers'))}</TabsContent>
+          <TabsContent value="payments">{renderTable(filterReports(MOCK_REPORTS, 'payments'))}</TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 }
