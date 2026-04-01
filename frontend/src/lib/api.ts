@@ -269,6 +269,41 @@ export async function updateProfile(profile: Record<string, unknown>): Promise<R
   return res.json();
 }
 
+// --- Story Extractor (conversational onboarding) ---
+
+export interface ExtractedProfile {
+  business_name: string | null;
+  business_description: string;
+  location: string | null;
+  full_address: string | null;
+  phone: string | null;
+  website: string | null;
+  category: string;
+  category_confidence: number;
+  services: Array<{ name: string; price: number }>;
+  scheduling_insight: string | null;
+  experience_years: number | null;
+  business_type: string;
+  highlights: string[];
+  missing_fields: string[];
+  follow_up_questions: string[];
+  parse_error?: boolean;
+  raw_response?: string;
+}
+
+export async function extractStory(
+  story: string,
+  followUpAnswers: string[] = [],
+): Promise<ExtractedProfile> {
+  const res = await fetch(`${API_BASE}/pipeline/extract-story`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ story, follow_up_answers: followUpAnswers }),
+  });
+  if (!res.ok) throw new Error(`Story extraction failed: ${res.statusText}`);
+  return res.json();
+}
+
 // --- Enhance Text (Inspire Me) ---
 
 export interface EnhanceTextResult {

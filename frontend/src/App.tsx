@@ -33,6 +33,7 @@ import { CustomerPreview } from '@/pages/portal/CustomerPreview';
 
 // Onboarding
 import { OnboardingFlow } from '@/pages/onboarding/OnboardingFlow';
+import { ConversationalOnboarding } from '@/pages/onboarding/ConversationalOnboarding';
 
 import type { GeneratedDeal, MerchantIntake } from '@/lib/api';
 
@@ -66,8 +67,9 @@ function App() {
           <Route path="preview/:id" element={<CustomerPreview />} />
         </Route>
 
-        {/* ── Business Onboarding (full-screen flow) ── */}
-        <Route path="/onboarding" element={<OnboardingFlow />} />
+        {/* ── Business Onboarding ── */}
+        <Route path="/onboarding" element={<ConversationalOnboarding />} />
+        <Route path="/onboarding/classic" element={<OnboardingFlow />} />
 
         {/* ── Landing page (Welcome) ── */}
         <Route element={<MerchantLayout />}>

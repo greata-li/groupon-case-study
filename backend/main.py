@@ -319,6 +319,90 @@ async def update_profile(profile: dict):
     return profile
 
 
+# --- Story Extractor (conversational onboarding) ---
+
+class StoryRequest(BaseModel):
+    story: str
+    follow_up_answers: list[str] = []  # answers to previous follow-up questions
+
+
+@app.post("/api/pipeline/extract-story")
+async def extract_story(request: StoryRequest):
+    """
+    Core AI endpoint: takes a merchant's free-form story and extracts
+    a complete structured business profile + services.
+    One call replaces 6+ form screens.
+    """
+    from app.endpoints.pipeline import call_claude, parse_json_response
+
+    combined_input = request.story
+    if request.follow_up_answers:
+        combined_input += "\n\nAdditional details:\n" + "\n".join(request.follow_up_answers)
+
+    config = {
+        "model": "claude-sonnet-4-20250514",
+        "max_tokens": 2048,
+        "temperature": 0.3,
+        "system_prompt": (
+            "You are a business intake specialist for Groupon's AI-powered merchant onboarding.\n\n"
+            "Extract structured business information from a merchant's free-form description. "
+            "The merchant may speak casually, mention things out of order, or be brief. "
+            "Extract everything you can and infer reasonable values for what's missing.\n\n"
+            "Return ONLY valid JSON with this structure:\n"
+            "{\n"
+            '  "business_name": "string or null",\n'
+            '  "business_description": "2-3 professional sentences about the business",\n'
+            '  "location": "city/neighborhood or null",\n'
+            '  "full_address": "street address if mentioned, or null",\n'
+            '  "phone": "phone number if mentioned, or null",\n'
+            '  "website": "website if mentioned, or null",\n'
+            '  "category": "Main Category > Subcategory (e.g., Health, Beauty & Wellness > Waxing)",\n'
+            '  "category_confidence": 0.0-1.0,\n'
+            '  "services": [\n'
+            '    { "name": "Service Name", "price": 65 }\n'
+            '  ],\n'
+            '  "scheduling_insight": "when they want to fill slots, or null",\n'
+            '  "experience_years": number or null,\n'
+            '  "business_type": "sole_provider | independent_contractor | company | third_party",\n'
+            '  "highlights": ["key selling point 1", "key selling point 2", "key selling point 3"],\n'
+            '  "missing_fields": ["list of important fields that could not be extracted"],\n'
+            '  "follow_up_questions": ["question to ask if key info is missing"]\n'
+            "}\n\n"
+            "Rules:\n"
+            "- Always generate a business_description even if brief — write a professional version of what they said\n"
+            "- Always detect category with confidence score\n"
+            "- Extract every service with price mentioned\n"
+            "- If they mention slow days, capture as scheduling_insight\n"
+            "- Generate 3 highlights from what they described\n"
+            "- missing_fields: only list truly critical missing info (business_name, location, services)\n"
+            "- follow_up_questions: ask 1-3 targeted questions for missing critical info. "
+            "Don't ask for things you can infer. Be conversational, not formal.\n"
+            "- If everything important is captured, return empty follow_up_questions array"
+        ),
+    }
+
+    raw = await call_claude(config, combined_input)
+
+    try:
+        extracted = parse_json_response(raw)
+    except (json.JSONDecodeError, ValueError):
+        extracted = {"raw_response": raw, "parse_error": True}
+
+    # Auto-save extracted data to profile
+    if not extracted.get("parse_error"):
+        profile = load_profile()
+        for key in ["business_name", "business_description", "location", "full_address",
+                     "phone", "website", "category", "services", "scheduling_insight",
+                     "experience_years", "business_type", "highlights"]:
+            val = extracted.get(key)
+            if val is not None:
+                profile[key] = val
+        profile["onboarded"] = True
+        save_profile(profile)
+
+    return extracted
+
+
 # --- AI Text Enhancement ---
 
 class EnhanceTextRequest(BaseModel):

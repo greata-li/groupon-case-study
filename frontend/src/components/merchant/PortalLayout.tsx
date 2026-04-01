@@ -50,7 +50,7 @@ const navItems: NavItem[] = [
   { label: 'Payments', icon: CreditCard, path: '/portal/payments' },
   { label: 'Reports', icon: BarChart3, path: '/portal/reports' },
   { label: 'Support', icon: HelpCircle, path: '/portal/support' },
-  { label: 'Admin', icon: Settings, path: '/admin' },
+  { label: 'Admin', icon: Settings, path: '/portal/profile' },
   { label: 'Connections', icon: LinkIcon, path: '/portal/connections' },
 ];
 
