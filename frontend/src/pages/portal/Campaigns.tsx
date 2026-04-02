@@ -117,7 +117,7 @@ export function Campaigns() {
         </TableHeader>
         <TableBody>
           {filtered.map((deal) => (
-            <TableRow key={deal.id}>
+            <TableRow key={deal.id} className="hover:bg-gray-50/50 transition-colors">
               <TableCell>
                 <button
                   onClick={() => navigate(`/portal/preview/${deal.id}`)}

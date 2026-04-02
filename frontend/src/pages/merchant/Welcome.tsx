@@ -151,7 +151,7 @@ function StepCard({
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-groupon-green/10 text-groupon-green transition-colors group-hover:bg-groupon-green group-hover:text-white">
           {icon}
         </div>
-        <span className="font-heading text-xs font-bold tracking-widest text-gray-300">
+        <span className="font-heading text-xs font-bold tracking-widest text-gray-400">
           STEP {number}
         </span>
       </div>

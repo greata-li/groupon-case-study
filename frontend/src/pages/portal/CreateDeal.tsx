@@ -641,7 +641,7 @@ export function CreateDeal() {
 
                   {/* Pricing row */}
                   {svc.included && (
-                    <div className="ml-8 grid grid-cols-4 gap-4">
+                    <div className="ml-0 sm:ml-8 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                       <div>
                         <Label className="text-xs text-gray-500">Regular Price</Label>
                         <div className="mt-1 flex h-8 items-center rounded-lg border border-input bg-gray-50 px-3 text-sm font-medium text-gray-700">
@@ -1605,7 +1605,7 @@ export function CreateDeal() {
 
   function renderLivePreview() {
     return (
-      <div className="w-[320px] shrink-0">
+      <div className="hidden w-[320px] shrink-0 xl:block">
         <div className="sticky top-20">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold text-gray-500 uppercase">Customer Preview</h3>
@@ -1683,10 +1683,38 @@ export function CreateDeal() {
   };
 
   return (
-    <div className="animate-fade-in-up p-6">
+    <div className="animate-fade-in-up p-4 sm:p-6">
+      {/* Mobile step indicator */}
+      <div className="mb-4 flex items-center gap-1.5 overflow-x-auto pb-2 lg:hidden">
+        {STEPS.map((s) => {
+          const isActive = s.id === step;
+          const isDone = s.id < step;
+          return (
+            <button
+              key={s.id}
+              onClick={() => setStep(s.id)}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                isActive
+                  ? 'bg-groupon-green text-white'
+                  : isDone
+                    ? 'bg-groupon-green-light text-groupon-green'
+                    : 'bg-gray-100 text-gray-400'
+              }`}
+            >
+              {isDone ? (
+                <CheckCircle2 className="h-3 w-3" />
+              ) : (
+                <span>{s.id}</span>
+              )}
+              <span className="hidden sm:inline">{s.short}</span>
+            </button>
+          );
+        })}
+      </div>
+
       <div className="flex gap-6">
-        {/* Step sidebar */}
-        <div className="w-[200px] shrink-0">
+        {/* Step sidebar — desktop only */}
+        <div className="hidden w-[200px] shrink-0 lg:block">
           <div className="sticky top-20">
             <h2 className="font-heading text-sm font-bold text-gray-900 mb-4">
               {editDealId ? 'Edit Deal' : 'Create Deal'}

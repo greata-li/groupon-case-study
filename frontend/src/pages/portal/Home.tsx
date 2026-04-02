@@ -268,7 +268,7 @@ export function Home() {
                   to={link.to}
                   className="flex flex-col items-center gap-2 rounded-xl border border-gray-200 bg-white p-4 text-center transition-all hover:border-groupon-green/30 hover:shadow-sm"
                 >
-                  <Icon className="h-5 w-5 text-gray-400" />
+                  <Icon className="h-5 w-5 text-gray-500" />
                   <span className="text-xs font-medium text-gray-600">{link.label}</span>
                 </Link>
               );
