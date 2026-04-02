@@ -176,18 +176,42 @@ The entire platform is mobile responsive: hamburger menus on small screens, resp
 
 ## 5. What We Would Change or Kill After Production
 
-### Kill
+### Kill (with conditions)
 - **Force-classified categories** if accuracy is below 80%. Switch to hybrid: AI suggests top 3, merchant picks.
-- **One-shot story extraction** if follow-up rate is too high. May need a more structured conversational flow for certain business types.
+- **One-shot story extraction** if follow-up rate exceeds 50%. May need a more structured conversational flow for certain business types.
+- **Client-side intent parsing** if the conversation becomes freeform. Replace with LLM intent classifier upstream. (Decision 017)
 
 ### Change
 - **Discount recommendations** based on actual deal performance data, not synthetic benchmarks.
 - **Description variety**: current Inspire Me produces similar openings across services. Pass all existing descriptions as context so each is unique.
 - **Photo handling**: server-side upload is functional; next step is AI-powered suggestions for positioning and quality.
+- **Output validation**: add business rule checks between LLM output and merchant review — price range guardrails, category-service alignment, fine print compliance templates. (Decision 019)
+- **Input sanitization**: add length limits, content policy classifier, and structured error messages before LLM calls. (Decision 018)
+- **Extraction approach**: add per-field confidence scores and progressive display as volume grows. (Decision 020)
 
 ### Watch
 - **High acceptance + low conversion** = the most dangerous failure mode. The AI writes deals that sound good to Sofia but don't convert. Need to correlate acceptance rate with actual deal performance.
 - **Conversational intake abandonment**: if merchants start the chat but don't finish, the conversational approach may not work for all personality types. Keep the manual "Set up manually" option prominent.
+
+### Prototype → Production Migration
+
+The prototype makes deliberate simplifications documented in the decision log. Here is a summary of what changes for production, organized by priority:
+
+| Area | Prototype | Production | Decision |
+|------|-----------|------------|----------|
+| **Authentication** | None. All endpoints public. | OAuth 2.0 / SSO via Groupon's identity provider. RBAC for merchant vs admin. | 008 |
+| **Rate limiting** | None. Backstopped by Anthropic's account limits. | Per-endpoint limits (10 req/min on LLM, 100 req/min on reads). Per-merchant monthly cost cap. | 009 |
+| **Prompt injection** | User text goes directly to LLM. | Input sanitization, system prompt hardening, audit logging. | 010 |
+| **File uploads** | Extension validation + UUID filenames only. | Size limits, MIME validation, image re-encoding, virus scanning. Move to S3. | 011 |
+| **Input validation** | Loose `dict` types, no length limits. | Strict Pydantic schemas, string limits, enum validation, HTML sanitization. | 012 |
+| **Data storage** | JSON files on disk. | PostgreSQL. Profile → merchants table, deals → deals table with FK. | 006 |
+| **Image storage** | Local disk + static file serving. | S3 + CloudFront CDN + pre-signed upload URLs. | 007 |
+| **Intent parsing** | Client-side regex in deal chat. | LLM intent classifier (Haiku) + entity extraction per message. | 017 |
+| **Input sanitization** | Trust the guided flow. | Length limits, language detection, content policy classifier. | 018 |
+| **Output validation** | Trust LLM structured output. | Business rule validation: price ranges, category alignment, compliance. | 019 |
+| **Extraction** | Single LLM call + follow-up questions. | Per-field confidence scoring, progressive display, contradiction detection. | 020 |
+
+Full details for each item are in [decisions.md](./decisions.md), referenced by decision number above.
 
 ---
 
