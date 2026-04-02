@@ -10,7 +10,7 @@ import {
   Sparkles,
   MessageCircle,
   ArrowRight,
-  Mic,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface ChatMessage {
@@ -30,27 +30,79 @@ interface DealChatProps {
   onSkip: () => void;
 }
 
+// Questions the AI needs answered before creating the deal
+interface DealInfo {
+  services: string | null;   // which services to include
+  discount: string | null;   // what discount
+  duration: string | null;   // how long (30/60/90 days)
+  scheduling: string | null; // target days/times
+  specialTerms: string | null; // any special restrictions
+}
+
 function buildGreeting(businessName: string, services: ProfileService[]): string {
   const name = businessName || 'there';
   if (services.length === 0) {
-    return `Hi ${name}! What deal would you like to create? Tell me which services you want to offer, any pricing preferences, and how long you'd like it to run.`;
+    return `Hi ${name}! Let's create a deal for your business. First, what services would you like to offer?`;
   }
   const serviceList = services
     .map((s) => `${s.name} ($${s.price})`)
     .join(', ');
-  return `Hi ${name}! I can see you offer: ${serviceList}.\n\nWhich of these would you like to include in your deal? And what discount are you thinking? For example: "all of them at 35% off for 3 months" or "just the deep tissue at 40% off."`;
+  return `Hi ${name}! I can see you offer: ${serviceList}.\n\nWhich of these would you like to include in your deal? You can say "all of them" or pick specific ones.`;
+}
+
+function getNextQuestion(info: DealInfo): string | null {
+  if (!info.services) return null; // already asked in greeting
+  if (!info.discount) {
+    return "Great choices! What discount would you like to offer? For beauty and wellness, 30-40% off tends to perform best on Groupon. What are you thinking?";
+  }
+  if (!info.duration) {
+    return "How long should this deal run? Options are usually 30 days, 60 days, or 90 days. 90 days is the most popular.";
+  }
+  if (!info.scheduling) {
+    return "Are there specific days or times you want to target? For example, if Tuesdays are slow, we can recommend the deal for midweek bookings. Or say 'anytime' if you're flexible.";
+  }
+  if (!info.specialTerms) {
+    return "Last thing — any special terms? For example: new customers only, appointment required, not valid with other offers. Or say 'standard terms' and I'll set sensible defaults.";
+  }
+  return null; // all questions answered
+}
+
+function parseUserResponse(text: string, currentQuestion: string, info: DealInfo): Partial<DealInfo> {
+  const lower = text.toLowerCase();
+
+  // Figure out which field this answer is for based on what we last asked
+  if (!info.services) {
+    return { services: text };
+  }
+  if (!info.discount) {
+    return { discount: text };
+  }
+  if (!info.duration) {
+    return { duration: text };
+  }
+  if (!info.scheduling) {
+    return { scheduling: text };
+  }
+  if (!info.specialTerms) {
+    return { specialTerms: text };
+  }
+  return {};
 }
 
 export function DealChat({ businessName, services, onDealExtracted, onSkip }: DealChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: 'assistant',
-      text: buildGreeting(businessName, services),
-    },
+    { role: 'assistant', text: buildGreeting(businessName, services) },
   ]);
   const [input, setInput] = useState('');
   const [extracting, setExtracting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dealInfo, setDealInfo] = useState<DealInfo>({
+    services: null,
+    discount: null,
+    duration: null,
+    scheduling: null,
+    specialTerms: null,
+  });
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -64,36 +116,78 @@ export function DealChat({ businessName, services, onDealExtracted, onSkip }: De
     setError(null);
 
     setMessages((prev) => [...prev, { role: 'user', text: userText }]);
-    setMessages((prev) => [...prev, { role: 'assistant', text: '✨ Creating your deal...' }]);
+
+    // Update deal info with the user's response
+    const updatedFields = parseUserResponse(userText, '', dealInfo);
+    const newInfo = { ...dealInfo, ...updatedFields };
+    setDealInfo(newInfo);
+
+    // Check if there's a next question to ask
+    const nextQ = getNextQuestion(newInfo);
+
+    if (nextQ) {
+      // Ask the next question
+      setTimeout(() => {
+        setMessages((prev) => [...prev, { role: 'assistant', text: nextQ }]);
+      }, 500);
+    } else {
+      // All info gathered — extract the deal
+      await extractFullDeal(newInfo);
+    }
+  }
+
+  async function extractFullDeal(info: DealInfo) {
     setExtracting(true);
+    setMessages((prev) => [
+      ...prev,
+      { role: 'assistant', text: '✨ Perfect! Let me set up your deal...' },
+    ]);
+
+    // Build a comprehensive story from all gathered info
+    const story = [
+      `Services: ${info.services}`,
+      `Discount: ${info.discount}`,
+      `Duration: ${info.duration}`,
+      `Scheduling: ${info.scheduling}`,
+      `Terms: ${info.specialTerms}`,
+    ].join('. ');
 
     try {
-      const result = await extractDeal(userText);
+      const result = await extractDeal(story);
 
       if (result.parse_error) {
         setMessages((prev) => [
           ...prev.slice(0, -1),
           {
             role: 'assistant',
-            text: "I had trouble with that. Could you try again? For example: \"I want to offer my massage services at 35% off for 3 months.\"",
+            text: "I had some trouble setting that up. Let me try again — could you describe the deal in one sentence?",
           },
         ]);
+        // Reset to allow retry
+        setDealInfo({ services: null, discount: null, duration: null, scheduling: null, specialTerms: null });
         setExtracting(false);
         return;
       }
+
+      const serviceCount = result.selected_services?.length || 0;
+      const maxDiscount = Math.max(...(result.selected_services?.map((s) => s.discount_pct) || [0]));
 
       setMessages((prev) => [
         ...prev.slice(0, -1),
         {
           role: 'assistant',
-          text: `Got it! I've set up your deal with ${result.selected_services?.length || 0} service${(result.selected_services?.length || 0) !== 1 ? 's' : ''}, pricing, highlights, and all the details. Let me show you everything so you can review and adjust.`,
+          text: `All done! Here's what I've set up:\n\n` +
+            `📋 ${serviceCount} service${serviceCount !== 1 ? 's' : ''} at up to ${maxDiscount}% off\n` +
+            `📅 Running for ${result.expiry_days} days\n` +
+            `✨ ${(result.highlights?.split('\n').filter(Boolean) || []).length} highlights generated\n` +
+            `📝 Descriptions written for each service\n\n` +
+            `I'll show you everything now so you can review and adjust before publishing.`,
         },
       ]);
 
-      // Brief delay so the user sees the confirmation before transitioning
       setTimeout(() => {
         onDealExtracted(result);
-      }, 1500);
+      }, 2000);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong');
       setMessages((prev) => [
@@ -111,6 +205,10 @@ export function DealChat({ businessName, services, onDealExtracted, onSkip }: De
     }
   }
 
+  // Progress indicator
+  const answeredCount = Object.values(dealInfo).filter(Boolean).length;
+  const totalQuestions = 5;
+
   return (
     <div className="flex flex-col h-full min-h-[calc(100vh-60px)]">
       {/* Header */}
@@ -123,19 +221,33 @@ export function DealChat({ businessName, services, onDealExtracted, onSkip }: De
             <div>
               <h2 className="font-heading text-lg font-bold text-gray-900">Create a Deal</h2>
               <p className="text-xs text-gray-500">
-                Describe your deal and our AI will set everything up
+                Answer a few questions and our AI will set everything up
               </p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onSkip}
-            className="text-xs text-gray-400 hover:text-gray-600"
-          >
-            Set up manually instead
-            <ArrowRight className="ml-1 h-3 w-3" />
-          </Button>
+          <div className="flex items-center gap-3">
+            {answeredCount > 0 && (
+              <div className="flex items-center gap-1.5">
+                {Array.from({ length: totalQuestions }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 w-6 rounded-full transition-colors ${
+                      i < answeredCount ? 'bg-groupon-green' : 'bg-gray-200'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onSkip}
+              className="text-xs text-gray-400 hover:text-gray-600"
+            >
+              Set up manually
+              <ArrowRight className="ml-1 h-3 w-3" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -165,7 +277,7 @@ export function DealChat({ businessName, services, onDealExtracted, onSkip }: De
             </div>
           ))}
 
-          {extracting && messages[messages.length - 1]?.text === '✨ Creating your deal...' && (
+          {extracting && (
             <div className="flex justify-start">
               <div className="rounded-2xl border border-gray-200 bg-white px-4 py-3 rounded-bl-md shadow-sm">
                 <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -184,11 +296,11 @@ export function DealChat({ businessName, services, onDealExtracted, onSkip }: De
       {messages.length === 1 && (
         <div className="bg-[#fafaf8] px-6 pb-2">
           <div className="max-w-2xl mx-auto">
-            <p className="text-xs text-gray-400 mb-2">Try something like:</p>
+            <p className="text-xs text-gray-400 mb-2">Quick start:</p>
             <div className="grid grid-cols-2 gap-2">
               {[
-                "I want to offer all my services at 35% off, running for 3 months",
-                "Run a deal on my deep tissue massage, 40% off, Tuesdays and Wednesdays only",
+                "All of them",
+                "Just the 60-minute massages",
               ].map((example, i) => (
                 <button
                   key={i}
@@ -210,7 +322,14 @@ export function DealChat({ businessName, services, onDealExtracted, onSkip }: De
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Describe the deal you want to create..."
+            placeholder={
+              !dealInfo.services ? "Which services do you want to include?"
+              : !dealInfo.discount ? "What discount percentage?"
+              : !dealInfo.duration ? "How long should the deal run?"
+              : !dealInfo.scheduling ? "Any specific days or times?"
+              : !dealInfo.specialTerms ? "Any special terms or restrictions?"
+              : "Describe your deal..."
+            }
             className="rounded-xl border-gray-200 min-h-[48px] max-h-[120px] resize-none text-sm flex-1"
             rows={1}
             disabled={extracting}
