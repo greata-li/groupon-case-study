@@ -111,7 +111,7 @@ export function Profile() {
   }
 
   return (
-    <div className="p-6 max-w-3xl animate-fade-in-up">
+    <div className="p-4 sm:p-6 max-w-3xl animate-fade-in-up">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-heading text-xl font-bold text-gray-900">Business Profile</h1>
@@ -211,7 +211,7 @@ export function Profile() {
                   className="mt-1.5"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label>
                     <Phone className="h-3 w-3 mr-1" />
@@ -299,7 +299,7 @@ export function Profile() {
                   className="mt-1.5"
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
                   <Label>Institution Number</Label>
                   <Input

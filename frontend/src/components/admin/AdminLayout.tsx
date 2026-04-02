@@ -35,14 +35,14 @@ export function AdminLayout() {
     <div className="min-h-screen bg-[#fafaf8]">
       {/* Header */}
       <header className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex h-12 max-w-7xl items-center gap-4 px-6">
+        <div className="mx-auto flex h-12 max-w-7xl items-center gap-4 px-4 sm:px-6">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-groupon-green" />
             <h1 className="font-heading text-base font-bold text-gray-900">
               Pipeline Admin
             </h1>
           </div>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={handleResetProfile}
               disabled={resetting}
@@ -59,7 +59,7 @@ export function AdminLayout() {
               className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
             >
               <FileCode className="h-3.5 w-3.5" />
-              API Docs
+              <span className="hidden sm:inline">API Docs</span>
               <ExternalLink className="h-3 w-3" />
             </a>
             <Link
@@ -67,15 +67,15 @@ export function AdminLayout() {
               className="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-1 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
-              Merchant Portal
+              <span className="hidden sm:inline">Merchant Portal</span>
             </Link>
           </div>
         </div>
       </header>
 
       {/* Nav */}
-      <nav className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex max-w-7xl gap-1 px-6">
+      <nav className="border-b border-gray-200 bg-white overflow-x-auto">
+        <div className="mx-auto flex max-w-7xl gap-1 px-4 sm:px-6">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -97,7 +97,7 @@ export function AdminLayout() {
       </nav>
 
       {/* Content */}
-      <main className="mx-auto max-w-7xl px-6 py-6">
+      <main className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6">
         <Outlet />
       </main>
     </div>

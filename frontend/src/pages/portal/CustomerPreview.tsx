@@ -103,8 +103,8 @@ export function CustomerPreview() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl px-6 py-6">
-        <div className="grid grid-cols-[1fr_360px] gap-8">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4 lg:gap-8">
           {/* Left: Deal content */}
           <div className="space-y-5">
             {/* Breadcrumb */}

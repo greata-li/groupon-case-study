@@ -122,7 +122,7 @@ export function Payments() {
   }
 
   return (
-    <div className="p-6 max-w-5xl animate-fade-in-up">
+    <div className="p-4 sm:p-6 max-w-5xl animate-fade-in-up">
       <div className="mb-6">
         <h1 className="font-heading text-xl font-bold text-gray-900">Payments</h1>
         <p className="mt-1 text-sm text-gray-500">Track your payouts and earnings.</p>
@@ -141,7 +141,7 @@ export function Payments() {
       </div>
 
       {/* Info cards */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <Card>
           <CardContent>
             <div className="flex items-center gap-3">
@@ -200,7 +200,7 @@ export function Payments() {
       </div>
 
       {/* Payout table */}
-      <div className="rounded-xl border border-gray-200 bg-white">
+      <div className="rounded-xl border border-gray-200 bg-white overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -255,7 +255,7 @@ export function Payments() {
                       <TableCell colSpan={5} className="bg-gray-50/80 p-0">
                         <div className="px-6 py-4">
                           {/* Breakdown */}
-                          <div className="grid grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div className="space-y-2">
                               <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wide">Payout Breakdown</h4>
                               <div className="rounded-lg border border-gray-200 bg-white divide-y divide-gray-100">

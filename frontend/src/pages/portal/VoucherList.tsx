@@ -131,7 +131,7 @@ export function VoucherList() {
   };
 
   return (
-    <div className="p-6 max-w-5xl animate-fade-in-up">
+    <div className="p-4 sm:p-6 max-w-5xl animate-fade-in-up">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-heading text-xl font-bold text-gray-900">Voucher List</h1>
@@ -144,7 +144,7 @@ export function VoucherList() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
         {[
           { label: 'Total Vouchers', value: stats.total, color: 'text-gray-900' },
           { label: 'Sold', value: stats.sold, color: 'text-blue-600' },
@@ -169,7 +169,7 @@ export function VoucherList() {
             className="pl-9"
           />
         </div>
-        <div className="flex gap-1 rounded-lg bg-gray-100 p-1">
+        <div className="flex flex-wrap gap-1 rounded-lg bg-gray-100 p-1">
           {['all', 'sold', 'redeemed', 'expired', 'refunded'].map((status) => (
             <button
               key={status}
@@ -187,7 +187,7 @@ export function VoucherList() {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-gray-200 bg-white">
+      <div className="rounded-xl border border-gray-200 bg-white overflow-x-auto">
         {filtered.length === 0 ? (
           <div className="py-16 text-center">
             <Ticket className="mx-auto h-10 w-10 text-gray-300 mb-3" />

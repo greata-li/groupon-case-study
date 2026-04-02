@@ -28,7 +28,7 @@ export function Welcome() {
       <section className="relative overflow-hidden bg-white">
         <div className="absolute inset-0 bg-gradient-to-br from-groupon-green-light/40 via-transparent to-groupon-purple/[0.03]" />
 
-        <div className="relative mx-auto max-w-6xl px-6 py-20 md:py-28">
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 py-20 md:py-28">
           <div className="mx-auto max-w-2xl text-center">
             {/* Eyebrow */}
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-groupon-green/10 px-4 py-1.5 text-sm font-medium text-groupon-green">
@@ -77,12 +77,12 @@ export function Welcome() {
 
       {/* How it works */}
       <section className="border-t border-gray-100 bg-white">
-        <div className="mx-auto max-w-5xl px-6 py-16">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-16">
           <h2 className="font-heading text-center text-2xl font-bold tracking-tight text-gray-900 md:text-3xl">
             How it works
           </h2>
 
-          <div className="stagger-children mt-12 grid gap-8 md:grid-cols-3">
+          <div className="stagger-children mt-12 grid gap-4 md:gap-8 md:grid-cols-3">
             <StepCard
               number="01"
               title="Tell us your story"
@@ -107,8 +107,8 @@ export function Welcome() {
 
       {/* Stats */}
       <section className="border-t border-gray-100 bg-noise bg-gradient-to-b from-gray-50 to-white">
-        <div className="mx-auto max-w-5xl px-6 py-14">
-          <div className="grid gap-8 md:grid-cols-3 text-center">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-14">
+          <div className="grid gap-4 md:gap-8 md:grid-cols-3 text-center">
             <StatBlock
               icon={<Zap className="h-5 w-5 text-groupon-green" />}
               value="Under 5 min"

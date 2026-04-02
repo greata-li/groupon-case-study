@@ -315,7 +315,7 @@ export function IntakeForm({ onResult }: IntakeFormProps) {
   const StepIcon = step.icon;
 
   return (
-    <div className="flex min-h-[calc(100vh-12rem)] items-center justify-center px-6 py-12">
+    <div className="flex min-h-[calc(100vh-12rem)] items-center justify-center px-4 sm:px-6 py-12">
       <div className="w-full max-w-xl">
         {/* Progress dots */}
         <div className="mb-10">
@@ -347,7 +347,7 @@ export function IntakeForm({ onResult }: IntakeFormProps) {
 
         {/* Question card */}
         <div key={animKey} className="animate-fade-in-up">
-          <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-xl shadow-gray-900/[0.04] md:p-10">
+          <div className="rounded-2xl border border-gray-100 bg-white p-4 sm:p-6 md:p-8 lg:p-10 shadow-xl shadow-gray-900/[0.04]">
             {/* Icon + label */}
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-groupon-green/10 text-groupon-green">

@@ -210,7 +210,7 @@ function renderTable(reports: MockReport[]) {
 
 export function Reports() {
   return (
-    <div className="p-6 max-w-5xl animate-fade-in-up">
+    <div className="p-4 sm:p-6 max-w-5xl animate-fade-in-up">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-heading text-xl font-bold text-gray-900">Reports</h1>
@@ -223,7 +223,7 @@ export function Reports() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="rounded-xl border border-gray-200 bg-white p-4">
           <div className="flex items-center gap-2 mb-1">
             <BarChart3 className="h-4 w-4 text-gray-400" />
@@ -262,7 +262,7 @@ export function Reports() {
             Payments ({MOCK_REPORTS.filter((r) => r.type === 'payments').length})
           </TabsTrigger>
         </TabsList>
-        <div className="mt-4 rounded-xl border border-gray-200 bg-white">
+        <div className="mt-4 rounded-xl border border-gray-200 bg-white overflow-x-auto">
           <TabsContent value="all">{renderTable(filterReports(MOCK_REPORTS, 'all'))}</TabsContent>
           <TabsContent value="vouchers">{renderTable(filterReports(MOCK_REPORTS, 'vouchers'))}</TabsContent>
           <TabsContent value="payments">{renderTable(filterReports(MOCK_REPORTS, 'payments'))}</TabsContent>

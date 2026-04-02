@@ -126,7 +126,7 @@ export function Home() {
   }
 
   return (
-    <div className="animate-fade-in-up p-6 max-w-5xl">
+    <div className="animate-fade-in-up p-4 sm:p-6 max-w-5xl">
       {/* Welcome banner */}
       <div className="rounded-xl bg-gradient-to-r from-groupon-green to-groupon-green-dark p-6 text-white mb-8">
         <div className="flex items-center gap-2 mb-2">

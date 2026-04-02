@@ -717,7 +717,7 @@ export function CreateDeal() {
         </div>
 
         {/* Three options */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {([
             { id: 'upload' as const, label: 'Upload my own photos', icon: Upload, desc: 'JPG or PNG, up to 10MB' },
             { id: 'stock' as const, label: 'Choose a stock photo', icon: Image, desc: 'Free stock images' },
@@ -816,7 +816,7 @@ export function CreateDeal() {
 
         {/* Stock photo grid */}
         {form.photoOption === 'stock' && (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <button
                 key={i}
@@ -1173,7 +1173,7 @@ export function CreateDeal() {
         {/* Redemption method */}
         <div>
           <Label>Redemption Method</Label>
-          <div className="mt-2 grid grid-cols-3 gap-3">
+          <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {([
               { id: 'physical' as const, label: 'In Person', desc: 'Customer visits your location' },
               { id: 'travel' as const, label: 'Travel / On-site', desc: 'You go to the customer' },
@@ -1312,7 +1312,7 @@ export function CreateDeal() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-[1fr_320px] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 lg:gap-6">
           {/* Left: summary sections */}
           <div className="space-y-4">
             {/* Services */}

@@ -63,7 +63,7 @@ const FEATURES = [
 
 export function Booking() {
   return (
-    <div className="p-6 max-w-5xl animate-fade-in-up">
+    <div className="p-4 sm:p-6 max-w-5xl animate-fade-in-up">
       <div className="mb-6">
         <h1 className="font-heading text-xl font-bold text-gray-900">Booking</h1>
         <p className="mt-1 text-sm text-gray-500">
@@ -71,7 +71,7 @@ export function Booking() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         {FEATURES.map((feature) => {
           const Icon = feature.icon;
           return (
@@ -95,7 +95,7 @@ export function Booking() {
       <Separator className="mb-8" />
 
       <h2 className="font-heading text-base font-bold text-gray-900 mb-4">Connect Your Platform</h2>
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           {PLATFORMS.map((platform) => (
             <Card key={platform.name}>
               <CardContent>
@@ -129,7 +129,7 @@ export function Booking() {
 
       <Card className="bg-gradient-to-r from-gray-900 to-gray-800">
         <CardContent>
-          <div className="flex items-center gap-6 py-2">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 py-2">
             <div className="flex-1">
               <Badge className="bg-white/10 text-white border-0 text-xs mb-2">
                 Partner Offer

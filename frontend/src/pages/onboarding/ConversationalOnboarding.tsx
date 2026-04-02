@@ -224,7 +224,7 @@ export function ConversationalOnboarding() {
   // ==================== SAVED PHASE (fallback) ====================
   if (phase === 'saved') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#fafaf8] px-6">
+      <div className="flex min-h-screen items-center justify-center bg-[#fafaf8] px-4 sm:px-6">
         <div className="w-full max-w-md text-center animate-fade-in-up">
           <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-groupon-green">
             <CheckCircle2 className="h-10 w-10 text-white" />
@@ -262,7 +262,7 @@ export function ConversationalOnboarding() {
       <div className="min-h-screen bg-[#fafaf8]">
         {/* Header */}
         <header className="border-b border-gray-200 bg-white">
-          <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-6">
+          <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4 sm:px-6">
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-groupon-green" />
               <span className="font-heading text-base font-bold text-gray-900">
@@ -279,12 +279,12 @@ export function ConversationalOnboarding() {
           </div>
         </header>
 
-        <div className="mx-auto max-w-4xl px-6 py-8 animate-fade-in-up">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8 animate-fade-in-up">
           <p className="text-sm text-gray-500 mb-6">
             Here's what our AI extracted from your description. Edit anything that needs adjusting.
           </p>
 
-          <div className="grid grid-cols-[1fr_340px] gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4 lg:gap-6">
             {/* Left: Profile fields */}
             <div className="space-y-5">
               {/* Business basics */}
@@ -294,7 +294,7 @@ export function ConversationalOnboarding() {
                     <Store className="h-4 w-4 text-groupon-green" />
                     Business Info
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-gray-700 mb-1 block">Business Name</label>
                       <Input
@@ -452,7 +452,7 @@ export function ConversationalOnboarding() {
                     <MapPin className="h-4 w-4 text-groupon-green" />
                     Location & Contact
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm font-medium text-gray-700 mb-1 block">Location</label>
                       <Input
@@ -590,7 +590,7 @@ export function ConversationalOnboarding() {
     <div className="flex min-h-screen flex-col bg-[#fafaf8]">
       {/* Header */}
       <header className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex h-14 max-w-3xl items-center px-6">
+        <div className="mx-auto flex h-14 max-w-3xl items-center px-4 sm:px-6">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-groupon-green">
               <MessageCircle className="h-4 w-4 text-white" />
@@ -607,7 +607,7 @@ export function ConversationalOnboarding() {
 
       {/* Chat area */}
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-3xl px-6 py-6 space-y-4">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-6 space-y-4">
           {messages.map((msg, i) => (
             <div
               key={i}
@@ -648,8 +648,8 @@ export function ConversationalOnboarding() {
 
       {/* Prompt area */}
       {messages.length === 1 && (
-        <div className="mx-auto max-w-3xl px-6 pb-4">
-          <div className="grid grid-cols-2 gap-2">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 pb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {[
               "I run a waxing and lash studio in Lincoln Park, Chicago. 12 years experience, Brazilian waxes for $65, lash lifts for $85.",
               "I'm a massage therapist in downtown Seattle. I do deep tissue, Swedish, and hot stone massages. Prices range from $80-$150.",
@@ -668,7 +668,7 @@ export function ConversationalOnboarding() {
       )}
 
       {/* Input bar */}
-      <div className="border-t border-gray-200 bg-white px-6 py-4">
+      <div className="border-t border-gray-200 bg-white px-4 sm:px-6 py-4">
         <div className="mx-auto max-w-3xl">
           <div className="flex items-end gap-3">
             <div className="flex-1 relative">

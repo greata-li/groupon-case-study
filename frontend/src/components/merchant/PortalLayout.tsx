@@ -19,6 +19,8 @@ import {
   ChevronRight,
   LogOut,
   User,
+  Menu,
+  X,
 } from 'lucide-react';
 
 interface NavChild {
@@ -59,6 +61,7 @@ export function PortalLayout() {
   const navigate = useNavigate();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['Campaigns']));
   const [businessName, setBusinessName] = useState('My Business');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetchProfile()
@@ -69,6 +72,11 @@ export function PortalLayout() {
       })
       .catch(() => {});
   }, []);
+
+  // Close sidebar on navigation
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
 
   function toggleExpand(label: string) {
     setExpandedItems((prev) => {
@@ -95,8 +103,16 @@ export function PortalLayout() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-20 bg-black/30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 z-30 flex h-screen w-[240px] flex-col border-r border-gray-200 bg-white">
+      <aside className={`fixed left-0 top-0 z-30 flex h-screen w-[240px] flex-col border-r border-gray-200 bg-white transition-transform md:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         {/* Logo */}
         <div className="flex h-16 items-center px-5 border-b border-gray-100">
           <Link to="/portal/home" className="flex items-baseline gap-2">
@@ -196,28 +212,34 @@ export function PortalLayout() {
       </aside>
 
       {/* Main content */}
-      <div className="ml-[240px] flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen md:ml-[240px]">
         {/* Top header */}
-        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-6">
-          <div className="flex items-center gap-4">
-            <h2 className="text-sm font-medium text-gray-700">{businessName}</h2>
-            <span className="text-xs text-gray-300">|</span>
-            <span className="text-xs text-gray-400">Merchant Portal</span>
-          </div>
+        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-6">
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 md:hidden"
+            >
+              {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+            <h2 className="text-sm font-medium text-gray-700">{businessName}</h2>
+            <span className="hidden text-xs text-gray-300 sm:inline">|</span>
+            <span className="hidden text-xs text-gray-400 sm:inline">Merchant Portal</span>
+          </div>
+          <div className="flex items-center gap-2 md:gap-3">
             <Button
               onClick={() => navigate('/portal/vouchers')}
-              className="h-8 rounded-lg bg-groupon-green px-4 text-xs font-bold text-white hover:bg-groupon-green-dark"
+              className="hidden h-8 rounded-lg bg-groupon-green px-4 text-xs font-bold text-white hover:bg-groupon-green-dark sm:inline-flex"
             >
               Redeem
             </Button>
             <Button
               onClick={() => navigate('/portal/create')}
               variant="outline"
-              className="h-8 rounded-lg px-4 text-xs font-medium"
+              className="h-8 rounded-lg px-3 text-xs font-medium sm:px-4"
             >
-              <Plus className="mr-1 h-3.5 w-3.5" />
-              New Campaign
+              <Plus className="h-3.5 w-3.5 sm:mr-1" />
+              <span className="hidden sm:inline">New Campaign</span>
             </Button>
             <button className="relative rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600">
               <Bell className="h-[18px] w-[18px]" />

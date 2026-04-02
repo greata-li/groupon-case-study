@@ -61,13 +61,13 @@ export function CustomerPreview({ deal, intake }: CustomerPreviewProps) {
         </div>
       </header>
 
-      <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8">
         {/* Prototype badge */}
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600">
           This is a preview of how customers will see your deal
         </div>
 
-        <div className="grid grid-cols-[1fr_400px] gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-4 lg:gap-8">
           {/* Left: Deal content */}
           <div className="space-y-5">
             {/* Breadcrumb */}
@@ -165,7 +165,7 @@ export function CustomerPreview({ deal, intake }: CustomerPreviewProps) {
 
           {/* Right: Purchase sidebar */}
           <div>
-            <div className="sticky top-4 space-y-4">
+            <div className="lg:sticky top-4 space-y-4">
               {/* Urgency banner */}
               <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-2.5 text-center">
                 <span className="text-sm font-medium text-red-600">

@@ -111,7 +111,7 @@ export function Campaigns() {
           <TableRow>
             <TableHead>Campaign Name</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Created</TableHead>
+            <TableHead className="hidden sm:table-cell">Created</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -146,7 +146,7 @@ export function Campaigns() {
                   <option value="inactive">Inactive</option>
                 </select>
               </TableCell>
-              <TableCell className="text-sm text-gray-500">
+              <TableCell className="hidden sm:table-cell text-sm text-gray-500">
                 {formatDate(deal.published_at)}
               </TableCell>
               <TableCell className="text-right">
@@ -191,7 +191,7 @@ export function Campaigns() {
   }
 
   return (
-    <div className="p-6 max-w-5xl animate-fade-in-up">
+    <div className="p-4 sm:p-6 max-w-5xl animate-fade-in-up">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -214,7 +214,7 @@ export function Campaigns() {
           <TabsTrigger value="active">Active ({deals.filter((d) => d.status === 'active').length})</TabsTrigger>
           <TabsTrigger value="drafts">Drafts ({deals.filter((d) => d.status === 'draft').length})</TabsTrigger>
         </TabsList>
-        <div className="mt-4 rounded-xl border border-gray-200 bg-white">
+        <div className="mt-4 rounded-xl border border-gray-200 bg-white overflow-x-auto">
           <TabsContent value="all">{renderTable(filterDeals('all'))}</TabsContent>
           <TabsContent value="active">{renderTable(filterDeals('active'))}</TabsContent>
           <TabsContent value="drafts">{renderTable(filterDeals('drafts'))}</TabsContent>

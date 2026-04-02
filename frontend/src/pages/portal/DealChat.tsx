@@ -242,7 +242,7 @@ export function DealChat({ businessName, services, onDealExtracted, onSkip }: De
   return (
     <div className="flex flex-col h-full min-h-[calc(100vh-60px)]">
       {/* Header */}
-      <div className="border-b border-gray-200 bg-white px-6 py-4">
+      <div className="border-b border-gray-200 bg-white px-4 sm:px-6 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-groupon-green">
@@ -283,7 +283,7 @@ export function DealChat({ businessName, services, onDealExtracted, onSkip }: De
 
       {/* Chat area */}
       <div className="flex-1 overflow-y-auto bg-[#fafaf8]">
-        <div className="max-w-2xl mx-auto px-6 py-6 space-y-4">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-4">
           {messages.map((msg, i) => (
             <div
               key={i}
@@ -324,10 +324,10 @@ export function DealChat({ businessName, services, onDealExtracted, onSkip }: De
 
       {/* Example prompts on first view */}
       {messages.length === 1 && (
-        <div className="bg-[#fafaf8] px-6 pb-2">
+        <div className="bg-[#fafaf8] px-4 sm:px-6 pb-2">
           <div className="max-w-2xl mx-auto">
             <p className="text-xs text-gray-400 mb-2">Quick start:</p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
                 "All of them",
                 "Just the 60-minute massages",
@@ -346,8 +346,8 @@ export function DealChat({ businessName, services, onDealExtracted, onSkip }: De
       )}
 
       {/* Input bar */}
-      <div className="border-t border-gray-200 bg-white px-6 py-4">
-        <div className="max-w-2xl mx-auto flex items-end gap-3">
+      <div className="border-t border-gray-200 bg-white px-4 sm:px-6 py-4">
+        <div className="max-w-2xl mx-auto flex items-end gap-2 sm:gap-3">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}

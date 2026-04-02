@@ -42,7 +42,7 @@ export function MyDeals() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
+    <div className="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -61,7 +61,7 @@ export function MyDeals() {
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <StatCard icon={TrendingUp} label="Active Deals" value={String(deals.length)} />
         <StatCard icon={Users} label="Total Views" value="—" subtitle="Goes live in 24h" />
         <StatCard icon={DollarSign} label="Revenue" value="—" subtitle="No sales yet" />
@@ -92,7 +92,7 @@ export function MyDeals() {
             return (
               <div
                 key={item.id}
-                className="flex items-center gap-5 rounded-xl border border-gray-200 bg-white p-5 transition-all hover:shadow-md"
+                className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 rounded-xl border border-gray-200 bg-white p-5 transition-all hover:shadow-md"
               >
                 {/* Image placeholder */}
                 <div className="h-20 w-20 shrink-0 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">

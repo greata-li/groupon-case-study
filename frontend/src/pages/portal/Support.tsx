@@ -84,7 +84,7 @@ export function Support() {
   }
 
   return (
-    <div className="p-6 max-w-5xl animate-fade-in-up">
+    <div className="p-4 sm:p-6 max-w-5xl animate-fade-in-up">
       <div className="mb-6">
         <h1 className="font-heading text-xl font-bold text-gray-900">Support</h1>
         <p className="mt-1 text-sm text-gray-500">Find answers and get help with your merchant account.</p>
@@ -102,7 +102,7 @@ export function Support() {
       </div>
 
       {/* Category cards */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
         {CATEGORIES.filter((cat) => {
           if (!searchQuery) return true;
           const q = searchQuery.toLowerCase();
@@ -132,7 +132,7 @@ export function Support() {
       </div>
 
       {/* Contact section */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <Card className="bg-groupon-green-light/30 border-groupon-green/20">
           <CardContent>
             <div className="flex items-center gap-4">
