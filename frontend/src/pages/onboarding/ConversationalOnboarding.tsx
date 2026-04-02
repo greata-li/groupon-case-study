@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { extractStory, updateProfile, publishDeal, type ExtractedProfile, type ExtractedDeal, type GeneratedDeal, type MerchantIntake, type DealService, type FinePrint } from '@/lib/api';
+import { extractStory, updateProfile, type ExtractedProfile, type ExtractedDeal } from '@/lib/api';
 import { DealChat } from '@/pages/portal/DealChat';
 import { VoiceInput } from '@/components/ui/voice-input';
 import { Button } from '@/components/ui/button';
@@ -176,55 +176,10 @@ export function ConversationalOnboarding() {
   }
 
   function handleDealExtracted(deal: ExtractedDeal) {
-    // Deal has been created via chat — publish it and go to portal
-    const services: DealService[] = (deal.selected_services || []).map((s) => ({
-      name: s.name,
-      original_price: s.regular_price,
-      discount_pct: s.discount_pct,
-      deal_price: s.groupon_price,
-      voucher_cap: s.voucher_cap,
-    }));
-
-    const finePrint: FinePrint = {
-      expiry_days: deal.expiry_days || 90,
-      max_per_person: 1,
-      appointment_required: deal.restrictions?.includes('Appointment required') ?? true,
-      new_customers_only: deal.restrictions?.includes('New customers only') ?? false,
-      restrictions: deal.restrictions || [],
-      cancellation_policy: 'Cancellation requests honored before service is provided.',
-    };
-
-    const generatedDeal: GeneratedDeal = {
-      title: deal.deal_title || `Deal at ${editProfile?.business_name || 'Business'}`,
-      description: Object.values(deal.descriptions || {}).join(' '),
-      highlights: deal.highlights?.split('\n').filter(Boolean) || [],
-      services,
-      fine_print: finePrint,
-      category: editProfile?.category || '',
-      scheduling_recommendation: deal.scheduling_suggestion || '',
-      photo_guidance: deal.photo_guidance || '',
-      confidence: { title: 0.9, description: 0.85, pricing: 0.9, category: 0.95 },
-    };
-
-    const intake: MerchantIntake = {
-      business_name: editProfile?.business_name || '',
-      business_description: editProfile?.business_description || '',
-      location: editProfile?.location || '',
-      services: services.map((s) => s.name).join(', '),
-      additional_info: '',
-      phone: editProfile?.phone || undefined,
-      address: editProfile?.full_address || undefined,
-    };
-
-    publishDeal(generatedDeal, intake, {
-      phone: editProfile?.phone || undefined,
-      address: editProfile?.full_address || undefined,
-    }).then(() => {
-      navigate('/portal/campaigns');
-    }).catch(() => {
-      // Still navigate even if save fails
-      navigate('/portal/campaigns');
-    });
+    // Store extracted deal data in sessionStorage so the builder can pick it up
+    sessionStorage.setItem('prefilled_deal', JSON.stringify(deal));
+    // Navigate to the builder (not auto-publish)
+    navigate('/portal/create?from=onboarding');
   }
 
   function updateService(index: number, field: 'name' | 'price', value: string) {

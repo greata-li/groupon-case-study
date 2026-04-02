@@ -150,7 +150,7 @@ export function Campaigns() {
                   <Button
                     variant="ghost"
                     size="icon-sm"
-                    onClick={() => navigate('/portal/create')}
+                    onClick={() => navigate(`/portal/create?edit=${deal.id}`)}
                     title="Edit"
                   >
                     <Edit3 className="h-4 w-4" />

@@ -1,0 +1,96 @@
+[
+  {
+    "id": "9b07db64-968e-4f13-9ede-3de4c408e669",
+    "deal": {
+      "title": "Therapeutic Massage at Sakura Spa (Up to 35% Off)",
+      "description": "60-minute therapeutic massage session with choice of hot stone, deep tissue, or regular relaxation massage performed by registered massage therapist 30-minute focused massage session with choice of hot stone, deep tissue, or regular relaxation massage performed by registered massage therapist",
+      "highlights": [
+        "Professional registered massage therapists on staff",
+        "Choice of hot stone, deep tissue, or relaxation massage",
+        "Flexible 30 or 60-minute session options",
+        "Convenient downtown Barrie location",
+        "Perfect for stress relief and muscle tension"
+      ],
+      "services": [
+        {
+          "name": "Hot Stone Massage (60 minutes)",
+          "original_price": 90,
+          "discount_pct": 20,
+          "deal_price": 72,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Deep Tissue Massage (60 minutes)",
+          "original_price": 90,
+          "discount_pct": 20,
+          "deal_price": 72,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Regular Massage (60 minutes)",
+          "original_price": 90,
+          "discount_pct": 20,
+          "deal_price": 72,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Hot Stone Massage (30 minutes)",
+          "original_price": 60,
+          "discount_pct": 35,
+          "deal_price": 39,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Deep Tissue Massage (30 minutes)",
+          "original_price": 60,
+          "discount_pct": 35,
+          "deal_price": 39,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Regular Massage (30 minutes)",
+          "original_price": 60,
+          "discount_pct": 35,
+          "deal_price": 39,
+          "voucher_cap": 50
+        }
+      ],
+      "fine_print": {
+        "expiry_days": 90,
+        "max_per_person": 1,
+        "appointment_required": true,
+        "new_customers_only": false,
+        "restrictions": [
+          "Appointment required",
+          "Valid Monday-Friday 9am-5pm preferred",
+          "One voucher per person"
+        ],
+        "cancellation_policy": "Cancellation requests honored before service is provided."
+      },
+      "category": "Health, Beauty & Wellness > Massage Therapy",
+      "scheduling_recommendation": "Perfect for weekday appointments 9am-5pm when availability is best",
+      "photo_guidance": "Professional spa interior shots showing massage rooms, hot stones, and relaxing atmosphere. Include exterior storefront shot and any certifications/credentials displayed.",
+      "confidence": {
+        "title": 0.9,
+        "description": 0.85,
+        "pricing": 0.9,
+        "category": 0.95
+      }
+    },
+    "intake": {
+      "business_name": "Sakura Spa",
+      "business_description": "Sakura Spa is a professional massage therapy clinic staffed by registered massage therapists. We specialize in therapeutic massage services including hot stone massage, deep tissue massage, and relaxation massage, offering both individual sessions and value-packed service packages.",
+      "location": "Barrie, ON",
+      "services": "Hot Stone Massage (60 minutes), Deep Tissue Massage (60 minutes), Regular Massage (60 minutes), Hot Stone Massage (30 minutes), Deep Tissue Massage (30 minutes), Regular Massage (30 minutes)",
+      "additional_info": "",
+      "phone": "+17052414943",
+      "address": "384 Yonge St #12, Barrie, ON L4N 4C8"
+    },
+    "contact": {
+      "phone": "+17052414943",
+      "address": "384 Yonge St #12, Barrie, ON L4N 4C8"
+    },
+    "published_at": "2026-04-01T21:07:11.153949",
+    "status": "active"
+  }
+]

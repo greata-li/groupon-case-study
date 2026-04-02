@@ -1,6 +1,6 @@
 {
   "business_name": "Sakura Spa",
-  "business_description": "Sakura Spa is a massage therapy business located in Barrie, Ontario, offering a variety of massage services including deep tissue, regular, and hot stone massages. They provide flexible scheduling with both 30-minute and hourly sessions to accommodate different client needs.",
+  "business_description": "Sakura Spa is a professional massage therapy clinic staffed by registered massage therapists. We specialize in therapeutic massage services including hot stone massage, deep tissue massage, and relaxation massage, offering both individual sessions and value-packed service packages.",
   "location": "Barrie, ON",
   "full_address": "384 Yonge St #12, Barrie, ON L4N 4C8",
   "phone": "+17052414943",
@@ -8,29 +8,41 @@
   "category": "Health, Beauty & Wellness > Massage Therapy",
   "services": [
     {
-      "name": "60-Minute Massage",
+      "name": "Hot Stone Massage (60 minutes)",
       "price": 90
     },
     {
-      "name": "30-Minute Massage",
-      "price": 70
-    },
-    {
-      "name": "Deep Tissue Massage",
+      "name": "Deep Tissue Massage (60 minutes)",
       "price": 90
     },
     {
-      "name": "Hot Stone Massage",
+      "name": "Regular Massage (60 minutes)",
       "price": 90
+    },
+    {
+      "name": "Hot Stone Massage (30 minutes)",
+      "price": 60
+    },
+    {
+      "name": "Deep Tissue Massage (30 minutes)",
+      "price": 60
+    },
+    {
+      "name": "Regular Massage (30 minutes)",
+      "price": 60
+    },
+    {
+      "name": "20-Hour Service Package",
+      "price": 1400
     }
   ],
-  "scheduling_insight": "Open Wednesday to Sunday, closed Monday and Tuesday",
+  "scheduling_insight": "wants to attract more customers during weekdays 9am-5pm, which are slower periods",
   "experience_years": null,
   "business_type": "company",
   "highlights": [
-    "Offers insurance reimbursement assistance for clients",
-    "Flexible session lengths with both 30-minute and hourly options",
-    "Multiple massage modalities including deep tissue and hot stone"
+    "Registered massage therapists on staff",
+    "Multiple massage specialties including hot stone and deep tissue",
+    "Flexible scheduling with both 30 and 60-minute sessions available"
   ],
   "onboarded": true
 }
