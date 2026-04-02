@@ -504,6 +504,15 @@ class PublishDealRequest(BaseModel):
     contact: dict | None = None
 
 
+@app.post("/api/deals/reset")
+async def reset_deals():
+    """Reset all deals and profile — for demo purposes."""
+    app.state.deals = []
+    save_deals([])
+    save_profile({"onboarded": False})
+    return {"reset": True}
+
+
 @app.post("/api/deals")
 async def publish_deal(request: PublishDealRequest):
     """Publish a deal — saves to disk so it persists across restarts."""
@@ -569,13 +578,6 @@ async def delete_deal(deal_id: str):
     return {"deleted": deal_id}
 
 
-@app.post("/api/deals/reset")
-async def reset_deals():
-    """Reset all deals and profile — for demo purposes."""
-    app.state.deals = []
-    save_deals([])
-    save_profile({"onboarded": False})
-    return {"reset": True}
 
 
 # --- Health ---

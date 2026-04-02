@@ -118,15 +118,15 @@ export function Booking() {
                       Connected
                     </Badge>
                   ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-3 rounded-lg text-xs"
-                      render={<a href={platform.url} target="_blank" rel="noopener noreferrer" />}
+                    <a
+                      href={platform.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 inline-flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50"
                     >
                       Connect
-                      <ExternalLink className="ml-1 h-3 w-3" />
-                    </Button>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
                   )}
                 </div>
               </CardContent>
@@ -149,14 +149,15 @@ export function Booking() {
               <p className="text-sm text-gray-300 mt-1">
                 Get started with Square Appointments for free. Manage bookings, payments, and customer info all in one place.
               </p>
-              <Button
-                size="sm"
-                className="mt-4 rounded-lg bg-white text-gray-900 font-bold text-xs hover:bg-gray-100"
-                render={<a href="https://squareup.com/appointments" target="_blank" rel="noopener noreferrer" />}
+              <a
+                href="https://squareup.com/appointments"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center gap-1 rounded-lg bg-white px-4 py-2 text-xs font-bold text-gray-900 transition-colors hover:bg-gray-100"
               >
                 Get Started with Square
-                <ArrowRight className="ml-1 h-3 w-3" />
-              </Button>
+                <ArrowRight className="h-3 w-3" />
+              </a>
             </div>
             <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-white/10">
               <span className="text-3xl font-extrabold text-white">S</span>

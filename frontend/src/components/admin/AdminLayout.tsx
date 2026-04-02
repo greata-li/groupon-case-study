@@ -51,7 +51,8 @@ export function AdminLayout() {
               {resetDone ? 'Reset!' : 'Reset Profile'}
             </button>
             <a
-              href="http://localhost:8000/docs"
+              href="/api/docs"
+              onClick={(e) => { e.preventDefault(); window.open('http://localhost:8000/docs', '_blank'); }}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
