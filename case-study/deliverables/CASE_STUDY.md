@@ -128,15 +128,24 @@ All prompts are configurable via the admin panel. A PM can change model selectio
 | Feature | Status | Notes |
 |---------|--------|-------|
 | Conversational onboarding (chat + voice) | **Fully functional** | Real Claude API calls, voice via Web Speech API |
-| AI deal creation (chat → builder) | **Fully functional** | Real Claude API calls, pre-fills all 7 steps |
-| Deal publishing + persistence | **Fully functional** | Saved to JSON file store, persists across restarts |
+| AI deal creation (chat → builder) | **Fully functional** | Multi-turn conversation, pre-fills all 7 steps |
+| Smart routing (new vs returning merchant) | **Fully functional** | Checks profile, routes to onboarding or deal creation |
+| Deal publishing + persistence | **Fully functional** | JSON file store, persists across restarts |
+| Deal editing (update existing) | **Fully functional** | PUT endpoint, "Save Changes" vs "Publish" |
+| Deal status toggle (Active/Draft/Inactive) | **Fully functional** | PATCH endpoint, toggle on campaigns page |
 | Customer preview | **Fully functional** | Mirrors Groupon deal page layout |
-| Admin prompt editor + test panel | **Fully functional** | Changes take effect immediately |
+| Admin prompt editor + test panel | **Fully functional** | Model dropdown (Haiku/Sonnet/Opus), changes take effect immediately |
+| Admin analytics dashboard | **Fully functional** | Pipeline stats, costs, field acceptance rates |
+| Admin reset profile (demo tool) | **Fully functional** | Resets merchant profile + deals for demo walkthroughs |
+| Onboarding checklist tracking | **Fully functional** | Marks items complete as merchant visits pages |
 | Voucher list, reviews, payments | **Mock data** | Realistic mock data, UI fully interactive |
-| Booking platform connections | **Simulated** | Credential dialogs work, no real OAuth |
-| Photo upload | **Partial** | File picker works, no server-side storage |
+| Payment drill-down | **Fully functional** | Expandable rows showing gross, commission, net breakdown |
 | CSV report download | **Fully functional** | Generates real CSV files with mock data |
+| Booking platform connections | **Simulated** | Credential dialogs with realistic API key fields (Booker, Mindbody, Square) |
+| Photo upload | **Partial** | File picker + drag-drop work, no server-side storage |
+| Customer reviews AI response | **Simulated** | AI generates suggested responses, not connected to real review system |
 | AI chatbot (support) | **Simulated** | Simulated responses, not connected to LLM |
+| API documentation | **Fully functional** | Auto-generated Swagger UI at /docs, linked from admin panel |
 
 ---
 

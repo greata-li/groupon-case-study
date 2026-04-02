@@ -165,6 +165,52 @@ Uses the saved profile as context. When Sofia says "all of them at 35% off," the
 
 ---
 
+## Phase 7: Complete Merchant Portal (Day 6)
+
+### Built the Full Platform
+Expanded from deal generator to complete merchant platform matching Groupon's actual portal:
+- 12 sidebar pages: Home, Campaigns, Create Deal, Booking, Voucher List, Customer Reviews, Payments, Reports, Support, Admin, Connections
+- Onboarding checklist with progress tracking
+- Campaign management with Active/Draft/Inactive status toggle
+
+### What We Learned
+- **Completeness matters for credibility** — a half-built portal undermines the AI features. Every page Groupon has needs a counterpart.
+- **Mock data should look realistic** — voucher codes, payment amounts, customer names, dates all need to feel real.
+
+---
+
+## Phase 8: QA and Production Polish (Day 7)
+
+### Comprehensive QA Round
+Tested every flow end-to-end. Key bugs found and fixed:
+
+1. **Discount % not displaying** — pre-filled services from AI didn't calculate discount. Added `recalcAllDiscounts()` helper applied to all prefill paths.
+2. **Edit creates duplicates** — clicking Edit → Publish created new deals. Added PUT `/api/deals/:id` endpoint, builder now detects edit mode.
+3. **Highlights as raw JSON** — LLM returned JSON arrays in markdown fences. Added `cleanHighlights()` parser.
+4. **Photo upload non-functional** — wired up file picker and drag-drop with visual feedback.
+5. **No save feedback** — added success message + auto-redirect after saving.
+6. **Checklist items never complete** — added completion tracking via profile API, marks items when pages visited.
+
+### Smart Routing
+Added profile-aware routing throughout:
+- Landing page CTA: onboarding if new, portal/create if onboarded
+- Nav "Create Deal": same smart logic
+- Admin "Reset Profile": clears profile + deals for demo walkthroughs
+
+### Connection Credential Dialogs
+Each booking platform (Booker, Mindbody, Square, Google Business, Yelp) has a dialog with realistic credential fields:
+- API keys with example format placeholders
+- Location IDs, Site IDs as needed
+- Simulated connect/disconnect with status badges
+
+### Deal Status Management
+Campaigns page now has status toggle per deal:
+- Active / Draft / Inactive
+- PATCH endpoint for status changes
+- Edit shows "Save Changes", new deals show "Save as Draft" / "Publish"
+
+---
+
 ## Key Architectural Decisions Log
 
 | Decision | Options Considered | Choice | Reasoning |

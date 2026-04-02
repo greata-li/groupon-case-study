@@ -27,6 +27,17 @@
 
 *Demo: Show the deal chat → builder flow*
 
+### Show the merchant portal
+"After publishing, Sofia lands in a complete merchant portal — campaigns, vouchers, customer reviews, payments, reports, support. Every page Groupon has, we have, but with AI assistance throughout."
+
+*Demo: Quick tour of portal pages*
+- Campaigns page with status toggle (Active/Draft)
+- Customer reviews with AI-suggested response
+- Connections page with credential dialogs (Booker, Mindbody, Square)
+- Payment drill-down with line items
+
+"And for returning merchants — she doesn't go through onboarding again. Smart routing detects her profile and goes straight to deal creation."
+
 ---
 
 ## 2. How I'd Measure Success (~2 min)
@@ -64,13 +75,15 @@
 "This is how a PM maintains the system."
 
 *Demo: Show the admin panel*
-- 7 configurable endpoints
+- 7 configurable endpoints with pipeline flow connectors
 - Change model from Haiku to Sonnet with a dropdown
-- Edit a prompt
-- Run a test
-- Show analytics
+- Edit a prompt, change temperature
+- Run a test with sample input, see output + latency
+- Show analytics: pipeline costs, field acceptance rates
+- API Docs link (auto-generated Swagger UI)
+- Reset Profile button (for demo walkthroughs)
 
-"Every prompt, every model selection, every temperature is configurable. No code changes needed. This is how you iterate in production."
+"Every prompt, every model selection, every temperature is configurable. No code changes needed. The API docs are auto-generated. A PM can iterate on prompts and test outputs without touching code — that's how you maintain an AI system in production."
 
 ---
 
@@ -106,8 +119,12 @@
 ### What broke
 "Highlights came back as raw JSON — we had to add a parser for markdown code fences. Descriptions for similar services all started the same way — we had to adjust temperature and add uniqueness rules. The first-time flow auto-published deals without merchant review — we added Save as Draft."
 
+"During QA, we found the edit flow was creating duplicates instead of updating — we added a PUT endpoint and edit detection. The discount percentages weren't calculating from pre-filled prices — we added auto-calculation across all prefill paths. Every bug found was a chance to make the system more robust."
+
 ---
 
 ## Closing
 
-"The thesis is simple: Sofia shouldn't navigate Groupon. The AI should do the work. She tells her story once, reviews what the AI creates, and publishes. Under 10 minutes, no marketing expertise needed."
+"The thesis is simple: Sofia shouldn't navigate Groupon. The AI should do the work. She tells her story once, reviews what the AI creates, and publishes. Under 5 minutes, no marketing expertise needed."
+
+"We built a complete merchant platform — not just a deal generator. Every feature Groupon's portal has, ours has, with AI assistance at every step. And the entire system is maintainable: a PM can tweak prompts, swap models, test outputs, and monitor performance without writing a line of code."
