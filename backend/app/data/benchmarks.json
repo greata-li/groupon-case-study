@@ -2,7 +2,7 @@
   "_meta": {
     "description": "Synthetic market intelligence data for the Groupon AI Deal Creator prototype. In production, this would pull from Groupon's actual deal performance database.",
     "last_updated": "2026-03-28",
-    "data_source": "Synthetic — based on assumed industry benchmarks",
+    "data_source": "Synthetic - based on assumed industry benchmarks",
     "coverage": "Beauty & Spas category, Chicago market"
   },
   "categories": {
@@ -26,7 +26,7 @@
           "title_patterns": [
             "[Service] at [Business] (Up to X% Off)",
             "One or Two [Service] Sessions at [Business]",
-            "[Service] Package at [Business] — [Location]"
+            "[Service] Package at [Business] - [Location]"
           ],
           "fine_print_templates": [
             "New customers only. By appointment only. Valid [days]. Limit 1 per person. Not valid with other offers. Gratuity not included.",
@@ -50,7 +50,7 @@
           "title_patterns": [
             "Lash Lift and Tint at [Business] (Up to X% Off)",
             "Full Set of Eyelash Extensions at [Business]",
-            "Lash Services at [Business] — [Location]"
+            "Lash Services at [Business] - [Location]"
           ],
           "fine_print_templates": [
             "New customers only. Patch test may be required 48 hours before appointment. By appointment only. Limit 1 per person.",
@@ -60,7 +60,7 @@
       },
       "market_insights": {
         "chicago": {
-          "market_size": "Large — high density of beauty businesses",
+          "market_size": "Large - high density of beauty businesses",
           "competition_level": "High",
           "avg_deals_per_subcategory": 45,
           "peak_purchase_days": ["Monday", "Tuesday"],
@@ -94,7 +94,7 @@
     {
       "id": 2,
       "assumption": "Bundles outperform single services by 25%",
-      "basis": "Common marketplace pattern — higher perceived value drives conversion",
+      "basis": "Common marketplace pattern - higher perceived value drives conversion",
       "impact_if_wrong": "Bundle recommendations may not lift performance as expected",
       "validation": "Compare bundle vs single service deal performance in production data"
     },

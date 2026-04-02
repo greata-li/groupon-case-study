@@ -5,6 +5,14 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import {
   Link as LinkIcon,
   CheckCircle2,
   XCircle,
@@ -21,6 +29,61 @@ interface PlatformConnection {
   lastSync?: string;
   apiKey?: string;
 }
+
+interface CredentialField {
+  key: string;
+  label: string;
+  placeholder: string;
+}
+
+interface PlatformConfig {
+  fields: CredentialField[];
+  signupUrl: string;
+  signupLabel: string;
+}
+
+const PLATFORM_CONFIGS: Record<string, PlatformConfig> = {
+  booker: {
+    fields: [
+      { key: 'apiKey', label: 'API Key', placeholder: 'bkr_live_xxxxxxxxxxxx' },
+      { key: 'locationId', label: 'Location ID', placeholder: 'LOC-12345' },
+    ],
+    signupUrl: 'https://www.booker.com',
+    signupLabel: 'Booker',
+  },
+  mindbody: {
+    fields: [
+      { key: 'apiKey', label: 'API Key', placeholder: 'mb_api_xxxxxxxxxxxx' },
+      { key: 'siteId', label: 'Site ID', placeholder: '-99999' },
+      { key: 'sourceName', label: 'Source Name', placeholder: 'GrouponIntegration' },
+    ],
+    signupUrl: 'https://www.mindbodyonline.com',
+    signupLabel: 'Mindbody',
+  },
+  square: {
+    fields: [
+      { key: 'accessToken', label: 'Access Token', placeholder: 'sq0atp-xxxxxxxxxxxx' },
+      { key: 'locationId', label: 'Location ID', placeholder: 'LXXXXXXXXXXXXXXXXX' },
+    ],
+    signupUrl: 'https://squareup.com',
+    signupLabel: 'Square',
+  },
+  google: {
+    fields: [
+      { key: 'apiKey', label: 'API Key', placeholder: 'AIzaSyxxxxxxxxxxxx' },
+    ],
+    signupUrl: 'https://business.google.com',
+    signupLabel: 'Google Business',
+  },
+  yelp: {
+    fields: [
+      { key: 'apiKey', label: 'API Key', placeholder: 'yelp_xxxxxxxxxxxx' },
+      { key: 'businessId', label: 'Business ID', placeholder: 'your-business-name-city' },
+    ],
+    signupUrl: 'https://biz.yelp.com',
+    signupLabel: 'Yelp',
+  },
+};
 
 const PLATFORMS: PlatformConnection[] = [
   {
@@ -58,19 +121,31 @@ const PLATFORMS: PlatformConnection[] = [
 export function Connections() {
   const [platforms, setPlatforms] = useState(PLATFORMS);
   const [connectingId, setConnectingId] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedPlatformId, setSelectedPlatformId] = useState<string | null>(null);
+  const [credentials, setCredentials] = useState<Record<string, string>>({});
 
-  function handleConnect(id: string) {
-    setConnectingId(id);
+  function openConnectDialog(id: string) {
+    setSelectedPlatformId(id);
+    setCredentials({});
+    setDialogOpen(true);
+  }
+
+  function handleDialogConnect() {
+    if (!selectedPlatformId) return;
+    setDialogOpen(false);
+    setConnectingId(selectedPlatformId);
     // Simulate connection
     setTimeout(() => {
       setPlatforms((prev) =>
         prev.map((p) =>
-          p.id === id
+          p.id === selectedPlatformId
             ? { ...p, status: 'connected' as const, lastSync: new Date().toISOString() }
             : p,
         ),
       );
       setConnectingId(null);
+      setSelectedPlatformId(null);
     }, 1500);
   }
 
@@ -105,6 +180,8 @@ export function Connections() {
   }
 
   const connectedCount = platforms.filter((p) => p.status === 'connected').length;
+  const selectedPlatform = platforms.find((p) => p.id === selectedPlatformId);
+  const platformConfig = selectedPlatformId ? PLATFORM_CONFIGS[selectedPlatformId] : null;
 
   return (
     <div className="p-6 max-w-5xl animate-fade-in-up">
@@ -174,7 +251,7 @@ export function Connections() {
                   ) : (
                     <Button
                       size="sm"
-                      onClick={() => handleConnect(platform.id)}
+                      onClick={() => openConnectDialog(platform.id)}
                       disabled={connectingId === platform.id}
                       className="rounded-lg bg-groupon-green text-xs font-bold text-white hover:bg-groupon-green-dark"
                     >
@@ -192,6 +269,65 @@ export function Connections() {
           </Card>
         ))}
       </div>
+
+      {/* Credential Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Connect {selectedPlatform?.name}</DialogTitle>
+            <DialogDescription>
+              Enter your {selectedPlatform?.name} credentials to connect your account.
+            </DialogDescription>
+          </DialogHeader>
+          {platformConfig && (
+            <div className="space-y-4 py-2">
+              {platformConfig.fields.map((field) => (
+                <div key={field.key} className="space-y-1.5">
+                  <Label className="text-xs font-medium">{field.label}</Label>
+                  <Input
+                    placeholder={field.placeholder}
+                    value={credentials[field.key] ?? ''}
+                    onChange={(e) =>
+                      setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }))
+                    }
+                    className="font-mono text-sm"
+                  />
+                </div>
+              ))}
+              <p className="text-xs text-gray-500 pt-1">
+                Don't have an account?{' '}
+                <a
+                  href={platformConfig.signupUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-groupon-green hover:underline font-medium"
+                >
+                  Sign up for {platformConfig.signupLabel}
+                  <ExternalLink className="ml-1 inline h-3 w-3" />
+                </a>
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-lg text-xs"
+              onClick={() => setDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleDialogConnect}
+              className="rounded-lg bg-groupon-green text-xs font-bold text-white hover:bg-groupon-green-dark"
+            >
+              <LinkIcon className="mr-1 h-3 w-3" />
+              Connect
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* API Key section */}
       <Card className="mt-8">

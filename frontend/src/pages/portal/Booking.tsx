@@ -20,6 +20,7 @@ const PLATFORMS = [
     color: 'bg-purple-50 text-purple-600',
     iconBg: 'bg-purple-100',
     connected: false,
+    url: 'https://www.booker.com',
   },
   {
     name: 'Mindbody',
@@ -27,6 +28,7 @@ const PLATFORMS = [
     color: 'bg-blue-50 text-blue-600',
     iconBg: 'bg-blue-100',
     connected: false,
+    url: 'https://www.mindbodyonline.com',
   },
   {
     name: 'Square',
@@ -34,6 +36,7 @@ const PLATFORMS = [
     color: 'bg-gray-50 text-gray-600',
     iconBg: 'bg-gray-100',
     connected: false,
+    url: 'https://squareup.com',
   },
 ];
 
@@ -119,6 +122,7 @@ export function Booking() {
                       variant="outline"
                       size="sm"
                       className="mt-3 rounded-lg text-xs"
+                      render={<a href={platform.url} target="_blank" rel="noopener noreferrer" />}
                     >
                       Connect
                       <ExternalLink className="ml-1 h-3 w-3" />
@@ -148,6 +152,7 @@ export function Booking() {
               <Button
                 size="sm"
                 className="mt-4 rounded-lg bg-white text-gray-900 font-bold text-xs hover:bg-gray-100"
+                render={<a href="https://squareup.com/appointments" target="_blank" rel="noopener noreferrer" />}
               >
                 Get Started with Square
                 <ArrowRight className="ml-1 h-3 w-3" />

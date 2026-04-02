@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { fetchDeals, deleteDeal, type PublishedDeal } from '@/lib/api';
+import { fetchDeals, deleteDeal, updateDealStatus, type PublishedDeal } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -130,9 +130,21 @@ export function Campaigns() {
                 </p>
               </TableCell>
               <TableCell>
-                <Badge className={`text-xs font-bold capitalize ${statusColor(deal.status)}`}>
-                  {deal.status ?? 'Draft'}
-                </Badge>
+                <select
+                  value={deal.status || 'active'}
+                  onChange={async (e) => {
+                    const newStatus = e.target.value;
+                    try {
+                      await updateDealStatus(deal.id, newStatus);
+                      setDeals((prev) => prev.map((d) => d.id === deal.id ? { ...d, status: newStatus } : d));
+                    } catch { /* ignore */ }
+                  }}
+                  className={`rounded-md border px-2 py-1 text-xs font-bold capitalize cursor-pointer ${statusColor(deal.status)}`}
+                >
+                  <option value="active">Active</option>
+                  <option value="draft">Draft</option>
+                  <option value="inactive">Inactive</option>
+                </select>
               </TableCell>
               <TableCell className="text-sm text-gray-500">
                 {formatDate(deal.published_at)}

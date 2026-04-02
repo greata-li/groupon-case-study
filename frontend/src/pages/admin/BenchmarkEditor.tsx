@@ -26,6 +26,8 @@ import {
   Info,
   Database,
   X,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 
 export function BenchmarkEditor() {
@@ -37,6 +39,7 @@ export function BenchmarkEditor() {
   const [error, setError] = useState<string | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const [showGuide, setShowGuide] = useState(true);
+  const [showRawJson, setShowRawJson] = useState(false);
 
   useEffect(() => {
     fetchBenchmarks()
@@ -193,39 +196,58 @@ export function BenchmarkEditor() {
         </Card>
       )}
 
-      {/* Raw JSON editor */}
-      <Card className="border-gray-100">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 font-heading text-base">
-            <FileJson className="h-4 w-4 text-gray-500" />
-            Raw Data Editor
-          </CardTitle>
-          <p className="text-xs text-gray-500">
-            Edit the benchmark data directly. Changes affect how the Market Intelligence
-            endpoint recommends pricing. The pipeline reads this data at runtime.
-          </p>
-        </CardHeader>
-        <Separator />
-        <CardContent className="pt-4">
-          {parseError && (
-            <div className="mb-3 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-              <AlertTriangle className="h-4 w-4" />
-              {parseError}
-            </div>
+      {/* Raw JSON editor - collapsible */}
+      <div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowRawJson((prev) => !prev)}
+          className="rounded-lg text-xs font-medium"
+        >
+          {showRawJson ? (
+            <ChevronDown className="mr-1.5 h-3.5 w-3.5" />
+          ) : (
+            <ChevronRight className="mr-1.5 h-3.5 w-3.5" />
           )}
-          {error && (
-            <div className="mb-3 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
-              <AlertTriangle className="h-4 w-4" />
-              {error}
-            </div>
-          )}
-          <Textarea
-            className="min-h-[400px] rounded-lg font-mono text-xs leading-relaxed"
-            value={rawJson}
-            onChange={(e) => handleJsonChange(e.target.value)}
-          />
-        </CardContent>
-      </Card>
+          <FileJson className="mr-1.5 h-3.5 w-3.5 text-gray-500" />
+          {showRawJson ? 'Hide Raw JSON Editor' : 'Show Raw JSON Editor'}
+        </Button>
+
+        {showRawJson && (
+          <Card className="border-gray-100 mt-3">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 font-heading text-base">
+                <FileJson className="h-4 w-4 text-gray-500" />
+                Raw Data Editor
+              </CardTitle>
+              <p className="text-xs text-gray-500">
+                Edit the benchmark data directly. Changes affect how the Market Intelligence
+                endpoint recommends pricing. The pipeline reads this data at runtime.
+              </p>
+            </CardHeader>
+            <Separator />
+            <CardContent className="pt-4">
+              {parseError && (
+                <div className="mb-3 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+                  <AlertTriangle className="h-4 w-4" />
+                  {parseError}
+                </div>
+              )}
+              {error && (
+                <div className="mb-3 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+                  <AlertTriangle className="h-4 w-4" />
+                  {error}
+                </div>
+              )}
+              <Textarea
+                className="min-h-[400px] rounded-lg font-mono text-xs leading-relaxed"
+                value={rawJson}
+                onChange={(e) => handleJsonChange(e.target.value)}
+              />
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
