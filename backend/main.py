@@ -569,6 +569,15 @@ async def delete_deal(deal_id: str):
     return {"deleted": deal_id}
 
 
+@app.post("/api/deals/reset")
+async def reset_deals():
+    """Reset all deals and profile — for demo purposes."""
+    app.state.deals = []
+    save_deals([])
+    save_profile({"onboarded": False})
+    return {"reset": True}
+
+
 # --- Health ---
 
 @app.get("/api/health")

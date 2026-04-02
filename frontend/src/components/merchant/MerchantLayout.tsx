@@ -1,6 +1,25 @@
-import { Outlet, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { fetchProfile } from '@/lib/api';
 
 export function MerchantLayout() {
+  const navigate = useNavigate();
+  const [isOnboarded, setIsOnboarded] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetchProfile()
+      .then((p) => setIsOnboarded(Boolean(p?.onboarded)))
+      .catch(() => setIsOnboarded(false));
+  }, []);
+
+  function handleCreateDeal() {
+    if (isOnboarded) {
+      navigate('/portal/create');
+    } else {
+      navigate('/onboarding');
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#fafaf8]">
       {/* Slim prototype indicator */}
@@ -20,7 +39,9 @@ export function MerchantLayout() {
 
           <nav className="flex items-center gap-6 text-sm font-medium text-gray-500">
             <Link to="/" className="transition-colors hover:text-gray-900">Home</Link>
-            <Link to="/onboarding" className="transition-colors hover:text-gray-900">Create Deal</Link>
+            <button onClick={handleCreateDeal} className="transition-colors hover:text-gray-900">
+              Create Deal
+            </button>
             <Link to="/portal" className="transition-colors hover:text-gray-900">Merchant Portal</Link>
             <Link
               to="/admin"

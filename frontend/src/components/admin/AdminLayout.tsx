@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { NavLink, Outlet, Link } from 'react-router-dom';
-import { LayoutDashboard, FlaskConical, Database, BarChart3, FileCode, ArrowLeft, Sparkles, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, FlaskConical, Database, BarChart3, FileCode, ArrowLeft, Sparkles, ExternalLink, RotateCcw } from 'lucide-react';
+import { updateProfile } from '@/lib/api';
 
 const navItems = [
   { to: '/admin', label: 'Endpoints', icon: LayoutDashboard, end: true },
@@ -9,6 +11,25 @@ const navItems = [
 ];
 
 export function AdminLayout() {
+  const [resetting, setResetting] = useState(false);
+  const [resetDone, setResetDone] = useState(false);
+
+  async function handleResetProfile() {
+    if (!confirm('Reset the merchant profile? This simulates a new merchant for demo purposes.')) return;
+    setResetting(true);
+    try {
+      await updateProfile({ onboarded: false });
+      // Also clear deals
+      await fetch('/api/deals/reset', { method: 'POST' }).catch(() => {});
+      setResetDone(true);
+      setTimeout(() => setResetDone(false), 3000);
+    } catch {
+      // ignore
+    } finally {
+      setResetting(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#fafaf8]">
       {/* Header */}
@@ -21,6 +42,14 @@ export function AdminLayout() {
             </h1>
           </div>
           <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={handleResetProfile}
+              disabled={resetting}
+              className="flex items-center gap-1.5 rounded-lg border border-red-200 px-2.5 py-1 text-xs text-red-500 transition-colors hover:bg-red-50 hover:text-red-700 disabled:opacity-50"
+            >
+              <RotateCcw className={`h-3.5 w-3.5 ${resetting ? 'animate-spin' : ''}`} />
+              {resetDone ? 'Reset!' : 'Reset Profile'}
+            </button>
             <a
               href="http://localhost:8000/docs"
               target="_blank"
