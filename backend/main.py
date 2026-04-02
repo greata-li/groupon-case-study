@@ -350,6 +350,7 @@ async def extract_story(request: StoryRequest):
     Core AI endpoint: takes a merchant's free-form story and extracts
     a complete structured business profile + services.
     One call replaces 6+ form screens.
+    Reads config from admin-editable JSON (story_extractor.json).
     """
     from app.endpoints.pipeline import call_claude, parse_json_response
 
@@ -357,50 +358,8 @@ async def extract_story(request: StoryRequest):
     if request.follow_up_answers:
         combined_input += "\n\nAdditional details:\n" + "\n".join(request.follow_up_answers)
 
-    config = {
-        "model": "claude-sonnet-4-20250514",
-        "max_tokens": 2048,
-        "temperature": 0.3,
-        "system_prompt": (
-            "You are a business intake specialist for Groupon's AI-powered merchant onboarding.\n\n"
-            "Extract structured business information from a merchant's free-form description. "
-            "The merchant may speak casually, mention things out of order, or be brief. "
-            "Extract everything you can and infer reasonable values for what's missing.\n\n"
-            "Return ONLY valid JSON with this structure:\n"
-            "{\n"
-            '  "business_name": "string or null",\n'
-            '  "business_description": "2-3 professional sentences about the business",\n'
-            '  "location": "city/neighborhood (extracted from full_address if given)",\n'
-            '  "full_address": "FULL street address including unit/suite, city, state/province, and zip/postal code. null ONLY if not mentioned.",\n'
-            '  "phone": "phone number - REQUIRED for Groupon merchants. null only if not mentioned.",\n'
-            '  "website": "website if mentioned, or null",\n'
-            '  "category": "Main Category > Subcategory (e.g., Health, Beauty & Wellness > Waxing)",\n'
-            '  "category_confidence": 0.0-1.0,\n'
-            '  "services": [\n'
-            '    { "name": "Service Name", "price": 65 }\n'
-            '  ],\n'
-            '  "scheduling_insight": "when they want to fill slots, or null",\n'
-            '  "experience_years": number or null,\n'
-            '  "business_type": "sole_provider | independent_contractor | company | third_party",\n'
-            '  "highlights": ["key selling point 1", "key selling point 2", "key selling point 3"],\n'
-            '  "missing_fields": ["list of important fields that could not be extracted"],\n'
-            '  "follow_up_questions": ["question to ask if key info is missing"]\n'
-            "}\n\n"
-            "Rules:\n"
-            "- Always generate a business_description even if brief - write a professional version of what they said\n"
-            "- Always detect category with confidence score\n"
-            "- Extract every service with price mentioned\n"
-            "- If they mention slow days, capture as scheduling_insight\n"
-            "- Generate 3 highlights from what they described\n"
-            "- missing_fields: list critical missing info (business_name, full_address, phone, services)\n"
-            "- full_address is REQUIRED - if the merchant only gives a city or partial address, "
-            "you MUST add 'full_address' to missing_fields and ask for the complete street address with zip/postal code in follow_up_questions.\n"
-            "- phone is REQUIRED - if not provided, add 'phone' to missing_fields and ask for it in follow_up_questions.\n"
-            "- follow_up_questions: ask 1-3 targeted questions for missing critical info. "
-            "Don't ask for things you can infer. Be conversational, not formal.\n"
-            "- If everything important is captured (including full_address and phone), return empty follow_up_questions array"
-        ),
-    }
+    # Read from admin-configurable config (editable via admin panel)
+    config = app.state.endpoint_configs.get("story_extractor", {})
 
     raw = await call_claude(config, combined_input)
 
@@ -435,42 +394,17 @@ async def extract_deal(request: DealStoryRequest):
     """
     Takes a merchant's free-form description of what deal they want to run
     and extracts structured deal data. Uses the saved profile for context.
+    Reads config from admin-editable JSON (deal_extractor.json).
     """
     from app.endpoints.pipeline import call_claude, parse_json_response
 
     profile = load_profile()
 
+    # Read from admin-configurable config, inject merchant profile as runtime context
+    base_config = app.state.endpoint_configs.get("deal_extractor", {})
     config = {
-        "model": "claude-sonnet-4-20250514",
-        "max_tokens": 2048,
-        "temperature": 0.4,
-        "system_prompt": (
-            "You are a deal creation specialist for Groupon.\n\n"
-            "A merchant is describing what deal they want to run. Using their saved business profile "
-            "and their description, extract everything needed to create a complete Groupon deal.\n\n"
-            f"Merchant profile: {json.dumps(profile)}\n\n"
-            "Return ONLY valid JSON:\n"
-            "{\n"
-            '  "selected_services": [\n'
-            '    { "name": "Service Name", "regular_price": 65, "groupon_price": 39, "discount_pct": 40, "voucher_cap": 50 }\n'
-            '  ],\n'
-            '  "highlights": "3-5 bullet points separated by newlines",\n'
-            '  "descriptions": { "0": "What is included in option 1", "1": "What is included in option 2" },\n'
-            '  "expiry_days": 90,\n'
-            '  "scheduling_suggestion": "Best for Tuesday/Wednesday bookings",\n'
-            '  "deal_title": "Service at Business Name (Up to X% Off)",\n'
-            '  "restrictions": ["New customers only", "Appointment required"],\n'
-            '  "photo_guidance": "Suggestion for what photos would work best"\n'
-            "}\n\n"
-            "Rules:\n"
-            "- Use services from the merchant's profile. If they mention specific ones, use those. "
-            "If they say 'all my services' or are vague, include all profile services.\n"
-            "- Set Groupon prices at 35-40% off regular unless they specify a discount.\n"
-            "- Generate compelling highlights and per-service descriptions.\n"
-            "- If they mention timing (e.g., 'for 3 months', 'Tuesdays'), capture in scheduling_suggestion and expiry_days.\n"
-            "- Generate a professional deal title.\n"
-            "- Include sensible restrictions based on service type."
-        ),
+        **base_config,
+        "system_prompt": base_config.get("system_prompt", "") + f"\n\nMerchant profile: {json.dumps(profile)}",
     }
 
     raw = await call_claude(config, request.story)
@@ -491,7 +425,10 @@ class EnhanceTextRequest(BaseModel):
 
 @app.post("/api/pipeline/enhance-text")
 async def enhance_text(request: EnhanceTextRequest):
-    """AI 'Inspire Me' / 'Share More Details' - enhances or generates text for any field."""
+    """
+    AI 'Inspire Me' / 'Share More Details' - enhances or generates text for any field.
+    Reads config from admin-editable JSON (text_enhancer.json).
+    """
     from app.endpoints.pipeline import call_claude
 
     prompts = {
@@ -508,11 +445,12 @@ async def enhance_text(request: EnhanceTextRequest):
         existing="\n".join(existing) if existing else "(none yet)",
     )
 
+    # Read from admin-configurable config (editable via admin panel)
+    base_config = app.state.endpoint_configs.get("text_enhancer", {})
+    # Override temperature per field type for optimal output variety
     config = {
-        "model": "claude-haiku-4-5-20251001",
-        "max_tokens": 512,
-        "temperature": 0.8 if request.field_type == "description" else 0.6,
-        "system_prompt": "You are a marketing copywriter for Groupon. Write warm, professional, conversion-focused copy. Be concise. NEVER start two descriptions with the same opening phrase - vary your language creatively.",
+        **base_config,
+        "temperature": 0.8 if request.field_type == "description" else base_config.get("temperature", 0.6),
     }
 
     raw = await call_claude(config, user_message)

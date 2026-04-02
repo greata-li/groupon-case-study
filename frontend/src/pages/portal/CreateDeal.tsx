@@ -692,12 +692,17 @@ export function CreateDeal() {
                         <Label className="text-xs text-gray-500">Discount</Label>
                         <div
                           className={`mt-1 flex h-8 items-center rounded-lg border px-3 text-sm font-bold ${
-                            svc.discountPct >= 30
+                            svc.discountPct > 70
+                              ? 'border-amber-400/50 bg-amber-50 text-amber-600'
+                              : svc.discountPct >= 30
                               ? 'border-groupon-green/30 bg-groupon-green-light text-groupon-green'
                               : 'border-input bg-gray-50 text-gray-500'
                           }`}
                         >
                           {svc.discountPct > 0 ? `${svc.discountPct}% Off` : '--'}
+                          {svc.discountPct > 70 && (
+                            <span className="ml-1 text-[10px] font-normal" title="Discounts over 70% may reduce profitability">!</span>
+                          )}
                         </div>
                       </div>
                       <div>
