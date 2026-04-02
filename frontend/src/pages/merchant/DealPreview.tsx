@@ -339,7 +339,7 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
                     {service.description && (
                       <p className="text-sm text-gray-500 mb-4">{service.description}</p>
                     )}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="rounded-lg bg-gray-50 p-3">
                         <span className="text-xs text-gray-400 block">Regular Price</span>
                         <span className="text-lg font-bold text-gray-400 line-through">
@@ -382,7 +382,7 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
 
             {isStructuredFinePrint && finePrintObj ? (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FinePrintCard label="Expiry" value={`${finePrintObj.expiry_days} days after purchase`} />
                   <FinePrintCard label="Limit per person" value={`${finePrintObj.max_per_person}`} />
                   <FinePrintCard label="Appointment" value={finePrintObj.appointment_required ? 'Required' : 'Not required'} />
@@ -648,11 +648,11 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
             <div className="rounded-xl border border-gray-200 bg-white p-5">
               <h4 className="font-heading text-sm font-bold text-gray-900 mb-3">Deal Summary</h4>
               <div className="space-y-3 text-sm">
-                <SummaryRow label="Title" value={deal.title || '—'} />
-                <SummaryRow label="Category" value={deal.category || '—'} />
+                <SummaryRow label="Title" value={deal.title || '-'} />
+                <SummaryRow label="Category" value={deal.category || '-'} />
                 <SummaryRow label="Business" value={intake.business_name} />
                 <SummaryRow label="Location" value={contactAddress || intake.location} />
-                <SummaryRow label="Phone" value={contactPhone || '—'} />
+                <SummaryRow label="Phone" value={contactPhone || '-'} />
                 <Separator />
                 <div>
                   <span className="text-gray-500">Options:</span>
@@ -690,7 +690,7 @@ export function DealPreview({ result, intake, onPublish }: DealPreviewProps) {
           className="flex items-center gap-2 text-sm text-gray-400 transition-colors hover:text-gray-600"
         >
           {showPipeline ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          Pipeline details — {result.total_latency_ms}ms total
+          Pipeline details - {result.total_latency_ms}ms total
         </button>
         {showPipeline && (
           <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -801,7 +801,7 @@ function EditableField({ value, editing, confidence, onStartEdit, onSave, onCanc
       </div>
       {confidence !== undefined && confidence < 0.8 && (
         <Badge variant="outline" className="mt-2 border-amber-300 text-amber-600 text-xs">
-          <Sparkles className="mr-1 h-3 w-3" /> AI suggestion — review recommended
+          <Sparkles className="mr-1 h-3 w-3" /> AI suggestion - review recommended
         </Badge>
       )}
     </div>

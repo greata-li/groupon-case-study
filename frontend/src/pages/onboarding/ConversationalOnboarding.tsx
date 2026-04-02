@@ -37,23 +37,41 @@ interface ChatMessage {
   text: string;
 }
 
+const STORAGE_KEY = 'onboarding_state';
+
+const INITIAL_MESSAGE: ChatMessage = {
+  role: 'assistant',
+  text: "Welcome to Groupon! I'm here to help set up your business. Just tell me about what you do - your business name, what services you offer, where you're located, and your prices. You can type or use the microphone. Don't worry about formatting - just tell me your story.",
+};
+
+function loadSaved() {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch { /* ignore */ }
+  return null;
+}
+
 export function ConversationalOnboarding() {
   const navigate = useNavigate();
-  const [phase, setPhase] = useState<Phase>('chat');
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: 'assistant',
-      text: "Welcome to Groupon! I'm here to help set up your business. Just tell me about what you do — your business name, what services you offer, where you're located, and your prices. You can type or use the microphone. Don't worry about formatting — just tell me your story.",
-    },
-  ]);
+  const saved = useRef(loadSaved()).current;
+
+  const [phase, setPhase] = useState<Phase>(saved?.phase === 'extracting' ? 'chat' : saved?.phase || 'chat');
+  const [messages, setMessages] = useState<ChatMessage[]>(saved?.messages || [INITIAL_MESSAGE]);
   const [input, setInput] = useState('');
-  const [extractedProfile, setExtractedProfile] = useState<ExtractedProfile | null>(null);
-  const [followUpAnswers, setFollowUpAnswers] = useState<string[]>([]);
-  const [originalStory, setOriginalStory] = useState('');
+  const [extractedProfile, setExtractedProfile] = useState<ExtractedProfile | null>(saved?.extractedProfile || null);
+  const [followUpAnswers, setFollowUpAnswers] = useState<string[]>(saved?.followUpAnswers || []);
+  const [originalStory, setOriginalStory] = useState(saved?.originalStory || '');
   const [error, setError] = useState<string | null>(null);
 
   // Editable profile fields for review phase
-  const [editProfile, setEditProfile] = useState<ExtractedProfile | null>(null);
+  const [editProfile, setEditProfile] = useState<ExtractedProfile | null>(saved?.editProfile || null);
+
+  // Persist state to sessionStorage on changes
+  useEffect(() => {
+    const state = { phase, messages, extractedProfile, editProfile, followUpAnswers, originalStory };
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [phase, messages, extractedProfile, editProfile, followUpAnswers, originalStory]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -118,14 +136,14 @@ export function ConversationalOnboarding() {
         return;
       }
 
-      // All good — go to review
+      // All good - go to review
       setExtractedProfile(result);
       setEditProfile(result);
       setMessages((prev) => [
         ...prev.slice(0, -1),
         {
           role: 'assistant',
-          text: "I've got everything I need! Let me show you what I captured — you can review and edit anything before we save your profile.",
+          text: "I've got everything I need! Let me show you what I captured - you can review and edit anything before we save your profile.",
         },
       ]);
       setPhase('review');
@@ -171,11 +189,13 @@ export function ConversationalOnboarding() {
       onboarded: true,
     };
     await updateProfile(profileData);
+    sessionStorage.removeItem(STORAGE_KEY);
     // Flow directly into deal creation instead of going to portal
     setPhase('deal-chat');
   }
 
   function handleDealExtracted(deal: ExtractedDeal) {
+    sessionStorage.removeItem(STORAGE_KEY);
     // Store extracted deal data in sessionStorage so the builder can pick it up
     sessionStorage.setItem('prefilled_deal', JSON.stringify(deal));
     // Navigate to the builder (not auto-publish)
@@ -388,26 +408,31 @@ export function ConversationalOnboarding() {
                     Photos help customers see what to expect. Deals with photos get 2x more views.
                   </p>
 
-                  {/* Upload area */}
                   <div
                     className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 p-6 text-center cursor-pointer hover:border-groupon-green/30 hover:bg-groupon-green/[0.02] transition-all"
                     onClick={() => {
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.accept = 'image/*';
-                      input.multiple = true;
-                      input.onchange = (e) => {
+                      const inp = document.createElement('input');
+                      inp.type = 'file';
+                      inp.accept = 'image/*';
+                      inp.multiple = true;
+                      inp.onchange = async (e) => {
                         const files = (e.target as HTMLInputElement).files;
-                        if (files) {
-                          // In production, upload to server. For prototype, store file names.
-                          const names = Array.from(files).map(f => f.name);
-                          setEditProfile({
-                            ...editProfile,
-                            photos: [...(editProfile.photos || []), ...names],
-                          } as any);
+                        if (!files) return;
+                        const uploaded: { url: string; filename: string }[] = [];
+                        for (const file of Array.from(files)) {
+                          const form = new FormData();
+                          form.append('file', file);
+                          const res = await fetch('/api/upload', { method: 'POST', body: form });
+                          if (res.ok) uploaded.push(await res.json());
+                        }
+                        if (uploaded.length > 0) {
+                          setEditProfile((prev) => prev ? {
+                            ...prev,
+                            photos: [...((prev as any).photos || []), ...uploaded.map(u => u.url)],
+                          } as any : prev);
                         }
                       };
-                      input.click();
+                      inp.click();
                     }}
                   >
                     <Camera className="h-8 w-8 text-gray-300 mx-auto mb-2" />
@@ -419,22 +444,25 @@ export function ConversationalOnboarding() {
                     </p>
                   </div>
 
-                  {/* Uploaded files display */}
                   {(editProfile as any).photos && (editProfile as any).photos.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {((editProfile as any).photos as string[]).map((photo, i) => (
-                        <Badge key={i} variant="secondary" className="text-xs gap-1">
-                          {photo}
+                        <div key={i} className="relative group rounded-lg overflow-hidden border border-gray-200">
+                          <img
+                            src={photo}
+                            alt={`Business photo ${i + 1}`}
+                            className="w-full h-24 object-cover"
+                          />
                           <button
                             onClick={() => {
                               const updated = ((editProfile as any).photos as string[]).filter((_, idx) => idx !== i);
                               setEditProfile({ ...editProfile, photos: updated } as any);
                             }}
-                            className="ml-1 hover:text-red-500"
+                            className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/60 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             ×
                           </button>
-                        </Badge>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -543,8 +571,16 @@ export function ConversationalOnboarding() {
                     </h4>
                     {/* Mini preview card */}
                     <div className="rounded-lg border border-gray-100 bg-gray-50 p-4">
-                      <div className="h-32 rounded-lg bg-gray-200 mb-3 flex items-center justify-center">
-                        <Store className="h-8 w-8 text-gray-400" />
+                      <div className="h-32 rounded-lg bg-gray-200 mb-3 flex items-center justify-center overflow-hidden">
+                        {(editProfile as any).photos?.length > 0 ? (
+                          <img
+                            src={(editProfile as any).photos[0]}
+                            alt="Business"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Store className="h-8 w-8 text-gray-400" />
+                        )}
                       </div>
                       <h3 className="font-heading text-sm font-bold text-gray-900">
                         {editProfile.business_name || 'Your Business'}
@@ -680,7 +716,7 @@ export function ConversationalOnboarding() {
                 placeholder={
                   originalStory
                     ? 'Answer the follow-up questions...'
-                    : 'Tell me about your business — name, services, prices, location...'
+                    : 'Tell me about your business - name, services, prices, location...'
                 }
                 className="rounded-xl border-gray-200 pr-12 min-h-[48px] max-h-[120px] resize-none text-sm"
                 rows={1}

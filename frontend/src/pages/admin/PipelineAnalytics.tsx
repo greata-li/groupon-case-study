@@ -73,7 +73,7 @@ export function PipelineAnalytics() {
       </div>
 
       {/* Top stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCard icon={Zap} label="Total Pipeline Runs" value={String(pipelineStats.totalRuns)} />
         <StatCard icon={Clock} label="Avg Latency" value={`${(pipelineStats.avgLatency / 1000).toFixed(1)}s`} />
         <StatCard icon={CheckCircle2} label="Success Rate" value={`${pipelineStats.successRate}%`} color="green" />

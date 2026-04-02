@@ -78,6 +78,12 @@ export function PortalLayout() {
     setSidebarOpen(false);
   }, [location.pathname]);
 
+  // Lock body scroll when sidebar is open on mobile
+  useEffect(() => {
+    document.body.style.overflow = sidebarOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [sidebarOpen]);
+
   function toggleExpand(label: string) {
     setExpandedItems((prev) => {
       const next = new Set(prev);
