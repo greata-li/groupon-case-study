@@ -796,7 +796,19 @@ export function CreateDeal() {
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                   {form.uploadedPhotos.map((photo, i) => (
-                    <div key={i} className="relative group rounded-lg overflow-hidden border border-gray-200">
+                    <div
+                      key={i}
+                      className={`relative group rounded-lg overflow-hidden border-2 cursor-pointer transition-all ${
+                        i === 0 ? 'border-groupon-green ring-1 ring-groupon-green/30' : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => {
+                        if (i === 0) return;
+                        const reordered = [...form.uploadedPhotos];
+                        const [selected] = reordered.splice(i, 1);
+                        reordered.unshift(selected);
+                        updateForm({ uploadedPhotos: reordered });
+                      }}
+                    >
                       {photo.startsWith('/uploads/') ? (
                         <img src={photo} alt={`Photo ${i + 1}`} className="w-full h-24 object-cover" />
                       ) : (
@@ -804,8 +816,13 @@ export function CreateDeal() {
                           <Camera className="h-6 w-6 text-gray-300" />
                         </div>
                       )}
+                      {i === 0 && (
+                        <div className="absolute bottom-1 left-1 bg-groupon-green text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                          Primary
+                        </div>
+                      )}
                       <button
-                        onClick={() => updateForm({ uploadedPhotos: form.uploadedPhotos.filter((_, idx) => idx !== i) })}
+                        onClick={(e) => { e.stopPropagation(); updateForm({ uploadedPhotos: form.uploadedPhotos.filter((_, idx) => idx !== i) }); }}
                         className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/60 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         x
@@ -968,7 +985,7 @@ export function CreateDeal() {
                 Inspire Me
               </Button>
             </FeatureTooltip>
-            <FeatureTooltip id="voice-input" message="Dictate instead of typing. Click to start, speak naturally, click again to stop." position="bottom">
+            <FeatureTooltip id="voice-input" message="Dictate instead of typing. Click to start, speak naturally, click again to stop." position="bottom" delay={12000}>
               <VoiceInput
                 onTranscript={(t) =>
                   updateForm({ highlights: (form.highlights ? form.highlights + '\n' : '') + t })
@@ -1572,9 +1589,13 @@ export function CreateDeal() {
 
     return (
       <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
-        {/* Photo placeholder */}
-        <div className="h-40 bg-gradient-to-br from-groupon-green-light to-gray-100 flex items-center justify-center relative">
-          <Camera className="h-10 w-10 text-gray-300" />
+        {/* Photo */}
+        <div className="h-40 bg-gradient-to-br from-groupon-green-light to-gray-100 flex items-center justify-center relative overflow-hidden">
+          {form.uploadedPhotos.length > 0 && form.uploadedPhotos[0].startsWith('/uploads/') ? (
+            <img src={form.uploadedPhotos[0]} alt="Deal" className="w-full h-full object-cover" />
+          ) : (
+            <Camera className="h-10 w-10 text-gray-300" />
+          )}
           {firstService && firstService.discountPct > 0 && (
             <div className="absolute top-3 left-3 bg-groupon-green text-white text-xs font-bold px-2 py-1 rounded-lg">
               {firstService.discountPct}% Off

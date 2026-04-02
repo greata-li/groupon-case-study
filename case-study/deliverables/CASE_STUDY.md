@@ -207,7 +207,7 @@ The entire platform is mobile responsive: hamburger menus on small screens, resp
 
 ## 7. Technical Decisions and Reasoning
 
-Documented in [decisions.md](../decisions.md). Key decisions:
+Documented in [decisions.md](./decisions.md). Key decisions:
 
 1. **Python over Node.js** - AI/data ecosystem, builder fluency, FastAPI auto-docs. Trade: two languages in the stack.
 2. **Claude over OpenAI** - reliable structured JSON, tiered pricing (Haiku/Sonnet). Architecture supports swapping.
@@ -261,8 +261,8 @@ Complete field-by-field mapping documented in [flow-mapping.md](flow-mapping.md)
 - [x] Admin panel: 7 endpoint configs, prompt editor, test panel, analytics
 - [x] Synthetic market data for Beauty & Spas / Chicago
 - [x] Product documentation (this document)
-- [x] Decision log with reasoning ([decisions.md](../decisions.md))
+- [x] Decision log with reasoning ([decisions.md](./decisions.md))
 - [x] Flow mapping: Groupon's 21 screens → our approach ([flow-mapping.md](flow-mapping.md))
 - [x] Real-world findings from Groupon investigation ([findings.md](findings.md))
-- [ ] Video walkthrough (in progress)
-- [ ] Iteration log ([iteration-log.md](iteration-log.md))
+- [x] Video walkthrough script ([video-script.md](video-script.md))
+- [x] Iteration log ([iteration-log.md](iteration-log.md))

@@ -117,11 +117,8 @@ async def run_service_suggester(config: dict, input_data: dict) -> dict:
 
     try:
         parsed = parse_json_response(raw_output)
-        print(f"[service_suggester] Parse SUCCESS: {len(parsed.get('suggestions', []))} suggestions")
         return parsed
-    except (json.JSONDecodeError, ValueError) as e:
-        print(f"[service_suggester] Parse FAILED: {e}")
-        print(f"[service_suggester] Raw output first 200 chars: {raw_output[:200]}")
+    except (json.JSONDecodeError, ValueError):
         return {"raw_response": raw_output, "parse_error": True}
 
 

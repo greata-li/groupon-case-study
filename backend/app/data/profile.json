@@ -1,3 +1,51 @@
 {
-  "onboarded": false
+  "business_name": "Sakura Spa",
+  "business_description": "Sakura Spa is a professional massage therapy business specializing in relaxation and therapeutic treatments. We offer a range of massage services including regular massage, deep tissue massage, and hot stone massage to help clients unwind and address their wellness needs.",
+  "location": "Barrie, Ontario",
+  "full_address": "384 Yonge St #12, Barrie, ON L4N 4C8",
+  "phone": "+17052414943",
+  "website": null,
+  "category": "Health, Beauty & Wellness > Massage Therapy",
+  "services": [
+    {
+      "name": "Regular Massage (60 minutes)",
+      "price": 100
+    },
+    {
+      "name": "Deep Tissue Massage (60 minutes)",
+      "price": 110
+    },
+    {
+      "name": "Hot Stone Massage (60 minutes)",
+      "price": 110
+    },
+    {
+      "name": "Regular Massage (30 minutes)",
+      "price": 70
+    },
+    {
+      "name": "Deep Tissue Massage (30 minutes)",
+      "price": 80
+    },
+    {
+      "name": "Hot Stone Massage (30 minutes)",
+      "price": 80
+    }
+  ],
+  "scheduling_insight": null,
+  "experience_years": null,
+  "business_type": "company",
+  "highlights": [
+    "Offers both 30 and 60 minute massage sessions for flexible scheduling",
+    "Specializes in therapeutic deep tissue and relaxing hot stone treatments",
+    "Conveniently located on Yonge Street in Barrie with professional spa setting"
+  ],
+  "photos": [
+    "/uploads/51f4bfa98da142a0a35c26b13fe660c3.jpg"
+  ],
+  "onboarded": true,
+  "checklist_completed": {
+    "voucher": true,
+    "payments": true
+  }
 }

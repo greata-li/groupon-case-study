@@ -71,39 +71,48 @@ function parseUserResponse(text: string, info: DealInfo): Partial<DealInfo> {
   const lower = text.toLowerCase();
   const updates: Partial<DealInfo> = {};
 
-  // Try to detect ALL fields in one message
+  // Try to detect ALL fields in one message — the more we capture per turn, the fewer questions we ask
 
   // Services - if we haven't captured services yet, the whole message is about services
-  // But also check if they mentioned discount/duration/etc. in the same message
   if (!info.services) {
     updates.services = text;
   }
 
-  // Discount - look for percentage mentions (e.g. "30% off", "30% discount", "30 percent", bare "30%")
-  const discountMatch = lower.match(/(\d+)\s*(%\s*(off|discount)?|percent)/);
+  // Discount - percentage mentions ("30% off", "30% discount", "30 percent", bare "30%", "half off")
+  const discountMatch = lower.match(/(\d+)\s*(%\s*(off|discount)?|percent)|half\s*(off|price)/);
   if (discountMatch && !info.discount) {
     updates.discount = text;
-    // If services weren't set yet but they mentioned both, capture services too
-    if (!info.services) {
-      updates.services = text;
-    }
+    if (!info.services) updates.services = text;
   }
 
-  // Duration - look for day/month mentions
-  const durationMatch = lower.match(/(\d+)\s*(day|days|month|months)/);
+  // Duration - day/month/week mentions ("90 days", "3 months", "one time voucher")
+  const durationMatch = lower.match(/(\d+)\s*(day|days|week|weeks|month|months)/);
   if (durationMatch && !info.duration) {
     updates.duration = text;
   }
 
-  // Scheduling - look for day names or "anytime"
-  const schedWords = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'weekday', 'weekend', 'midweek', 'anytime', 'flexible'];
-  if (schedWords.some((w) => lower.includes(w)) && !info.scheduling) {
+  // Scheduling - day names, flexibility signals, or indifference
+  const schedPatterns = [
+    'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+    'weekday', 'weekend', 'midweek', 'anytime', 'any time', 'flexible',
+    "don't care", "dont care", 'no preference', 'whenever', 'any day', 'all day',
+    'open to', 'doesn\'t matter', 'doesnt matter', 'no restriction on time',
+    'come in any', 'come any', 'no specific',
+  ];
+  if (schedPatterns.some((w) => lower.includes(w)) && !info.scheduling) {
     updates.scheduling = text;
   }
 
-  // Special terms - look for restriction keywords
-  const termWords = ['new customer', 'appointment', 'standard', 'no refund', 'waiver', 'default'];
-  if (termWords.some((w) => lower.includes(w)) && !info.specialTerms) {
+  // Special terms - restrictions, customer type, usage limits
+  const termPatterns = [
+    'new customer', 'first time', 'first-time', 'one time', 'one-time', 'once per',
+    'appointment', 'must book', 'must call', 'reservation',
+    'standard', 'default', 'normal terms',
+    'no refund', 'non-refundable', 'waiver',
+    'existing customer', 'returning', 'all customer', 'everyone',
+    'one per person', 'limit one', 'per visit',
+  ];
+  if (termPatterns.some((w) => lower.includes(w)) && !info.specialTerms) {
     updates.specialTerms = text;
   }
 

@@ -24,3 +24,4 @@ __pycache__/
 
 # Raw research materials (screenshots, etc.)
 _raw/
+backend/uploads/

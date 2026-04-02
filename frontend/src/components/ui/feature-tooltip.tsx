@@ -6,39 +6,50 @@ interface FeatureTooltipProps {
   message: string;
   children: React.ReactNode;
   position?: 'top' | 'bottom';
+  delay?: number;
 }
 
 /**
  * One-time tooltip that appears on first visit and is dismissed on click.
  * Uses localStorage to track which tooltips have been seen.
+ * Use `delay` to stagger multiple tooltips so they don't overlap.
  */
-export function FeatureTooltip({ id, message, children, position = 'top' }: FeatureTooltipProps) {
+export function FeatureTooltip({ id, message, children, position = 'top', delay = 800 }: FeatureTooltipProps) {
   const storageKey = `tooltip-seen-${id}`;
-  const [visible, setVisible] = useState(false);
+  const [autoVisible, setAutoVisible] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
+  // Auto-show once on first visit
   useEffect(() => {
     if (!localStorage.getItem(storageKey)) {
-      const showTimer = setTimeout(() => setVisible(true), 800);
+      const showTimer = setTimeout(() => setAutoVisible(true), delay);
       const hideTimer = setTimeout(() => {
-        setVisible(false);
+        setAutoVisible(false);
         localStorage.setItem(storageKey, '1');
-      }, 10800);
+      }, delay + 10000);
       return () => { clearTimeout(showTimer); clearTimeout(hideTimer); };
     }
-  }, [storageKey]);
+  }, [storageKey, delay]);
 
   function dismiss() {
-    setVisible(false);
+    setAutoVisible(false);
     localStorage.setItem(storageKey, '1');
   }
 
+  const visible = autoVisible || hovered;
+
   return (
-    <div className="relative inline-flex" ref={ref}>
+    <div
+      className="relative inline-flex"
+      ref={ref}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       {children}
       {visible && (
         <div
-          className={`absolute z-50 w-56 rounded-lg bg-gray-900 px-3 py-2 text-xs text-white shadow-lg ${
+          className={`absolute z-50 w-56 rounded-lg bg-gray-900 px-3 py-2 text-xs text-white shadow-lg pointer-events-none ${
             position === 'top'
               ? 'bottom-full mb-2 left-1/2 -translate-x-1/2'
               : 'top-full mt-2 left-1/2 -translate-x-1/2'
@@ -46,12 +57,14 @@ export function FeatureTooltip({ id, message, children, position = 'top' }: Feat
         >
           <div className="flex items-start gap-2">
             <span className="flex-1 leading-relaxed">{message}</span>
-            <button
-              onClick={dismiss}
-              className="mt-0.5 shrink-0 rounded p-0.5 hover:bg-white/20 transition-colors"
-            >
-              <X className="h-3 w-3" />
-            </button>
+            {autoVisible && (
+              <button
+                onClick={dismiss}
+                className="mt-0.5 shrink-0 rounded p-0.5 hover:bg-white/20 transition-colors pointer-events-auto"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
           </div>
           {/* Arrow */}
           <div

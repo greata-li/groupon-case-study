@@ -143,7 +143,6 @@ export function Campaigns() {
                 >
                   <option value="active">Active</option>
                   <option value="draft">Draft</option>
-                  <option value="inactive">Inactive</option>
                 </select>
               </TableCell>
               <TableCell className="hidden sm:table-cell text-sm text-gray-500">

@@ -32,11 +32,6 @@ export function validatePhone(value: string): string | null {
   return null;
 }
 
-export function validateAddress(value: string): string | null {
-  if (!value.trim()) return null; // optional at intake, required before publish
-  return null;
-}
-
 export function validateServicePrice(price: string): string | null {
   if (!price.trim()) return 'Price is required';
   const num = parseFloat(price.replace('$', ''));
