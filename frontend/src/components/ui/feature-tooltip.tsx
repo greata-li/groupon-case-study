@@ -23,7 +23,7 @@ export function FeatureTooltip({ id, message, children, position = 'top' }: Feat
       const hideTimer = setTimeout(() => {
         setVisible(false);
         localStorage.setItem(storageKey, '1');
-      }, 6000);
+      }, 10800);
       return () => { clearTimeout(showTimer); clearTimeout(hideTimer); };
     }
   }, [storageKey]);
