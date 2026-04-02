@@ -474,8 +474,8 @@ async def enhance_text(request: EnhanceTextRequest):
     from app.endpoints.pipeline import call_claude
 
     prompts = {
-        "highlights": "Write 3-5 punchy highlight bullet points for a Groupon deal. Business context: {context}. Current text (improve or generate from scratch if empty): {text}. Return ONLY a JSON array of strings.",
-        "description": "Write a compelling 2-3 sentence description for a Groupon deal option. Business context: {context}. Current text (improve or expand if provided, generate if empty): {text}. Return ONLY the description text, no JSON.",
+        "highlights": "Write 3-5 punchy highlight bullet points for a Groupon deal. Business context: {context}. Current text (improve or generate from scratch if empty): {text}. Return ONLY the bullet points as plain text, one per line. Do NOT return JSON.",
+        "description": "Write a compelling 2-3 sentence description for a Groupon deal option. Business context: {context}. Current text (improve or expand if provided, generate if empty): {text}. IMPORTANT: Start with a UNIQUE opening — never begin with the same words as other descriptions. Vary your sentence structure. Each service description should feel distinct. Return ONLY the description text, no JSON.",
         "business_description": "Write a professional 2-3 sentence business description for a Groupon merchant page. Business context: {context}. Current text (improve if provided, generate if empty): {text}. Return ONLY the description text, no JSON.",
     }
 
@@ -488,8 +488,8 @@ async def enhance_text(request: EnhanceTextRequest):
     config = {
         "model": "claude-haiku-4-5-20251001",
         "max_tokens": 512,
-        "temperature": 0.6,
-        "system_prompt": "You are a marketing copywriter for Groupon. Write warm, professional, conversion-focused copy. Be concise.",
+        "temperature": 0.8 if request.field_type == "description" else 0.6,
+        "system_prompt": "You are a marketing copywriter for Groupon. Write warm, professional, conversion-focused copy. Be concise. NEVER start two descriptions with the same opening phrase — vary your language creatively.",
     }
 
     raw = await call_claude(config, user_message)

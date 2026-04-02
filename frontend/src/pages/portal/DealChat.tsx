@@ -67,26 +67,56 @@ function getNextQuestion(info: DealInfo): string | null {
   return null; // all questions answered
 }
 
-function parseUserResponse(text: string, currentQuestion: string, info: DealInfo): Partial<DealInfo> {
+function parseUserResponse(text: string, info: DealInfo): Partial<DealInfo> {
   const lower = text.toLowerCase();
+  const updates: Partial<DealInfo> = {};
 
-  // Figure out which field this answer is for based on what we last asked
+  // Try to detect ALL fields in one message
+
+  // Services — if we haven't captured services yet, the whole message is about services
+  // But also check if they mentioned discount/duration/etc. in the same message
   if (!info.services) {
-    return { services: text };
+    updates.services = text;
   }
-  if (!info.discount) {
-    return { discount: text };
+
+  // Discount — look for percentage mentions
+  const discountMatch = lower.match(/(\d+)\s*%\s*off/);
+  if (discountMatch && !info.discount) {
+    updates.discount = text;
+    // If services weren't set yet but they mentioned both, capture services too
+    if (!info.services) {
+      updates.services = text;
+    }
   }
-  if (!info.duration) {
-    return { duration: text };
+
+  // Duration — look for day/month mentions
+  const durationMatch = lower.match(/(\d+)\s*(day|days|month|months)/);
+  if (durationMatch && !info.duration) {
+    updates.duration = text;
   }
-  if (!info.scheduling) {
-    return { scheduling: text };
+
+  // Scheduling — look for day names or "anytime"
+  const schedWords = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'weekday', 'weekend', 'midweek', 'anytime', 'flexible'];
+  if (schedWords.some((w) => lower.includes(w)) && !info.scheduling) {
+    updates.scheduling = text;
   }
-  if (!info.specialTerms) {
-    return { specialTerms: text };
+
+  // Special terms — look for restriction keywords
+  const termWords = ['new customer', 'appointment', 'standard', 'no refund', 'waiver', 'default'];
+  if (termWords.some((w) => lower.includes(w)) && !info.specialTerms) {
+    updates.specialTerms = text;
   }
-  return {};
+
+  // If nothing was detected, fill the next empty field sequentially
+  if (Object.keys(updates).length === 0) {
+    if (!info.services) return { services: text };
+    if (!info.discount) return { discount: text };
+    if (!info.duration) return { duration: text };
+    if (!info.scheduling) return { scheduling: text };
+    if (!info.specialTerms) return { specialTerms: text };
+  }
+
+  return updates;
 }
 
 export function DealChat({ businessName, services, onDealExtracted, onSkip }: DealChatProps) {
@@ -117,8 +147,8 @@ export function DealChat({ businessName, services, onDealExtracted, onSkip }: De
 
     setMessages((prev) => [...prev, { role: 'user', text: userText }]);
 
-    // Update deal info with the user's response
-    const updatedFields = parseUserResponse(userText, '', dealInfo);
+    // Update deal info with the user's response — detects multiple fields in one message
+    const updatedFields = parseUserResponse(userText, dealInfo);
     const newInfo = { ...dealInfo, ...updatedFields };
     setDealInfo(newInfo);
 

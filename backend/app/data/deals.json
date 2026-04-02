@@ -1,5 +1,215 @@
 [
   {
+    "id": "b728acbf-07e7-4dd3-81af-5849ab17caf7",
+    "deal": {
+      "title": "Hot Stone Massage (60 minutes) at Sakura Spa",
+      "description": "Melt away tension with Sakura Spa's soothing Hot Stone Massage, where smooth, heated stones release deep muscle knots and promote total relaxation in just 60 minutes. This therapeutic treatment improves circulation, reduces stress, and leaves you feeling completely rejuvenated\u2014plus, Sakura Spa can assist with insurance reimbursement to make your wellness investment even more affordable.",
+      "highlights": [
+        "Professional registered massage therapists on staff",
+        "Choice of hot stone, deep tissue, or relaxation massage",
+        "Flexible 30 or 60-minute session options",
+        "Convenient downtown Barrie location",
+        "Perfect for stress relief and muscle tension"
+      ],
+      "services": [
+        {
+          "name": "Hot Stone Massage (60 minutes)",
+          "description": "Melt away tension with Sakura Spa's soothing Hot Stone Massage, where smooth, heated stones release deep muscle knots and promote total relaxation in just 60 minutes. This therapeutic treatment improves circulation, reduces stress, and leaves you feeling completely rejuvenated\u2014plus, Sakura Spa can assist with insurance reimbursement to make your wellness investment even more affordable.",
+          "original_price": 90,
+          "discount_pct": 20,
+          "deal_price": 72,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Deep Tissue Massage (60 minutes)",
+          "description": "Release tension and restore mobility with a therapeutic 60-minute Deep Tissue Massage at Sakura Spa, where skilled therapists target stubborn knots and muscle tightness to leave you feeling renewed. Perfect for athletes, desk workers, or anyone seeking relief, this intensive treatment promotes healing and relaxation\u2014plus, we'll help you explore insurance reimbursement options to maximize your wellness investment.",
+          "original_price": 90,
+          "discount_pct": 20,
+          "deal_price": 72,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Regular Massage (60 minutes)",
+          "description": "Unwind and rejuvenate with a blissful 60-minute Regular Massage at Sakura Spa, where skilled therapists melt away tension and restore balance to your body. Whether you're seeking stress relief or wellness support, this classic massage is the perfect escape\u2014and Sakura Spa even assists with insurance reimbursement to make your self-care more affordable. Treat yourself to the relaxation you deserve today.",
+          "original_price": 90,
+          "discount_pct": 20,
+          "deal_price": 72,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Hot Stone Massage (30 minutes)",
+          "description": "Melt away tension with Sakura Spa's soothing Hot Stone Massage\u2014a 30-minute therapeutic treatment that uses warm stones to ease muscle tightness and promote deep relaxation. Whether you're seeking relief from everyday stress or targeted muscle care, this rejuvenating session delivers therapeutic benefits in a convenient timeframe. Plus, Sakura Spa assists with insurance reimbursement, making your wellness investment even more affordable.",
+          "original_price": 60,
+          "discount_pct": 35,
+          "deal_price": 39,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Deep Tissue Massage (30 minutes)",
+          "description": "Melt away tension and muscle tightness with a targeted 30-minute deep tissue massage at Sakura Spa, where skilled therapists use firm pressure to release knots and restore mobility. Perfect for busy schedules, this focused treatment delivers the therapeutic benefits you need\u2014plus, we'll help you explore insurance reimbursement options to maximize your wellness investment.",
+          "original_price": 60,
+          "discount_pct": 35,
+          "deal_price": 39,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Regular Massage (30 minutes)",
+          "description": "Unwind with a rejuvenating 30-minute Regular Massage at Sakura Spa, where skilled therapists help melt away tension and restore balance to your body. This quick wellness escape is perfect for busy schedules, and Sakura Spa even assists with insurance reimbursement to make self-care more affordable. Treat yourself to the relaxation you deserve today.",
+          "original_price": 60,
+          "discount_pct": 35,
+          "deal_price": 39,
+          "voucher_cap": 50
+        }
+      ],
+      "fine_print": {
+        "expiry_days": 90,
+        "max_per_person": 1,
+        "appointment_required": true,
+        "new_customers_only": false,
+        "restrictions": [
+          "Not valid with other offers"
+        ],
+        "cancellation_policy": "24-hour cancellation policy. No-shows will forfeit their voucher."
+      },
+      "voucher_instructions": {
+        "redemption_method": "physical",
+        "appointment_required": true,
+        "instructions": "Visit at 384 Yonge St #12, Barrie, ON L4N 4C8"
+      },
+      "category": "Health, Beauty & Wellness > Massage Therapy",
+      "scheduling_recommendation": "",
+      "photo_guidance": "",
+      "confidence": {
+        "title": 0.85,
+        "description": 0.85,
+        "pricing": 0.9,
+        "category": 0.92
+      }
+    },
+    "intake": {
+      "business_name": "Sakura Spa",
+      "business_description": "Sakura Spa is a professional massage therapy clinic offering regular massage, hot massage, and deep tissue massage services. The spa provides insurance reimbursement assistance to help customers with their wellness treatments.",
+      "location": "Barrie, ON",
+      "services": "Hot Stone Massage (60 minutes), Deep Tissue Massage (60 minutes), Regular Massage (60 minutes), Hot Stone Massage (30 minutes), Deep Tissue Massage (30 minutes), Regular Massage (30 minutes)",
+      "additional_info": "",
+      "phone": "+17052414943",
+      "address": "384 Yonge St #12, Barrie, ON L4N 4C8",
+      "website": ""
+    },
+    "contact": {
+      "phone": "+17052414943",
+      "address": "384 Yonge St #12, Barrie, ON L4N 4C8",
+      "website": ""
+    },
+    "published_at": "2026-04-01T21:57:57.435751",
+    "status": "active"
+  },
+  {
+    "id": "7a310e62-4f11-4f62-9f1b-f3d2758c51b6",
+    "deal": {
+      "title": "Hot Stone Massage (60 minutes) at Sakura Spa",
+      "description": "Melt away tension with Sakura Spa's soothing Hot Stone Massage, where smooth, heated stones release deep muscle knots and promote total relaxation in just 60 minutes. This therapeutic treatment improves circulation, reduces stress, and leaves you feeling completely rejuvenated\u2014plus, Sakura Spa can assist with insurance reimbursement to make your wellness investment even more affordable.",
+      "highlights": [
+        "Professional registered massage therapists on staff",
+        "Choice of hot stone, deep tissue, or relaxation massage",
+        "Flexible 30 or 60-minute session options",
+        "Convenient downtown Barrie location",
+        "Perfect for stress relief and muscle tension"
+      ],
+      "services": [
+        {
+          "name": "Hot Stone Massage (60 minutes)",
+          "description": "Melt away tension with Sakura Spa's soothing Hot Stone Massage, where smooth, heated stones release deep muscle knots and promote total relaxation in just 60 minutes. This therapeutic treatment improves circulation, reduces stress, and leaves you feeling completely rejuvenated\u2014plus, Sakura Spa can assist with insurance reimbursement to make your wellness investment even more affordable.",
+          "original_price": 90,
+          "discount_pct": 20,
+          "deal_price": 72,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Deep Tissue Massage (60 minutes)",
+          "description": "Release tension and restore mobility with a therapeutic 60-minute Deep Tissue Massage at Sakura Spa, where skilled therapists target stubborn knots and muscle tightness to leave you feeling renewed. Perfect for athletes, desk workers, or anyone seeking relief, this intensive treatment promotes healing and relaxation\u2014plus, we'll help you explore insurance reimbursement options to maximize your wellness investment.",
+          "original_price": 90,
+          "discount_pct": 20,
+          "deal_price": 72,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Regular Massage (60 minutes)",
+          "description": "Unwind and rejuvenate with a blissful 60-minute Regular Massage at Sakura Spa, where skilled therapists melt away tension and restore balance to your body. Whether you're seeking stress relief or wellness support, this classic massage is the perfect escape\u2014and Sakura Spa even assists with insurance reimbursement to make your self-care more affordable. Treat yourself to the relaxation you deserve today.",
+          "original_price": 90,
+          "discount_pct": 20,
+          "deal_price": 72,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Hot Stone Massage (30 minutes)",
+          "description": "Melt away tension with Sakura Spa's soothing Hot Stone Massage\u2014a 30-minute therapeutic treatment that uses warm stones to ease muscle tightness and promote deep relaxation. Whether you're seeking relief from everyday stress or targeted muscle care, this rejuvenating session delivers therapeutic benefits in a convenient timeframe. Plus, Sakura Spa assists with insurance reimbursement, making your wellness investment even more affordable.",
+          "original_price": 60,
+          "discount_pct": 35,
+          "deal_price": 39,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Deep Tissue Massage (30 minutes)",
+          "description": "Melt away tension and muscle tightness with a targeted 30-minute deep tissue massage at Sakura Spa, where skilled therapists use firm pressure to release knots and restore mobility. Perfect for busy schedules, this focused treatment delivers the therapeutic benefits you need\u2014plus, we'll help you explore insurance reimbursement options to maximize your wellness investment.",
+          "original_price": 60,
+          "discount_pct": 35,
+          "deal_price": 39,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Regular Massage (30 minutes)",
+          "description": "Unwind with a rejuvenating 30-minute Regular Massage at Sakura Spa, where skilled therapists help melt away tension and restore balance to your body. This quick wellness escape is perfect for busy schedules, and Sakura Spa even assists with insurance reimbursement to make self-care more affordable. Treat yourself to the relaxation you deserve today.",
+          "original_price": 60,
+          "discount_pct": 35,
+          "deal_price": 39,
+          "voucher_cap": 50
+        }
+      ],
+      "fine_print": {
+        "expiry_days": 90,
+        "max_per_person": 1,
+        "appointment_required": true,
+        "new_customers_only": false,
+        "restrictions": [
+          "Not valid with other offers"
+        ],
+        "cancellation_policy": "24-hour cancellation policy. No-shows will forfeit their voucher."
+      },
+      "voucher_instructions": {
+        "redemption_method": "physical",
+        "appointment_required": true,
+        "instructions": "Visit at 384 Yonge St #12, Barrie, ON L4N 4C8"
+      },
+      "category": "Health, Beauty & Wellness > Massage Therapy",
+      "scheduling_recommendation": "",
+      "photo_guidance": "",
+      "confidence": {
+        "title": 0.85,
+        "description": 0.85,
+        "pricing": 0.9,
+        "category": 0.92
+      }
+    },
+    "intake": {
+      "business_name": "Sakura Spa",
+      "business_description": "Sakura Spa is a professional massage therapy clinic offering regular massage, hot massage, and deep tissue massage services. The spa provides insurance reimbursement assistance to help customers with their wellness treatments.",
+      "location": "Barrie, ON",
+      "services": "Hot Stone Massage (60 minutes), Deep Tissue Massage (60 minutes), Regular Massage (60 minutes), Hot Stone Massage (30 minutes), Deep Tissue Massage (30 minutes), Regular Massage (30 minutes)",
+      "additional_info": "",
+      "phone": "+17052414943",
+      "address": "384 Yonge St #12, Barrie, ON L4N 4C8",
+      "website": ""
+    },
+    "contact": {
+      "phone": "+17052414943",
+      "address": "384 Yonge St #12, Barrie, ON L4N 4C8",
+      "website": ""
+    },
+    "published_at": "2026-04-01T21:57:29.695228",
+    "status": "active"
+  },
+  {
     "id": "9b07db64-968e-4f13-9ede-3de4c408e669",
     "deal": {
       "title": "Therapeutic Massage at Sakura Spa (Up to 35% Off)",

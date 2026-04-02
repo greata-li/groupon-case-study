@@ -231,15 +231,15 @@ export function CreateDeal() {
 
             if (extracted.selected_services && extracted.selected_services.length > 0) {
               const dealUpdates: Partial<DealFormState> = {
-                services: extracted.selected_services.map((s: any) => ({
+                services: recalcAllDiscounts(extracted.selected_services.map((s: any) => ({
                   included: true,
                   name: s.name,
                   regularPrice: s.regular_price,
                   grouponPrice: String(s.groupon_price),
-                  discountPct: s.discount_pct,
+                  discountPct: 0,
                   voucherCap: String(s.voucher_cap || 50),
                   description: '',
-                })),
+                }))),
                 highlights: cleanHighlights(extracted.highlights || ''),
                 descriptions: Object.fromEntries(
                   Object.entries(extracted.descriptions || {}).map(([k, v]) => [parseInt(k), v])
@@ -275,15 +275,15 @@ export function CreateDeal() {
         const services = Array.isArray(d.services) ? d.services : [];
         setForm((prev) => ({
           ...prev,
-          services: services.map((s) => ({
+          services: recalcAllDiscounts(services.map((s) => ({
             included: true,
             name: s.name || '',
             regularPrice: s.original_price || 0,
             grouponPrice: String(s.deal_price || ''),
-            discountPct: s.discount_pct || 0,
+            discountPct: 0,
             voucherCap: String(s.voucher_cap || 50),
             description: s.description || '',
-          })),
+          }))),
           highlights: Array.isArray(d.highlights) ? d.highlights.join('\n') : (typeof d.highlights === 'string' ? d.highlights : ''),
           descriptions: services.reduce((acc, s, i) => ({ ...acc, [i]: s.description || '' }), {} as Record<number, string>),
         }));
@@ -323,6 +323,18 @@ export function CreateDeal() {
     setForm((prev) => ({ ...prev, ...partial }));
   }
 
+  /** Recalculate discount % for all services based on regular vs Groupon price */
+  function recalcAllDiscounts(services: ServiceEntry[]): ServiceEntry[] {
+    return services.map((svc) => {
+      const reg = svc.regularPrice || 0;
+      const grp = parseFloat(svc.grouponPrice) || 0;
+      if (reg > 0 && grp > 0 && grp < reg) {
+        return { ...svc, discountPct: Math.round(((reg - grp) / reg) * 100) };
+      }
+      return svc;
+    });
+  }
+
   function updateService(index: number, partial: Partial<ServiceEntry>) {
     setForm((prev) => {
       const services = [...prev.services];
@@ -347,15 +359,15 @@ export function CreateDeal() {
     if (extracted.selected_services && extracted.selected_services.length > 0) {
       setForm((prev) => ({
         ...prev,
-        services: extracted.selected_services.map((s) => ({
+        services: recalcAllDiscounts(extracted.selected_services.map((s) => ({
           included: true,
           name: s.name,
           regularPrice: s.regular_price,
           grouponPrice: String(s.groupon_price),
-          discountPct: s.discount_pct,
+          discountPct: 0,
           voucherCap: String(s.voucher_cap || 50),
           description: '',
-        })),
+        }))),
         highlights: cleanHighlights(extracted.highlights || '') || prev.highlights,
         descriptions: Object.fromEntries(
           Object.entries(extracted.descriptions || {}).map(([k, v]) => [parseInt(k), v])
@@ -738,13 +750,58 @@ export function CreateDeal() {
 
         {/* Upload zone */}
         {form.photoOption === 'upload' && (
-          <div className="rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/50 p-12 text-center">
-            <Upload className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-            <p className="text-sm font-medium text-gray-700">Drag and drop photos here</p>
-            <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 10MB each</p>
-            <Button variant="outline" className="mt-4 rounded-lg text-xs">
-              Choose Files
-            </Button>
+          <div>
+            <div
+              className="rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/50 p-12 text-center cursor-pointer hover:border-groupon-green/40 hover:bg-groupon-green/[0.02] transition-all"
+              onClick={() => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.multiple = true;
+                input.onchange = (e) => {
+                  const files = (e.target as HTMLInputElement).files;
+                  if (files) {
+                    const names = Array.from(files).map((f) => f.name);
+                    updateForm({ uploadedPhotos: [...form.uploadedPhotos, ...names] });
+                  }
+                };
+                input.click();
+              }}
+              onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-groupon-green', 'bg-groupon-green/5'); }}
+              onDragLeave={(e) => { e.currentTarget.classList.remove('border-groupon-green', 'bg-groupon-green/5'); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.currentTarget.classList.remove('border-groupon-green', 'bg-groupon-green/5');
+                const files = e.dataTransfer.files;
+                if (files) {
+                  const names = Array.from(files).map((f) => f.name);
+                  updateForm({ uploadedPhotos: [...form.uploadedPhotos, ...names] });
+                }
+              }}
+            >
+              <Upload className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+              <p className="text-sm font-medium text-gray-700">Drag and drop photos here</p>
+              <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 10MB each</p>
+              <Button variant="outline" className="mt-4 rounded-lg text-xs" onClick={(e) => e.stopPropagation()}>
+                Choose Files
+              </Button>
+            </div>
+            {/* Show uploaded file names */}
+            {form.uploadedPhotos.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {form.uploadedPhotos.map((name, i) => (
+                  <Badge key={i} variant="secondary" className="text-xs gap-1">
+                    {name}
+                    <button
+                      onClick={() => updateForm({ uploadedPhotos: form.uploadedPhotos.filter((_, idx) => idx !== i) })}
+                      className="ml-1 hover:text-red-500"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -1209,7 +1266,7 @@ export function CreateDeal() {
 
     // Completion checklist
     const checks = [
-      { label: 'At least one service with pricing', done: includedServices.some((s) => parseFloat(s.grouponPrice) > 0) },
+      { label: 'At least one service with pricing', done: includedServices.some((s) => parseFloat(s.grouponPrice) > 0 || s.discountPct > 0) },
       { label: 'Highlights added', done: highlightLines.length > 0 },
       { label: 'Service descriptions written', done: includedServices.every((s) => {
         const idx = form.services.indexOf(s);
