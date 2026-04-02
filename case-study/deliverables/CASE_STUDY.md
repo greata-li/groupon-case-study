@@ -195,7 +195,7 @@ The entire platform is mobile responsive: hamburger menus on small screens, resp
 
 ### Prototype → Production Migration
 
-The prototype makes deliberate simplifications documented in the decision log. Here is a summary of what changes for production, organized by priority:
+The prototype makes deliberate simplifications documented in the [decision log](./decisions.md). Here is a summary of what changes for production, organized by priority:
 
 | Area | Prototype | Production | Decision |
 |------|-----------|------------|----------|
