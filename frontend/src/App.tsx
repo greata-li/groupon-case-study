@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Admin
@@ -9,14 +8,11 @@ import { TestPanel } from '@/pages/admin/TestPanel';
 import { BenchmarkEditor } from '@/pages/admin/BenchmarkEditor';
 import { PipelineAnalytics } from '@/pages/admin/PipelineAnalytics';
 
-// Legacy merchant layout (landing page + old deal flow)
+// Landing page
 import { MerchantLayout } from '@/components/merchant/MerchantLayout';
 import { Welcome } from '@/pages/merchant/Welcome';
-import { MerchantFlow } from '@/pages/merchant/MerchantFlow';
-import { MyDeals } from '@/pages/merchant/MyDeals';
-import { CustomerPreview as LegacyCustomerPreview } from '@/pages/merchant/CustomerPreview';
 
-// New Merchant Portal
+// Merchant Portal
 import { PortalLayout } from '@/components/merchant/PortalLayout';
 import { Home } from '@/pages/portal/Home';
 import { Campaigns } from '@/pages/portal/Campaigns';
@@ -32,21 +28,9 @@ import { Connections } from '@/pages/portal/Connections';
 import { CustomerPreview } from '@/pages/portal/CustomerPreview';
 
 // Onboarding
-import { OnboardingFlow } from '@/pages/onboarding/OnboardingFlow';
 import { ConversationalOnboarding } from '@/pages/onboarding/ConversationalOnboarding';
 
-import type { GeneratedDeal, MerchantIntake } from '@/lib/api';
-
 function App() {
-  const [lastDeal, setLastDeal] = useState<{
-    deal: GeneratedDeal;
-    intake: MerchantIntake;
-  } | null>(null);
-
-  function handleDealPublished(deal: GeneratedDeal, intake: MerchantIntake) {
-    setLastDeal({ deal, intake });
-  }
-
   return (
     <BrowserRouter>
       <Routes>
@@ -69,29 +53,17 @@ function App() {
 
         {/* ── Business Onboarding ── */}
         <Route path="/onboarding" element={<ConversationalOnboarding />} />
-        <Route path="/onboarding/classic" element={<OnboardingFlow />} />
 
-        {/* ── Landing page (Welcome) ── */}
+        {/* ── Landing page ── */}
         <Route element={<MerchantLayout />}>
           <Route path="/" element={<Welcome />} />
-          <Route
-            path="/create"
-            element={<MerchantFlow onPublish={handleDealPublished} />}
-          />
-          <Route path="/deals" element={<MyDeals />} />
         </Route>
 
-        {/* Legacy customer preview (full page) */}
-        <Route
-          path="/preview-deal"
-          element={
-            lastDeal ? (
-              <LegacyCustomerPreview deal={lastDeal.deal} intake={lastDeal.intake} />
-            ) : (
-              <Navigate to="/portal/campaigns" replace />
-            )
-          }
-        />
+        {/* ── Redirects from old routes ── */}
+        <Route path="/create" element={<Navigate to="/portal/create" replace />} />
+        <Route path="/deals" element={<Navigate to="/portal/campaigns" replace />} />
+        <Route path="/preview-deal" element={<Navigate to="/portal/campaigns" replace />} />
+        <Route path="/onboarding/classic" element={<Navigate to="/onboarding" replace />} />
 
         {/* ── Admin panel ── */}
         <Route path="/admin" element={<AdminLayout />}>

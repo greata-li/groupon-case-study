@@ -294,4 +294,113 @@ groupon-case-study/
 - **Number ranges:** `temperature` 0.0-2.0, `max_tokens` 1-4096, `expiryDays` 1-365, prices non-negative
 - **Sanitization:** Strip HTML tags from all text inputs at the API boundary
 
+## Decision 009: Required Fields in AI Onboarding - Full Address & Phone
+
+**Date:** 2026-04-02
+**Status:** Accepted
+
+**Decision:** The AI story extractor must treat full street address and phone number as required fields. If the merchant only provides a city/neighborhood or omits their phone, the AI must generate follow-up questions asking for the complete information before allowing profile save.
+
+**Reasoning:**
+
+Groupon deals are location-based. A partial address (e.g., "Barrie, Ontario") is useless for:
+- **Customer discovery:** "deals near me" search needs geocoding, which needs a real street address
+- **Voucher redemption:** customers need to know exactly where to go
+- **Merchant verification:** Groupon needs to confirm the business exists at a physical location
+
+Phone is required because:
+- **Customer support:** Groupon's existing portal requires it for merchant contact
+- **Booking flow:** many deal types involve calling to schedule appointments
+- **Verification:** standard part of merchant onboarding across all platforms
+
+**Implementation:**
+- LLM prompt updated to mark `full_address` and `phone` as REQUIRED
+- If only city/neighborhood provided, AI adds `full_address` to `missing_fields` and generates a follow-up question asking for complete street address with zip/postal code
+- If phone is not mentioned, AI adds `phone` to `missing_fields` and asks for it
+- AI won't return empty `follow_up_questions` until both are captured
+
+**Production path:**
+- Google Places Autocomplete for address input with standardization
+- Geocoding (lat/lng) for map display and proximity search
+- Phone validation (format check, potentially SMS verification)
+- Service area validation - Groupon only operates in certain markets
+
+---
+
+## Decision 010: Conversational AI Instead of Forms
+
+**Date:** 2026-03-30
+**Status:** Locked
+
+**Options considered:**
+1. Multi-step form wizard (traditional approach, like Groupon's current 21-screen flow)
+2. Conversational AI — merchant describes their business in free text, AI extracts structured data (chosen)
+3. Hybrid — form with AI-assisted field suggestions
+
+**Decision:** Full conversational approach for both onboarding (business profile) and deal creation.
+
+**Reasoning:**
+
+The whole point of this case study is proving that AI can replace Groupon's 21-screen form flow. Building another form — even a shorter one — misses the thesis. The conversational approach lets merchants describe their business naturally (text or voice), and the AI handles the translation to structured data.
+
+Key insight from user research: small business owners don't think in form fields. They think in stories — "I run a spa in Barrie, we do hot stone massages for $90." Forcing that into 21 screens of dropdowns and text inputs is where Groupon loses them.
+
+**What we gain:** A fundamentally different UX that demonstrates the AI value proposition clearly. Under 5 minutes from "tell me about your business" to published deal.
+
+**What we trade:** Precision on first pass. The AI may miss details, extract wrong prices, or miscategorize. Mitigated by the review phase where merchants can edit every field before publishing.
+
+**Implementation:** Two conversational phases:
+1. **Onboarding chat** — "Tell me about your business" → AI extracts profile (name, services, prices, location, category)
+2. **Deal creation chat** — 5 follow-up questions (services, discount, duration, scheduling, terms) → AI generates complete deal
+
+---
+
+## Decision 011: Profile/Deal Separation — One-Time Profile, Repeatable Deals
+
+**Date:** 2026-03-31
+**Status:** Locked
+
+**Decision:** Separate business profile (one-time setup) from deal creation (repeatable). Profile stores the merchant's identity; deals reference the profile but don't duplicate it.
+
+**Reasoning:**
+
+Early versions asked for business info during deal creation every time. This was redundant — if a merchant already told us their name, services, and location, asking again for each deal is friction Groupon's current flow already suffers from.
+
+The separation mirrors how merchants actually think:
+- "I am Sakura Spa" (set once, update rarely) → **Profile**
+- "I want to run a 20% off massage deal this month" (repeatable, seasonal) → **Deal**
+
+**Implementation:**
+- Onboarding creates and saves the profile (`profile.json`)
+- Deal creation reads from the saved profile to pre-fill services, pricing, location, contact info
+- Profile can be edited independently from `/portal/profile`
+- After onboarding, the flow routes directly to deal creation with profile data pre-loaded via `sessionStorage`
+
+---
+
+## Decision 012: Platform Expansion — Full Merchant Portal, Not Just Deal Creator
+
+**Date:** 2026-03-31
+**Status:** Locked
+
+**Options considered:**
+1. Standalone deal creation tool (original scope)
+2. Complete merchant portal matching Groupon's actual merchant.groupon.com (chosen)
+
+**Decision:** Build a 12-page merchant portal that mirrors Groupon's real merchant dashboard, not just the deal creation flow.
+
+**Reasoning:**
+
+A standalone deal creator demonstrates one feature. A complete portal demonstrates understanding of the merchant's full journey — onboarding, campaign management, voucher tracking, payments, reviews, support. This shows the interviewer:
+1. Product thinking beyond a single feature
+2. Understanding of how the AI deal creator fits into the broader merchant experience
+3. Ability to prioritize what's functional vs. what's mock data
+
+**What's functional vs. mock:**
+- **Functional:** Onboarding, deal creation, campaign management (CRUD + status), profile, admin panel (prompt config, testing, analytics)
+- **Mock with realistic data:** Vouchers, payments, reviews, reports, booking integrations, connections
+- **Mock pages exist because:** They show product scope and let the demo feel complete. A merchant portal with only "Create Deal" and blank pages feels like a prototype. Mock data makes it feel like a real product.
+
+**What we trade:** Development time on pages that aren't the core thesis. Mitigated by keeping mock pages lightweight (static data, minimal interactivity).
+
 *Decisions below this line are pending or will be added as we build.*

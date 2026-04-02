@@ -4,8 +4,9 @@ from datetime import datetime
 from pathlib import Path
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
@@ -13,6 +14,8 @@ load_dotenv()
 
 CONFIG_DIR = Path(__file__).parent / "app" / "config"
 DATA_DIR = Path(__file__).parent / "app" / "data"
+UPLOADS_DIR = Path(__file__).parent / "uploads"
+UPLOADS_DIR.mkdir(exist_ok=True)
 
 
 @asynccontextmanager
@@ -25,7 +28,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Groupon AI Deal Creator — Pipeline API",
+    title="Groupon AI Deal Creator - Pipeline API",
     description="Admin and pipeline API for the AI-powered merchant deal creator",
     version="0.1.0",
     lifespan=lifespan,
@@ -38,6 +41,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
 
 # --- Helpers ---
@@ -245,7 +250,7 @@ async def generate_deal(intake: MerchantIntake):
             "category": classification.get("category", "Beauty & Spas"),
             "location": intake.location,
             "services": intake.services,
-            "prices": intake.services,  # raw text — LLM will parse
+            "prices": intake.services,  # raw text - LLM will parse
         },
     )
     market_data = market_result.get("output", {})
@@ -319,6 +324,19 @@ async def update_profile(profile: dict):
     return profile
 
 
+@app.post("/api/upload")
+async def upload_file(file: UploadFile = File(...)):
+    """Upload an image file and return its URL."""
+    ext = Path(file.filename or "photo.jpg").suffix.lower()
+    if ext not in {".jpg", ".jpeg", ".png", ".gif", ".webp"}:
+        raise HTTPException(400, "Only image files (jpg, png, gif, webp) are allowed")
+    filename = f"{uuid.uuid4().hex}{ext}"
+    filepath = UPLOADS_DIR / filename
+    contents = await file.read()
+    filepath.write_bytes(contents)
+    return {"url": f"/uploads/{filename}", "filename": file.filename}
+
+
 # --- Story Extractor (conversational onboarding) ---
 
 class StoryRequest(BaseModel):
@@ -352,9 +370,9 @@ async def extract_story(request: StoryRequest):
             "{\n"
             '  "business_name": "string or null",\n'
             '  "business_description": "2-3 professional sentences about the business",\n'
-            '  "location": "city/neighborhood or null",\n'
-            '  "full_address": "street address if mentioned, or null",\n'
-            '  "phone": "phone number if mentioned, or null",\n'
+            '  "location": "city/neighborhood (extracted from full_address if given)",\n'
+            '  "full_address": "FULL street address including unit/suite, city, state/province, and zip/postal code. null ONLY if not mentioned.",\n'
+            '  "phone": "phone number - REQUIRED for Groupon merchants. null only if not mentioned.",\n'
             '  "website": "website if mentioned, or null",\n'
             '  "category": "Main Category > Subcategory (e.g., Health, Beauty & Wellness > Waxing)",\n'
             '  "category_confidence": 0.0-1.0,\n'
@@ -369,15 +387,18 @@ async def extract_story(request: StoryRequest):
             '  "follow_up_questions": ["question to ask if key info is missing"]\n'
             "}\n\n"
             "Rules:\n"
-            "- Always generate a business_description even if brief — write a professional version of what they said\n"
+            "- Always generate a business_description even if brief - write a professional version of what they said\n"
             "- Always detect category with confidence score\n"
             "- Extract every service with price mentioned\n"
             "- If they mention slow days, capture as scheduling_insight\n"
             "- Generate 3 highlights from what they described\n"
-            "- missing_fields: only list truly critical missing info (business_name, location, services)\n"
+            "- missing_fields: list critical missing info (business_name, full_address, phone, services)\n"
+            "- full_address is REQUIRED - if the merchant only gives a city or partial address, "
+            "you MUST add 'full_address' to missing_fields and ask for the complete street address with zip/postal code in follow_up_questions.\n"
+            "- phone is REQUIRED - if not provided, add 'phone' to missing_fields and ask for it in follow_up_questions.\n"
             "- follow_up_questions: ask 1-3 targeted questions for missing critical info. "
             "Don't ask for things you can infer. Be conversational, not formal.\n"
-            "- If everything important is captured, return empty follow_up_questions array"
+            "- If everything important is captured (including full_address and phone), return empty follow_up_questions array"
         ),
     }
 
@@ -470,26 +491,28 @@ class EnhanceTextRequest(BaseModel):
 
 @app.post("/api/pipeline/enhance-text")
 async def enhance_text(request: EnhanceTextRequest):
-    """AI 'Inspire Me' / 'Share More Details' — enhances or generates text for any field."""
+    """AI 'Inspire Me' / 'Share More Details' - enhances or generates text for any field."""
     from app.endpoints.pipeline import call_claude
 
     prompts = {
         "highlights": "Write 3-5 punchy highlight bullet points for a Groupon deal. Business context: {context}. Current text (improve or generate from scratch if empty): {text}. Return ONLY the bullet points as plain text, one per line. Do NOT return JSON.",
-        "description": "Write a compelling 2-3 sentence description for a Groupon deal option. Business context: {context}. Current text (improve or expand if provided, generate if empty): {text}. IMPORTANT: Start with a UNIQUE opening — never begin with the same words as other descriptions. Vary your sentence structure. Each service description should feel distinct. Return ONLY the description text, no JSON.",
+        "description": "Write a compelling 2-3 sentence description for a Groupon deal option. Business context: {context}. Current text (improve or expand if provided, generate if empty): {text}. ALREADY WRITTEN descriptions for other services (DO NOT repeat their openings, phrasing, or structure): {existing}. IMPORTANT: Start with a UNIQUE opening that is completely different from the existing descriptions above. Vary your sentence structure. Return ONLY the description text, no JSON.",
         "business_description": "Write a professional 2-3 sentence business description for a Groupon merchant page. Business context: {context}. Current text (improve if provided, generate if empty): {text}. Return ONLY the description text, no JSON.",
     }
 
     prompt_template = prompts.get(request.field_type, prompts["description"])
+    existing = request.context.get("existing_descriptions", [])
     user_message = prompt_template.format(
         context=json.dumps(request.context),
-        text=request.text or "(empty — generate from scratch)",
+        text=request.text or "(empty - generate from scratch)",
+        existing="\n".join(existing) if existing else "(none yet)",
     )
 
     config = {
         "model": "claude-haiku-4-5-20251001",
         "max_tokens": 512,
         "temperature": 0.8 if request.field_type == "description" else 0.6,
-        "system_prompt": "You are a marketing copywriter for Groupon. Write warm, professional, conversion-focused copy. Be concise. NEVER start two descriptions with the same opening phrase — vary your language creatively.",
+        "system_prompt": "You are a marketing copywriter for Groupon. Write warm, professional, conversion-focused copy. Be concise. NEVER start two descriptions with the same opening phrase - vary your language creatively.",
     }
 
     raw = await call_claude(config, user_message)
@@ -506,7 +529,7 @@ class PublishDealRequest(BaseModel):
 
 @app.post("/api/deals/reset")
 async def reset_deals():
-    """Reset all deals — for demo purposes. Profile reset is handled separately via PUT /api/profile."""
+    """Reset all deals - for demo purposes. Profile reset is handled separately via PUT /api/profile."""
     app.state.deals = []
     save_deals([])
     return {"reset": True}
@@ -514,7 +537,7 @@ async def reset_deals():
 
 @app.post("/api/deals")
 async def publish_deal(request: PublishDealRequest):
-    """Publish a deal — saves to disk so it persists across restarts."""
+    """Publish a deal - saves to disk so it persists across restarts."""
     deal_record = {
         "id": str(uuid.uuid4()),
         "deal": request.deal,

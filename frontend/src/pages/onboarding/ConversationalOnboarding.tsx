@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { extractStory, updateProfile, type ExtractedProfile, type ExtractedDeal } from '@/lib/api';
 import { DealChat } from '@/pages/portal/DealChat';
 import { VoiceInput } from '@/components/ui/voice-input';
+import { FeatureTooltip } from '@/components/ui/feature-tooltip';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -186,6 +187,7 @@ export function ConversationalOnboarding() {
       experience_years: editProfile.experience_years,
       business_type: editProfile.business_type,
       highlights: editProfile.highlights,
+      photos: (editProfile as any).photos || [],
       onboarded: true,
     };
     await updateProfile(profileData);
@@ -722,7 +724,9 @@ export function ConversationalOnboarding() {
                 rows={1}
               />
             </div>
-            <VoiceInput onTranscript={handleVoiceTranscript} className="h-10 rounded-xl" />
+            <FeatureTooltip id="voice-onboarding" message="Prefer talking? Click to dictate your business description instead of typing.">
+              <VoiceInput onTranscript={handleVoiceTranscript} className="h-10 rounded-xl" />
+            </FeatureTooltip>
             <Button
               onClick={handleSend}
               disabled={!input.trim() || phase === 'extracting'}
