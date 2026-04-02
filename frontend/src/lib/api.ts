@@ -246,6 +246,31 @@ export async function fetchDeal(id: string): Promise<PublishedDeal> {
   return res.json();
 }
 
+export async function updateDeal(
+  id: string,
+  deal: GeneratedDeal,
+  intake: MerchantIntake,
+  contact?: { phone?: string; address?: string; website?: string },
+): Promise<PublishedDeal> {
+  const res = await fetch(`${API_BASE}/deals/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deal, intake, contact }),
+  });
+  if (!res.ok) throw new Error(`Failed to update deal: ${res.statusText}`);
+  return res.json();
+}
+
+export async function updateDealStatus(id: string, status: string): Promise<PublishedDeal> {
+  const res = await fetch(`${API_BASE}/deals/${id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new Error(`Failed to update status: ${res.statusText}`);
+  return res.json();
+}
+
 export async function deleteDeal(id: string): Promise<void> {
   const res = await fetch(`${API_BASE}/deals/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(`Failed to delete deal: ${res.statusText}`);

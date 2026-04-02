@@ -535,6 +535,32 @@ async def get_deal(deal_id: str):
     raise HTTPException(status_code=404, detail="Deal not found")
 
 
+@app.put("/api/deals/{deal_id}")
+async def update_deal(deal_id: str, request: PublishDealRequest):
+    """Update an existing deal."""
+    for i, d in enumerate(app.state.deals):
+        if d["id"] == deal_id:
+            app.state.deals[i]["deal"] = request.deal
+            app.state.deals[i]["intake"] = request.intake
+            if request.contact:
+                app.state.deals[i]["contact"] = request.contact
+            save_deals(app.state.deals)
+            return app.state.deals[i]
+    raise HTTPException(status_code=404, detail="Deal not found")
+
+
+@app.patch("/api/deals/{deal_id}/status")
+async def update_deal_status(deal_id: str, body: dict):
+    """Toggle deal status (active/draft/inactive)."""
+    new_status = body.get("status", "active")
+    for i, d in enumerate(app.state.deals):
+        if d["id"] == deal_id:
+            app.state.deals[i]["status"] = new_status
+            save_deals(app.state.deals)
+            return app.state.deals[i]
+    raise HTTPException(status_code=404, detail="Deal not found")
+
+
 @app.delete("/api/deals/{deal_id}")
 async def delete_deal(deal_id: str):
     """Delete a deal."""

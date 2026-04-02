@@ -1,5 +1,5 @@
 import { NavLink, Outlet, Link } from 'react-router-dom';
-import { LayoutDashboard, FlaskConical, Database, BarChart3, ArrowLeft, Sparkles } from 'lucide-react';
+import { LayoutDashboard, FlaskConical, Database, BarChart3, FileCode, ArrowLeft, Sparkles, ExternalLink } from 'lucide-react';
 
 const navItems = [
   { to: '/admin', label: 'Endpoints', icon: LayoutDashboard, end: true },
@@ -20,13 +20,25 @@ export function AdminLayout() {
               Pipeline Admin
             </h1>
           </div>
-          <Link
-            to="/portal"
-            className="ml-auto flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-1 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Merchant Portal
-          </Link>
+          <div className="ml-auto flex items-center gap-2">
+            <a
+              href="http://localhost:8000/docs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-2.5 py-1 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+            >
+              <FileCode className="h-3.5 w-3.5" />
+              API Docs
+              <ExternalLink className="h-3 w-3" />
+            </a>
+            <Link
+              to="/portal"
+              className="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-1 text-xs text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-700"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Merchant Portal
+            </Link>
+          </div>
         </div>
       </header>
 

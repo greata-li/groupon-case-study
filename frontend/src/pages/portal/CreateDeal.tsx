@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   enhanceText,
   publishDeal,
+  updateDeal,
   fetchProfile,
   fetchDeal,
   extractDeal,
@@ -531,13 +532,19 @@ export function CreateDeal() {
         website: form.website,
       };
 
-      await publishDeal(deal, intake, {
+      const contact = {
         phone: form.redemptionPhone,
         address: form.redemptionAddress,
         website: form.website,
-      });
-      // Note: publishDeal currently always creates as 'active' on the backend
-      // In production, we'd pass the status parameter
+      };
+
+      if (editDealId) {
+        // Update existing deal
+        await updateDeal(editDealId, deal, intake, contact);
+      } else {
+        // Create new deal
+        await publishDeal(deal, intake, contact);
+      }
 
       navigate('/portal/campaigns');
     } catch {
@@ -1445,34 +1452,53 @@ export function CreateDeal() {
 
         {/* Action buttons */}
         <div className="flex gap-3 pt-4 border-t border-gray-200">
-          <Button
-            onClick={() => handlePublish('draft')}
-            disabled={publishing}
-            variant="outline"
-            className="rounded-lg px-6 font-bold"
-          >
-            {publishing ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : null}
-            Save as Draft
-          </Button>
-          <Button
-            onClick={() => handlePublish('active')}
-            disabled={publishing || !allComplete}
-            className="rounded-lg bg-groupon-green px-8 font-bold text-white hover:bg-groupon-green-dark"
-          >
-            {publishing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Publishing...
-              </>
-            ) : (
-              'Publish Deal'
-            )}
-          </Button>
+          {editDealId ? (
+            <Button
+              onClick={() => handlePublish('active')}
+              disabled={publishing}
+              className="rounded-lg bg-groupon-green px-8 font-bold text-white hover:bg-groupon-green-dark"
+            >
+              {publishing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
+            </Button>
+          ) : (
+            <>
+              <Button
+                onClick={() => handlePublish('draft')}
+                disabled={publishing}
+                variant="outline"
+                className="rounded-lg px-6 font-bold"
+              >
+                {publishing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Save as Draft
+              </Button>
+              <Button
+                onClick={() => handlePublish('active')}
+                disabled={publishing || !allComplete}
+                className="rounded-lg bg-groupon-green px-8 font-bold text-white hover:bg-groupon-green-dark"
+              >
+                {publishing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Publishing...
+                  </>
+                ) : (
+                  'Publish Deal'
+                )}
+              </Button>
+            </>
+          )}
         </div>
         <p className="text-xs text-gray-400 mt-2">
-          Save as Draft to review later, or Publish to make your deal live.
+          {editDealId
+            ? 'Save your changes to update this deal.'
+            : 'Save as Draft to review later, or Publish to make your deal live.'}
         </p>
       </div>
     );

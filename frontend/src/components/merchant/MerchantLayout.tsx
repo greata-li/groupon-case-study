@@ -20,7 +20,7 @@ export function MerchantLayout() {
 
           <nav className="flex items-center gap-6 text-sm font-medium text-gray-500">
             <Link to="/" className="transition-colors hover:text-gray-900">Home</Link>
-            <Link to="/create" className="transition-colors hover:text-gray-900">Create Deal</Link>
+            <Link to="/portal/create" className="transition-colors hover:text-gray-900">Create Deal</Link>
             <Link to="/portal" className="transition-colors hover:text-gray-900">Merchant Portal</Link>
             <Link
               to="/admin"
