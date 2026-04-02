@@ -251,7 +251,7 @@ The most critical prompt in the system. Evolved through iteration:
 3. **Silent failures** - multiple frontend JavaScript errors (FullStory init called 4x, Bloodhound widget errors) with no user-facing feedback.
 
 ### Flow Analysis (27 Screenshots)
-Complete field-by-field mapping documented in [flow-mapping.md](flow-mapping.md). Every field Groupon collects across 21 screens was mapped to our AI-assisted approach. Result: zero fields skipped, all handled by AI or smart defaults.
+Complete field-by-field mapping documented in [flow-mapping.md](./flow-mapping.md). Every field Groupon collects across 21 screens was mapped to our AI-assisted approach. Result: zero fields skipped, all handled by AI or smart defaults.
 
 ---
 
@@ -262,7 +262,6 @@ Complete field-by-field mapping documented in [flow-mapping.md](flow-mapping.md)
 - [x] Synthetic market data for Beauty & Spas / Chicago
 - [x] Product documentation (this document)
 - [x] Decision log with reasoning ([decisions.md](./decisions.md))
-- [x] Flow mapping: Groupon's 21 screens → our approach ([flow-mapping.md](flow-mapping.md))
-- [x] Real-world findings from Groupon investigation ([findings.md](findings.md))
-- [x] Video walkthrough script ([video-script.md](video-script.md))
-- [x] Iteration log ([iteration-log.md](iteration-log.md))
+- [x] Flow mapping: Groupon's 21 screens → our approach ([flow-mapping.md](./flow-mapping.md))
+- [x] Real-world findings from Groupon investigation ([findings.md](./findings.md))
+- [x] Iteration log ([iteration-log.md](./iteration-log.md))
