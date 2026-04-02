@@ -16,6 +16,19 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+const AVAILABLE_MODELS = [
+  { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 (fast, cheap)' },
+  { id: 'claude-sonnet-4-20250514', label: 'Claude Sonnet 4 (balanced)' },
+  { id: 'claude-opus-4-6', label: 'Claude Opus 4.6 (most capable)' },
+];
+import {
   ArrowLeft,
   Save,
   Play,
@@ -161,7 +174,18 @@ export function EndpointDetail() {
           <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>Model</Label>
-              <Input value={model} onChange={(e) => setModel(e.target.value)} />
+              <Select value={model} onValueChange={setModel}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {AVAILABLE_MODELS.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label>Temperature</Label>
