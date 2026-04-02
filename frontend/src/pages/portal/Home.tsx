@@ -50,6 +50,7 @@ export function Home() {
   const hasProfile = Boolean(profile?.business_name);
   const hasDeal = deals.length > 0;
   const latestDeal = deals.length > 0 ? deals[0] : null;
+  const completed = (profile?.checklist_completed as Record<string, boolean>) || {};
 
   const checklist: ChecklistItem[] = [
     {
@@ -64,9 +65,9 @@ export function Home() {
       id: 'booking',
       title: 'Connect a booking platform',
       description: 'Integrate with Booker, Mindbody, or Square to manage appointments from Groupon customers.',
-      linkTo: '/portal/booking',
-      linkLabel: 'Set Up Booking',
-      completed: false,
+      linkTo: '/portal/connections',
+      linkLabel: 'Connect Platform',
+      completed: Boolean(completed.booking),
     },
     {
       id: 'campaign',
@@ -82,7 +83,7 @@ export function Home() {
       description: 'Understand how customers present vouchers and how you mark them as redeemed in your dashboard.',
       linkTo: '/portal/vouchers',
       linkLabel: 'View Vouchers',
-      completed: false,
+      completed: Boolean(completed.voucher),
     },
     {
       id: 'payments',
@@ -90,7 +91,7 @@ export function Home() {
       description: 'Payouts are processed weekly. Learn about the payment schedule and how refunds work.',
       linkTo: '/portal/payments',
       linkLabel: 'View Payments',
-      completed: false,
+      completed: Boolean(completed.payments),
     },
   ];
 

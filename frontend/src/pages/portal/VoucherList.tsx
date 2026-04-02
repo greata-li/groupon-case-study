@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { markChecklistComplete } from '@/lib/checklist';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -91,6 +92,8 @@ const MOCK_VOUCHERS: MockVoucher[] = [
 export function VoucherList() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => { markChecklistComplete('voucher'); }, []);
 
   const filtered = MOCK_VOUCHERS.filter((v) => {
     if (statusFilter !== 'all' && v.status !== statusFilter) return false;

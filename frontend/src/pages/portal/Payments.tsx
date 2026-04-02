@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { markChecklistComplete } from '@/lib/checklist';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -96,6 +97,8 @@ const MOCK_PAYOUTS: MockPayout[] = [
 
 export function Payments() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  useEffect(() => { markChecklistComplete('payments'); }, []);
 
   const nextPayoutDate = 'April 4, 2026';
   const totalPending = MOCK_PAYOUTS.filter((p) => p.status !== 'processed').reduce((sum, p) => sum + p.amount, 0);
