@@ -156,7 +156,7 @@ export function BenchmarkEditor() {
       {/* Assumptions table */}
       {data?.assumptions && (
         <Card className="border-gray-100">
-          <CardHeader className="pb-3">
+          <CardHeader className="border-b pb-3">
             <CardTitle className="flex items-center gap-2 font-heading text-base">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
               Stated Assumptions
@@ -215,7 +215,7 @@ export function BenchmarkEditor() {
 
         {showRawJson && (
           <Card className="border-gray-100 mt-3">
-            <CardHeader className="pb-3">
+            <CardHeader className="border-b pb-3">
               <CardTitle className="flex items-center gap-2 font-heading text-base">
                 <FileJson className="h-4 w-4 text-gray-500" />
                 Raw Data Editor

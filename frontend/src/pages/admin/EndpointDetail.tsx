@@ -269,7 +269,7 @@ export function EndpointDetail() {
               )}
               {testResult && !testing && (
                 <Card>
-                  <CardHeader className="pb-3">
+                  <CardHeader className="border-b pb-3">
                     <div className="flex items-center gap-3">
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <Cpu className="h-3 w-3" />

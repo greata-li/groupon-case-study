@@ -95,7 +95,7 @@ export function EndpointList() {
               className="cursor-pointer border-gray-100 transition-all hover:border-groupon-green/20 hover:shadow-md"
               onClick={() => navigate(`/admin/endpoint/${endpoint.id}`)}
             >
-              <CardHeader className="pb-3">
+              <CardHeader className="border-b pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-groupon-green/10 text-sm font-bold text-groupon-green">

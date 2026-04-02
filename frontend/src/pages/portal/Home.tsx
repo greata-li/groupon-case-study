@@ -285,7 +285,7 @@ export function Home() {
             <CardContent>
               <div className="relative pl-6">
                 {/* Vertical line */}
-                <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-gray-200" />
+                <div className="absolute left-3 top-2 bottom-2 w-0.5 bg-gray-200" />
 
                 <div className="space-y-6">
                   {progressSteps.map((step, i) => (
@@ -293,11 +293,11 @@ export function Home() {
                       {/* Dot */}
                       <div className="absolute -left-6 top-0.5">
                         {step.done ? (
-                          <div className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-groupon-green">
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-groupon-green">
                             <CheckCircle2 className="h-3.5 w-3.5 text-white" />
                           </div>
                         ) : (
-                          <div className="flex h-[22px] w-[22px] items-center justify-center rounded-full border-2 border-gray-300 bg-white">
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-gray-300 bg-white">
                             <span className="text-[10px] font-bold text-gray-400">{i + 1}</span>
                           </div>
                         )}

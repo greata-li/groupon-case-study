@@ -98,7 +98,7 @@ export function PipelineAnalytics() {
 
       {/* Endpoint performance table */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="border-b pb-3">
           <CardTitle className="font-heading text-base flex items-center gap-2">
             <Cpu className="h-4 w-4 text-gray-400" />
             Endpoint Performance
@@ -138,7 +138,7 @@ export function PipelineAnalytics() {
 
       {/* Field acceptance rates */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="border-b pb-3">
           <CardTitle className="font-heading text-base flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-gray-400" />
             AI Field Acceptance Rate
