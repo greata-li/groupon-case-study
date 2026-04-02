@@ -1,6 +1,15 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { enhanceText, publishDeal, fetchProfile, type GeneratedDeal, type MerchantIntake, type DealService, type FinePrint, type VoucherInstructions } from '@/lib/api';
+import {
+  enhanceText,
+  publishDeal,
+  fetchProfile,
+  type GeneratedDeal,
+  type MerchantIntake,
+  type DealService,
+  type FinePrint,
+  type VoucherInstructions,
+} from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,148 +20,122 @@ import { Separator } from '@/components/ui/separator';
 import { VoiceInput } from '@/components/ui/voice-input';
 import {
   CheckCircle2,
-  ChevronRight,
   Sparkles,
   Loader2,
   Plus,
   Trash2,
   Eye,
   EyeOff,
-  Image,
   Upload,
   Camera,
   Star,
   MapPin,
-  Clock,
   ShoppingCart,
-  Search,
-  ChevronDown,
-  Info,
   ArrowRight,
   ArrowLeft,
+  Image,
+  SkipForward,
+  AlertCircle,
 } from 'lucide-react';
 
 // ---------- Types ----------
 
-interface ServiceOption {
+interface ProfileService {
   name: string;
-  regularPrice: string;
+  price: number;
+}
+
+interface ProfileData {
+  business_name: string;
+  business_description: string;
+  category: string;
+  services: ProfileService[];
+  location: string;
+  full_address: string;
+  phone: string;
+  website: string;
+  highlights: string[];
+  scheduling_insight: string;
+}
+
+interface ServiceEntry {
+  included: boolean;
+  name: string;
+  regularPrice: number;
   grouponPrice: string;
   discountPct: number;
   voucherCap: string;
   description: string;
 }
 
-interface DealFormData {
-  // Step 1
-  bookingPlatform: string;
-  categoryTab: 'ai' | 'search' | 'browse';
-  selectedCategory: string;
-  categorySearch: string;
-  aiCategory: string;
-  aiConfidence: number;
-  // Step 2
-  services: ServiceOption[];
-  // Step 3
-  photos: string[];
-  photoSource: 'upload' | 'stock' | 'professional';
-  // Step 4
+interface DealFormState {
+  // Step 1 - Services & Pricing
+  services: ServiceEntry[];
+  // Step 2 - Photos
+  photoOption: 'upload' | 'stock' | 'skip';
+  uploadedPhotos: string[];
+  selectedStockPhoto: number | null;
+  // Step 3 - Highlights
   highlights: string;
-  // Step 5
+  // Step 4 - Descriptions (keyed by service index)
   descriptions: Record<number, string>;
-  // Step 6
-  voucherLimit: number;
+  // Step 5 - Fine Print
+  vouchersPerPurchase: number;
   expiryDays: number;
   cancellationPolicy: string;
   restrictionNewCustomers: boolean;
   restrictionAppointment: boolean;
-  restrictionNoRefund: boolean;
-  // Step 7
+  restrictionNoOtherOffers: boolean;
+  restrictionGratuity: boolean;
+  restrictionWaiver: boolean;
+  // Step 6 - Voucher Instructions
   redemptionMethod: 'physical' | 'travel' | 'online';
   redemptionAddress: string;
-  redemptionCity: string;
-  redemptionState: string;
-  redemptionZip: string;
   redemptionAppointment: boolean;
   redemptionPhone: string;
-  // meta
+  // Profile meta
   businessName: string;
   businessDescription: string;
+  category: string;
+  location: string;
+  website: string;
 }
 
 const STEPS = [
-  { id: 1, label: 'Initial Setup', short: 'Setup' },
-  { id: 2, label: 'Options', short: 'Options' },
-  { id: 3, label: 'Photos', short: 'Photos' },
-  { id: 4, label: 'Highlights', short: 'Highlights' },
-  { id: 5, label: 'Description', short: 'Description' },
-  { id: 6, label: 'Fine Print', short: 'Fine Print' },
-  { id: 7, label: 'Voucher Instructions', short: 'Voucher' },
-  { id: 8, label: 'Review & Publish', short: 'Review' },
+  { id: 1, label: 'Services & Pricing', short: 'Services' },
+  { id: 2, label: 'Photos', short: 'Photos', optional: true },
+  { id: 3, label: 'Highlights', short: 'Highlights' },
+  { id: 4, label: 'Description', short: 'Description' },
+  { id: 5, label: 'Fine Print', short: 'Fine Print' },
+  { id: 6, label: 'Voucher Instructions', short: 'Voucher' },
+  { id: 7, label: 'Review & Publish', short: 'Review' },
 ];
 
-const MAIN_CATEGORIES = [
-  {
-    name: 'Health, Beauty & Wellness',
-    subs: ['Hair Salons', 'Spas', 'Skin Care', 'Nail Salons', 'Massage', 'Weight Loss', 'Dental', 'Eye Care'],
-  },
-  {
-    name: 'Things to Do',
-    subs: ['Activities', 'Tours', 'Events', 'Classes', 'Escape Rooms', 'Amusement Parks'],
-  },
-  {
-    name: 'Home & Auto',
-    subs: ['Cleaning', 'Landscaping', 'HVAC', 'Plumbing', 'Auto Detailing', 'Auto Repair'],
-  },
-  {
-    name: 'Restaurants',
-    subs: ['Casual Dining', 'Fine Dining', 'Cafes', 'Bakeries', 'Bars'],
-  },
-  {
-    name: 'Retail',
-    subs: ['Clothing', 'Electronics', 'Home Goods', 'Gifts', 'Jewelry'],
-  },
-];
-
-const BOOKING_PLATFORMS = ['None', 'Booker', 'Mindbody', 'Square', 'Vagaro', 'Other'];
-
-function defaultFormData(): DealFormData {
+function defaultFormState(): DealFormState {
   return {
-    bookingPlatform: 'None',
-    categoryTab: 'ai',
-    selectedCategory: '',
-    categorySearch: '',
-    aiCategory: 'Health, Beauty & Wellness > Spas',
-    aiConfidence: 92,
-    services: [
-      {
-        name: '',
-        regularPrice: '',
-        grouponPrice: '',
-        discountPct: 0,
-        voucherCap: '',
-        description: '',
-      },
-    ],
-    photos: [],
-    photoSource: 'upload',
+    services: [],
+    photoOption: 'upload',
+    uploadedPhotos: [],
+    selectedStockPhoto: null,
     highlights: '',
     descriptions: {},
-    voucherLimit: 1,
+    vouchersPerPurchase: 1,
     expiryDays: 90,
-    cancellationPolicy: '',
+    cancellationPolicy: '24-hour cancellation policy. No-shows will forfeit their voucher.',
     restrictionNewCustomers: false,
     restrictionAppointment: true,
-    restrictionNoRefund: false,
+    restrictionNoOtherOffers: true,
+    restrictionGratuity: false,
+    restrictionWaiver: false,
     redemptionMethod: 'physical',
     redemptionAddress: '',
-    redemptionCity: '',
-    redemptionState: '',
-    redemptionZip: '',
     redemptionAppointment: true,
     redemptionPhone: '',
     businessName: '',
     businessDescription: '',
+    category: '',
+    location: '',
+    website: '',
   };
 }
 
@@ -161,58 +144,89 @@ function defaultFormData(): DealFormData {
 export function CreateDeal() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState<DealFormData>(defaultFormData);
+  const [form, setForm] = useState<DealFormState>(defaultFormState);
   const [showPreview, setShowPreview] = useState(true);
   const [inspiringField, setInspiringField] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
-  const [expandedBrowse, setExpandedBrowse] = useState<string | null>(null);
-  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [noServices, setNoServices] = useState(false);
+  const highlightsAutoGenerated = useRef(false);
+  const descriptionsAutoGenerated = useRef<Set<number>>(new Set());
 
-  // Load saved profile and pre-fill the form
+  // Load saved profile on mount
   useEffect(() => {
     fetchProfile()
-      .then((profile) => {
-        if (!profile || typeof profile !== 'object') return;
-        const p = profile as Record<string, any>;
-        const updates: Partial<DealFormData> = {};
+      .then((raw) => {
+        if (!raw || typeof raw !== 'object') {
+          setNoServices(true);
+          setProfileLoading(false);
+          return;
+        }
+        const p = raw as unknown as Partial<ProfileData>;
+        const updates: Partial<DealFormState> = {};
 
         if (p.business_name) updates.businessName = p.business_name;
         if (p.business_description) updates.businessDescription = p.business_description;
-        if (p.category) {
-          updates.selectedCategory = p.category;
-          updates.aiCategory = p.category;
-          updates.aiConfidence = p.category_confidence ? Math.round(p.category_confidence * 100) : 92;
-        }
-        if (p.phone) updates.redemptionPhone = p.phone;
+        if (p.category) updates.category = p.category;
+        if (p.location) updates.location = p.location;
         if (p.full_address) updates.redemptionAddress = p.full_address;
-        if (p.location) updates.redemptionCity = p.location;
+        if (p.phone) updates.redemptionPhone = p.phone;
+        if (p.website) updates.website = p.website;
 
-        // Pre-fill services from profile
         if (Array.isArray(p.services) && p.services.length > 0) {
-          updates.services = p.services.map((s: any) => ({
+          updates.services = p.services.map((s) => ({
+            included: true,
             name: s.name || '',
-            regularPrice: s.price ? String(s.price) : '',
+            regularPrice: s.price || 0,
             grouponPrice: '',
             discountPct: 0,
             voucherCap: '50',
             description: '',
           }));
+        } else {
+          setNoServices(true);
         }
 
         setForm((prev) => ({ ...prev, ...updates }));
-        setProfileLoaded(true);
+        setProfileLoading(false);
       })
       .catch(() => {
-        setProfileLoaded(true);
+        setNoServices(true);
+        setProfileLoading(false);
       });
   }, []);
 
+  // Auto-generate highlights when entering Step 3
+  useEffect(() => {
+    if (step === 3 && !form.highlights && !highlightsAutoGenerated.current && form.businessName) {
+      highlightsAutoGenerated.current = true;
+      handleInspireMe('highlights');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
+  // Auto-generate descriptions when entering Step 4
+  useEffect(() => {
+    if (step === 4 && form.businessName) {
+      const includedServices = form.services.filter((s) => s.included);
+      includedServices.forEach((svc, i) => {
+        const originalIndex = form.services.indexOf(svc);
+        if (!form.descriptions[originalIndex] && !descriptionsAutoGenerated.current.has(originalIndex)) {
+          descriptionsAutoGenerated.current.add(originalIndex);
+          handleInspireMe('description', originalIndex);
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
   // ---- Helpers ----
-  function updateForm(partial: Partial<DealFormData>) {
+
+  function updateForm(partial: Partial<DealFormState>) {
     setForm((prev) => ({ ...prev, ...partial }));
   }
 
-  function updateService(index: number, partial: Partial<ServiceOption>) {
+  function updateService(index: number, partial: Partial<ServiceEntry>) {
     setForm((prev) => {
       const services = [...prev.services];
       const svc = services[index];
@@ -220,7 +234,7 @@ export function CreateDeal() {
       services[index] = { ...svc, ...partial };
 
       // Auto-calc discount
-      const reg = parseFloat(services[index].regularPrice) || 0;
+      const reg = services[index].regularPrice || 0;
       const grp = parseFloat(services[index].grouponPrice) || 0;
       if (reg > 0 && grp > 0 && grp < reg) {
         services[index].discountPct = Math.round(((reg - grp) / reg) * 100);
@@ -237,7 +251,15 @@ export function CreateDeal() {
       ...prev,
       services: [
         ...prev.services,
-        { name: '', regularPrice: '', grouponPrice: '', discountPct: 0, voucherCap: '', description: '' },
+        {
+          included: true,
+          name: '',
+          regularPrice: 0,
+          grouponPrice: '',
+          discountPct: 0,
+          voucherCap: '50',
+          description: '',
+        },
       ],
     }));
   }
@@ -249,60 +271,92 @@ export function CreateDeal() {
     }));
   }
 
-  async function handleInspireMe(field: 'highlights' | 'description', serviceIndex?: number) {
-    const fieldKey = serviceIndex !== undefined ? `description-${serviceIndex}` : field;
-    setInspiringField(fieldKey);
-    try {
-      const currentText =
-        field === 'highlights'
-          ? form.highlights
-          : (serviceIndex !== undefined ? (form.descriptions[serviceIndex] ?? '') : '');
-
-      const result = await enhanceText(currentText, field, {
-        business_name: form.businessName,
-        category: form.selectedCategory || form.aiCategory,
-        services: form.services.map((s) => s.name).filter(Boolean),
+  function aiRecommendPricing() {
+    setForm((prev) => {
+      const services = prev.services.map((svc) => {
+        if (!svc.included || svc.regularPrice <= 0) return svc;
+        // Random between 35-40% off
+        const discountPct = Math.floor(Math.random() * 6) + 35;
+        const dealPrice = Math.round(svc.regularPrice * (1 - discountPct / 100));
+        return {
+          ...svc,
+          grouponPrice: String(dealPrice),
+          discountPct,
+        };
       });
-
-      const enhanced = result?.enhanced_text ?? currentText;
-
-      if (field === 'highlights') {
-        updateForm({ highlights: enhanced });
-      } else if (serviceIndex !== undefined) {
-        setForm((prev) => ({
-          ...prev,
-          descriptions: { ...prev.descriptions, [serviceIndex]: enhanced },
-        }));
-      }
-    } catch {
-      // silently fail
-    } finally {
-      setInspiringField(null);
-    }
+      return { ...prev, services };
+    });
   }
+
+  const handleInspireMe = useCallback(
+    async (field: 'highlights' | 'description', serviceIndex?: number) => {
+      const fieldKey = serviceIndex !== undefined ? `description-${serviceIndex}` : field;
+      setInspiringField(fieldKey);
+      try {
+        const currentText =
+          field === 'highlights'
+            ? form.highlights
+            : serviceIndex !== undefined
+              ? (form.descriptions[serviceIndex] ?? '')
+              : '';
+
+        const serviceName =
+          serviceIndex !== undefined ? form.services[serviceIndex]?.name : undefined;
+
+        const result = await enhanceText(currentText, field, {
+          business_name: form.businessName,
+          business_description: form.businessDescription,
+          category: form.category,
+          services: form.services.filter((s) => s.included).map((s) => s.name).filter(Boolean),
+          ...(serviceName ? { service_name: serviceName } : {}),
+        });
+
+        const enhanced = result?.enhanced_text ?? currentText;
+
+        if (field === 'highlights') {
+          updateForm({ highlights: enhanced });
+        } else if (serviceIndex !== undefined) {
+          setForm((prev) => ({
+            ...prev,
+            descriptions: { ...prev.descriptions, [serviceIndex]: enhanced },
+          }));
+        }
+      } catch {
+        // silently fail
+      } finally {
+        setInspiringField(null);
+      }
+    },
+    [form.highlights, form.descriptions, form.businessName, form.businessDescription, form.category, form.services],
+  );
 
   async function handlePublish() {
     setPublishing(true);
     try {
-      const services: DealService[] = form.services
-        .filter((s) => s.name)
-        .map((s, i) => ({
+      const includedServices = form.services.filter((s) => s.included && s.name);
+      const services: DealService[] = includedServices.map((s) => {
+        const originalIndex = form.services.indexOf(s);
+        return {
           name: s.name,
-          description: form.descriptions[i] ?? s.description,
-          original_price: parseFloat(s.regularPrice) || 0,
+          description: form.descriptions[originalIndex] ?? s.description,
+          original_price: s.regularPrice,
           discount_pct: s.discountPct,
           deal_price: parseFloat(s.grouponPrice) || 0,
           voucher_cap: parseInt(s.voucherCap) || undefined,
-        }));
+        };
+      });
+
+      const restrictions: string[] = [];
+      if (form.restrictionNoOtherOffers) restrictions.push('Not valid with other offers');
+      if (form.restrictionGratuity) restrictions.push('Gratuity not included');
+      if (form.restrictionWaiver) restrictions.push('Must sign waiver');
 
       const finePrint: FinePrint = {
         expiry_days: form.expiryDays,
-        max_per_person: form.voucherLimit,
+        max_per_person: form.vouchersPerPurchase,
         appointment_required: form.restrictionAppointment,
         new_customers_only: form.restrictionNewCustomers,
-        restrictions: [
-          ...(form.restrictionNoRefund ? ['No refunds after purchase'] : []),
-        ],
+        restrictions,
         cancellation_policy: form.cancellationPolicy,
       };
 
@@ -310,13 +364,13 @@ export function CreateDeal() {
         redemption_method: form.redemptionMethod,
         appointment_required: form.redemptionAppointment,
         instructions: form.redemptionAddress
-          ? `Visit at ${form.redemptionAddress}, ${form.redemptionCity}, ${form.redemptionState} ${form.redemptionZip}`
+          ? `Visit at ${form.redemptionAddress}`
           : 'Present voucher at location',
       };
 
       const deal: GeneratedDeal = {
-        title: `${form.services[0]?.name ?? 'Deal'} at ${form.businessName || 'Business'}`,
-        description: form.descriptions[0] ?? '',
+        title: `${includedServices[0]?.name ?? 'Deal'} at ${form.businessName || 'Business'}`,
+        description: form.descriptions[form.services.findIndex((s) => s.included)] ?? '',
         highlights: form.highlights
           .split('\n')
           .map((l) => l.trim())
@@ -324,25 +378,27 @@ export function CreateDeal() {
         services,
         fine_print: finePrint,
         voucher_instructions: voucherInstructions,
-        category: form.selectedCategory || form.aiCategory,
+        category: form.category,
         scheduling_recommendation: '',
         photo_guidance: '',
-        confidence: { title: 0.85, description: 0.85, pricing: 0.9, category: (form.aiConfidence / 100) },
+        confidence: { title: 0.85, description: 0.85, pricing: 0.9, category: 0.92 },
       };
 
       const intake: MerchantIntake = {
         business_name: form.businessName,
         business_description: form.businessDescription,
-        location: `${form.redemptionCity}, ${form.redemptionState}`,
-        services: form.services.map((s) => s.name).filter(Boolean).join(', '),
+        location: form.location,
+        services: includedServices.map((s) => s.name).filter(Boolean).join(', '),
         additional_info: '',
         phone: form.redemptionPhone,
         address: form.redemptionAddress,
+        website: form.website,
       };
 
       await publishDeal(deal, intake, {
         phone: form.redemptionPhone,
-        address: `${form.redemptionAddress}, ${form.redemptionCity}, ${form.redemptionState} ${form.redemptionZip}`,
+        address: form.redemptionAddress,
+        website: form.website,
       });
 
       navigate('/portal/campaigns');
@@ -353,379 +409,201 @@ export function CreateDeal() {
     }
   }
 
-  function canProceed(): boolean {
-    switch (step) {
-      case 1:
-        return Boolean(form.selectedCategory || form.aiCategory);
-      case 2:
-        return form.services.length > 0 && form.services.some((s) => s.name && s.regularPrice && s.grouponPrice);
-      default:
-        return true;
-    }
-  }
-
-  // ---- Render Steps ----
+  // ---- Step: Services & Pricing ----
 
   function renderStep1() {
+    const includedCount = form.services.filter((s) => s.included).length;
+
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="font-heading text-lg font-bold text-gray-900">Deal Setup</h2>
+          <h2 className="font-heading text-lg font-bold text-gray-900">Services & Pricing</h2>
           <p className="text-sm text-gray-500 mt-1">
-            {form.businessName
-              ? `Creating a new deal for ${form.businessName}. Your profile info is pre-filled.`
-              : 'Confirm your details and choose a category for this deal.'}
+            Select the services you want to offer and set Groupon pricing.
+            {includedCount > 0 && (
+              <span className="text-groupon-green font-medium"> {includedCount} service{includedCount !== 1 ? 's' : ''} selected.</span>
+            )}
           </p>
         </div>
 
-        {/* Profile summary — pre-filled from saved profile */}
-        {form.businessName && (
-          <Card className="border-groupon-green/20 bg-groupon-green-light/20">
-            <CardContent className="py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-groupon-green text-sm font-bold text-white">
-                    {form.businessName.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <span className="font-heading text-sm font-bold text-gray-900">{form.businessName}</span>
-                    {form.businessDescription && (
-                      <p className="text-xs text-gray-500 mt-0.5 max-w-md truncate">{form.businessDescription}</p>
-                    )}
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => navigate('/portal/profile')} className="text-xs rounded-lg">
-                  Edit Profile
-                </Button>
-              </div>
-              {form.services.length > 0 && form.services[0].name && (
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {form.services.filter(s => s.name).map((s, i) => (
-                    <Badge key={i} variant="secondary" className="text-xs">
-                      {s.name} {s.regularPrice && `· $${s.regularPrice}`}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        {/* AI Recommend button */}
+        {form.services.some((s) => s.included && s.regularPrice > 0) && (
+          <Button
+            variant="outline"
+            onClick={aiRecommendPricing}
+            className="rounded-lg border-groupon-green/30 text-groupon-green hover:bg-groupon-green-light"
+          >
+            <Sparkles className="mr-2 h-4 w-4" />
+            AI Recommend Pricing
+          </Button>
         )}
 
-        {/* Booking platform — only show if not set */}
-        {!form.businessName && (
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Business Name</Label>
-              <Input
-                value={form.businessName}
-                onChange={(e) => updateForm({ businessName: (e.target as HTMLInputElement).value })}
-                placeholder="Sofia's Glow Studio"
-                className="mt-1.5"
-              />
-            </div>
-            <div>
-              <Label>Business Description</Label>
-              <Input
-                value={form.businessDescription}
-                onChange={(e) => updateForm({ businessDescription: (e.target as HTMLInputElement).value })}
-                placeholder="Full-service beauty and wellness spa..."
-                className="mt-1.5"
-              />
-            </div>
-          </div>
-        )}
-
-        <div>
-          <Label>Booking Platform</Label>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {BOOKING_PLATFORMS.map((platform) => (
-              <button
-                key={platform}
-                onClick={() => updateForm({ bookingPlatform: platform })}
-                className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                  form.bookingPlatform === platform
-                    ? 'border-groupon-green bg-groupon-green-light text-groupon-green'
-                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
-                }`}
-              >
-                {platform}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Category selection */}
-        <div>
-          <Label>Category</Label>
-          <div className="mt-2 flex gap-1 rounded-lg bg-gray-100 p-1">
-            {(['ai', 'search', 'browse'] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => updateForm({ categoryTab: tab })}
-                className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  form.categoryTab === tab
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {tab === 'ai' ? 'AI Recommended' : tab === 'search' ? 'Search' : 'Browse'}
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-4">
-            {form.categoryTab === 'ai' && (
-              <div className="rounded-xl border border-groupon-green/30 bg-groupon-green-light/30 p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="h-4 w-4 text-groupon-green" />
-                  <span className="text-sm font-bold text-groupon-green">AI Detected Category</span>
-                  <Badge className="bg-groupon-green/10 text-groupon-green border-0 text-[11px]">
-                    {form.aiConfidence}% confidence
-                  </Badge>
-                </div>
-                <p className="text-sm font-medium text-gray-900">{form.aiCategory}</p>
-                <div className="mt-3 flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => updateForm({ selectedCategory: form.aiCategory })}
-                    className="rounded-lg bg-groupon-green text-xs font-bold text-white hover:bg-groupon-green-dark"
-                  >
-                    Accept
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => updateForm({ categoryTab: 'browse' })}
-                    className="rounded-lg text-xs"
-                  >
-                    Change
-                  </Button>
-                </div>
-                {form.selectedCategory === form.aiCategory && (
-                  <div className="mt-2 flex items-center gap-1 text-xs text-groupon-green">
-                    <CheckCircle2 className="h-3 w-3" /> Category accepted
-                  </div>
-                )}
-              </div>
-            )}
-
-            {form.categoryTab === 'search' && (
-              <div>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    value={form.categorySearch}
-                    onChange={(e) => updateForm({ categorySearch: (e.target as HTMLInputElement).value })}
-                    placeholder="Search categories..."
-                    className="pl-9"
-                  />
-                </div>
-                {form.categorySearch && (
-                  <div className="mt-2 rounded-lg border border-gray-200 divide-y divide-gray-100 max-h-60 overflow-y-auto">
-                    {MAIN_CATEGORIES.flatMap((cat) =>
-                      cat.subs
-                        .filter((sub) =>
-                          sub.toLowerCase().includes(form.categorySearch.toLowerCase()) ||
-                          cat.name.toLowerCase().includes(form.categorySearch.toLowerCase())
-                        )
-                        .map((sub) => {
-                          const full = `${cat.name} > ${sub}`;
-                          return (
-                            <button
-                              key={full}
-                              onClick={() => updateForm({ selectedCategory: full, categorySearch: '' })}
-                              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-left hover:bg-gray-50 transition-colors"
-                            >
-                              <span className="text-gray-500">{cat.name}</span>
-                              <ChevronRight className="h-3 w-3 text-gray-300" />
-                              <span className="font-medium text-gray-900">{sub}</span>
-                            </button>
-                          );
-                        })
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {form.categoryTab === 'browse' && (
-              <div className="space-y-1">
-                {MAIN_CATEGORIES.map((cat) => (
-                  <div key={cat.name}>
-                    <button
-                      onClick={() => setExpandedBrowse(expandedBrowse === cat.name ? null : cat.name)}
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      {expandedBrowse === cat.name ? (
-                        <ChevronDown className="h-4 w-4 text-gray-400" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4 text-gray-400" />
-                      )}
-                      {cat.name}
-                    </button>
-                    {expandedBrowse === cat.name && (
-                      <div className="ml-6 space-y-0.5">
-                        {cat.subs.map((sub) => {
-                          const full = `${cat.name} > ${sub}`;
-                          return (
-                            <button
-                              key={full}
-                              onClick={() => updateForm({ selectedCategory: full })}
-                              className={`block w-full rounded-md px-3 py-1.5 text-left text-sm transition-colors ${
-                                form.selectedCategory === full
-                                  ? 'bg-groupon-green-light text-groupon-green font-medium'
-                                  : 'text-gray-600 hover:bg-gray-50'
-                              }`}
-                            >
-                              {sub}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {form.selectedCategory && (
-            <div className="mt-3 flex items-center gap-2 text-sm">
-              <CheckCircle2 className="h-4 w-4 text-groupon-green" />
-              <span className="text-gray-600">Selected:</span>
-              <span className="font-medium text-gray-900">{form.selectedCategory}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  function renderStep2() {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="font-heading text-lg font-bold text-gray-900">Service Options</h2>
-          <p className="text-sm text-gray-500 mt-1">Add the services you want to offer on Groupon.</p>
-        </div>
-
-        {form.services.map((svc, i) => (
-          <Card key={i}>
-            <CardHeader className="border-b">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-bold">Option {i + 1}</CardTitle>
-                {form.services.length > 1 && (
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => removeService(i)}
-                    className="text-red-400 hover:text-red-600 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <Label>Service Name</Label>
-                  <Input
-                    value={svc.name}
-                    onChange={(e) => updateService(i, { name: (e.target as HTMLInputElement).value })}
-                    placeholder="60-Minute Deep Tissue Massage"
-                    className="mt-1.5"
-                  />
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label>Regular Price ($)</Label>
-                    <Input
-                      type="number"
-                      value={svc.regularPrice}
-                      onChange={(e) => updateService(i, { regularPrice: (e.target as HTMLInputElement).value })}
-                      placeholder="120"
-                      className="mt-1.5"
-                    />
-                  </div>
-                  <div>
-                    <Label>Groupon Price ($)</Label>
-                    <Input
-                      type="number"
-                      value={svc.grouponPrice}
-                      onChange={(e) => updateService(i, { grouponPrice: (e.target as HTMLInputElement).value })}
-                      placeholder="72"
-                      className="mt-1.5"
-                    />
-                  </div>
-                  <div>
-                    <Label>Discount</Label>
-                    <div className="mt-1.5 flex h-8 items-center rounded-lg border border-input bg-gray-50 px-3 text-sm font-bold text-groupon-green">
-                      {svc.discountPct > 0 ? `${svc.discountPct}% Off` : '--'}
+        {/* Service cards */}
+        <div className="space-y-4">
+          {form.services.map((svc, i) => (
+            <Card
+              key={i}
+              className={`transition-all ${
+                svc.included
+                  ? 'ring-2 ring-groupon-green/30 bg-white'
+                  : 'opacity-60 bg-gray-50'
+              }`}
+            >
+              <CardContent className="pt-4">
+                <div className="space-y-4">
+                  {/* Header row: checkbox + name + remove */}
+                  <div className="flex items-start gap-3">
+                    <label className="mt-1 flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={svc.included}
+                        onChange={(e) => updateService(i, { included: e.target.checked })}
+                        className="h-5 w-5 rounded border-gray-300 text-groupon-green focus:ring-groupon-green"
+                      />
+                    </label>
+                    <div className="flex-1 min-w-0">
+                      <Label className="text-xs text-gray-500">Service Name</Label>
+                      <Input
+                        value={svc.name}
+                        onChange={(e) => updateService(i, { name: (e.target as HTMLInputElement).value })}
+                        placeholder="60-Minute Deep Tissue Massage"
+                        className="mt-1"
+                      />
                     </div>
+                    {form.services.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => removeService(i)}
+                        className="mt-5 text-gray-400 hover:text-red-500 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
-                </div>
-                <div>
-                  <Label>Voucher Cap (optional)</Label>
-                  <Input
-                    type="number"
-                    value={svc.voucherCap}
-                    onChange={(e) => updateService(i, { voucherCap: (e.target as HTMLInputElement).value })}
-                    placeholder="Unlimited"
-                    className="mt-1.5 max-w-[200px]"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
 
-        <Button variant="outline" onClick={addService} className="rounded-lg w-full border-dashed">
+                  {/* Pricing row */}
+                  {svc.included && (
+                    <div className="ml-8 grid grid-cols-4 gap-4">
+                      <div>
+                        <Label className="text-xs text-gray-500">Regular Price</Label>
+                        <div className="mt-1 flex h-8 items-center rounded-lg border border-input bg-gray-50 px-3 text-sm font-medium text-gray-700">
+                          ${svc.regularPrice > 0 ? svc.regularPrice : '--'}
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-gray-500">Groupon Price</Label>
+                        <Input
+                          type="number"
+                          value={svc.grouponPrice}
+                          onChange={(e) =>
+                            updateService(i, { grouponPrice: (e.target as HTMLInputElement).value })
+                          }
+                          placeholder={svc.regularPrice > 0 ? String(Math.round(svc.regularPrice * 0.63)) : '0'}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-gray-500">Discount</Label>
+                        <div
+                          className={`mt-1 flex h-8 items-center rounded-lg border px-3 text-sm font-bold ${
+                            svc.discountPct >= 30
+                              ? 'border-groupon-green/30 bg-groupon-green-light text-groupon-green'
+                              : 'border-input bg-gray-50 text-gray-500'
+                          }`}
+                        >
+                          {svc.discountPct > 0 ? `${svc.discountPct}% Off` : '--'}
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-xs text-gray-500">Monthly Cap</Label>
+                        <Input
+                          type="number"
+                          value={svc.voucherCap}
+                          onChange={(e) =>
+                            updateService(i, { voucherCap: (e.target as HTMLInputElement).value })
+                          }
+                          placeholder="Unlimited"
+                          className="mt-1"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Add service */}
+        <Button variant="outline" onClick={addService} className="w-full rounded-lg border-dashed">
           <Plus className="mr-2 h-4 w-4" />
-          Add Another Option
+          Add another service
         </Button>
       </div>
     );
   }
 
-  function renderStep3() {
+  // ---- Step: Photos ----
+
+  function renderStep2() {
     return (
       <div className="space-y-6">
         <div>
           <h2 className="font-heading text-lg font-bold text-gray-900">Photos</h2>
-          <p className="text-sm text-gray-500 mt-1">Add photos to showcase your services.</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Add photos to make your deal stand out.
+            <Badge variant="secondary" className="ml-2 text-[10px]">
+              Optional
+            </Badge>
+          </p>
         </div>
 
-        {/* Source selection */}
-        <div className="flex gap-3">
+        {/* Three options */}
+        <div className="grid grid-cols-3 gap-4">
           {([
-            { id: 'upload', label: 'Upload Photos', icon: Upload },
-            { id: 'stock', label: 'Stock Photos', icon: Image },
-            { id: 'professional', label: 'Hire Photographer', icon: Camera },
-          ] as const).map(({ id, label, icon: Icon }) => (
+            { id: 'upload' as const, label: 'Upload my own photos', icon: Upload, desc: 'JPG or PNG, up to 10MB' },
+            { id: 'stock' as const, label: 'Choose a stock photo', icon: Image, desc: 'Free stock images' },
+            { id: 'skip' as const, label: 'Skip for now', icon: SkipForward, desc: 'Add photos later' },
+          ]).map(({ id, label, icon: Icon, desc }) => (
             <button
               key={id}
-              onClick={() => updateForm({ photoSource: id })}
-              className={`flex-1 flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-colors ${
-                form.photoSource === id
-                  ? 'border-groupon-green bg-groupon-green-light/30'
-                  : 'border-gray-200 hover:border-gray-300'
+              onClick={() => updateForm({ photoOption: id })}
+              className={`flex flex-col items-center gap-3 rounded-xl border-2 p-6 text-center transition-all ${
+                form.photoOption === id
+                  ? 'border-groupon-green bg-groupon-green-light/30 shadow-sm'
+                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
               }`}
             >
-              <Icon className={`h-6 w-6 ${form.photoSource === id ? 'text-groupon-green' : 'text-gray-400'}`} />
-              <span className={`text-xs font-medium ${form.photoSource === id ? 'text-groupon-green' : 'text-gray-600'}`}>
-                {label}
-              </span>
+              <div
+                className={`flex h-12 w-12 items-center justify-center rounded-xl ${
+                  form.photoOption === id ? 'bg-groupon-green/10' : 'bg-gray-100'
+                }`}
+              >
+                <Icon
+                  className={`h-6 w-6 ${
+                    form.photoOption === id ? 'text-groupon-green' : 'text-gray-400'
+                  }`}
+                />
+              </div>
+              <div>
+                <p
+                  className={`text-sm font-medium ${
+                    form.photoOption === id ? 'text-groupon-green' : 'text-gray-700'
+                  }`}
+                >
+                  {label}
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+              </div>
             </button>
           ))}
         </div>
 
-        {/* Upload area */}
-        {form.photoSource === 'upload' && (
-          <div className="rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-12 text-center">
-            <Upload className="mx-auto h-10 w-10 text-gray-300 mb-4" />
+        {/* Upload zone */}
+        {form.photoOption === 'upload' && (
+          <div className="rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/50 p-12 text-center">
+            <Upload className="mx-auto h-12 w-12 text-gray-300 mb-4" />
             <p className="text-sm font-medium text-gray-700">Drag and drop photos here</p>
             <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 10MB each</p>
             <Button variant="outline" className="mt-4 rounded-lg text-xs">
@@ -734,37 +612,38 @@ export function CreateDeal() {
           </div>
         )}
 
-        {/* Stock photos */}
-        {form.photoSource === 'stock' && (
-          <div>
-            <Input placeholder="Search stock photos..." className="mb-4" />
-            <div className="grid grid-cols-3 gap-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="aspect-[4/3] rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-groupon-green transition-all"
-                >
-                  <Camera className="h-8 w-8 text-gray-300" />
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-gray-400 mt-3 text-center">Stock photo selection - placeholder for demo</p>
+        {/* Stock photo grid */}
+        {form.photoOption === 'stock' && (
+          <div className="grid grid-cols-3 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => updateForm({ selectedStockPhoto: i })}
+                className={`aspect-[4/3] rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center transition-all ${
+                  form.selectedStockPhoto === i
+                    ? 'ring-3 ring-groupon-green shadow-md'
+                    : 'hover:ring-2 hover:ring-groupon-green/40'
+                }`}
+              >
+                <Camera className="h-8 w-8 text-gray-300" />
+              </button>
+            ))}
           </div>
         )}
 
-        {/* Professional */}
-        {form.photoSource === 'professional' && (
-          <Card>
-            <CardContent>
-              <div className="text-center py-4">
-                <Camera className="mx-auto h-10 w-10 text-groupon-green mb-3" />
-                <h3 className="font-heading text-sm font-bold text-gray-900">Professional Photography</h3>
-                <p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
-                  Groupon partners with professional photographers. A session will be scheduled after your campaign goes live.
-                </p>
-                <Badge className="mt-3 bg-groupon-green/10 text-groupon-green border-0 text-xs">
-                  Included Free
-                </Badge>
+        {/* Skip note */}
+        {form.photoOption === 'skip' && (
+          <Card className="border-amber-200 bg-amber-50/50">
+            <CardContent className="py-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-gray-800">No photos selected</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    You can always add photos later from your campaign dashboard. Deals with photos
+                    get up to 3x more views.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -773,28 +652,47 @@ export function CreateDeal() {
     );
   }
 
-  function renderStep4() {
+  // ---- Step: Highlights ----
+
+  function renderStep3() {
     const charCount = form.highlights.length;
+    const isGenerating = inspiringField === 'highlights';
+
     return (
       <div className="space-y-6">
         <div>
           <h2 className="font-heading text-lg font-bold text-gray-900">Highlights</h2>
           <p className="text-sm text-gray-500 mt-1">
-            Tell customers what makes your service special. Each line becomes a highlight bullet point.
+            Tell customers what makes your service special. Each line becomes a bullet point.
           </p>
         </div>
+
+        {isGenerating && !form.highlights && (
+          <div className="flex items-center gap-3 rounded-lg bg-groupon-green-light/50 px-4 py-3">
+            <Loader2 className="h-4 w-4 animate-spin text-groupon-green" />
+            <span className="text-sm text-groupon-green font-medium">
+              AI is writing your highlights...
+            </span>
+          </div>
+        )}
 
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <Label>Highlights</Label>
-            <span className={`text-xs ${charCount > 450 ? 'text-red-500 font-bold' : 'text-gray-400'}`}>
+            <span
+              className={`text-xs ${
+                charCount > 450 ? 'text-red-500 font-bold' : charCount > 400 ? 'text-amber-500' : 'text-gray-400'
+              }`}
+            >
               {charCount}/450
             </span>
           </div>
           <Textarea
             value={form.highlights}
             onChange={(e) => updateForm({ highlights: (e.target as HTMLTextAreaElement).value })}
-            placeholder="Licensed therapists with 10+ years of experience&#10;Premium organic products used&#10;Private treatment rooms&#10;Complimentary refreshments"
+            placeholder={
+              'Licensed therapists with 10+ years of experience\nPremium organic products used\nPrivate treatment rooms\nComplimentary refreshments'
+            }
             rows={6}
             maxLength={450}
           />
@@ -803,35 +701,38 @@ export function CreateDeal() {
               variant="outline"
               size="sm"
               onClick={() => handleInspireMe('highlights')}
-              disabled={inspiringField === 'highlights'}
+              disabled={isGenerating}
               className="rounded-lg text-xs"
             >
-              {inspiringField === 'highlights' ? (
+              {isGenerating ? (
                 <Loader2 className="mr-1 h-3 w-3 animate-spin" />
               ) : (
                 <Sparkles className="mr-1 h-3 w-3" />
               )}
               Inspire Me
             </Button>
-            <Button variant="outline" size="sm" className="rounded-lg text-xs">
-              <Info className="mr-1 h-3 w-3" />
-              Share More Details
-            </Button>
-            <VoiceInput onTranscript={(t) => updateForm({ highlights: (form.highlights ? form.highlights + ' ' : '') + t })} />
+            <VoiceInput
+              onTranscript={(t) =>
+                updateForm({ highlights: (form.highlights ? form.highlights + '\n' : '') + t })
+              }
+            />
           </div>
         </div>
 
         {/* Preview of highlights */}
         {form.highlights && (
-          <div className="rounded-lg bg-gray-50 p-4">
+          <div className="rounded-xl bg-gray-50 p-4">
             <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">Preview</h4>
             <ul className="space-y-1.5">
-              {form.highlights.split('\n').filter(Boolean).map((line, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-groupon-green" />
-                  {line.trim()}
-                </li>
-              ))}
+              {form.highlights
+                .split('\n')
+                .filter(Boolean)
+                .map((line, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-groupon-green" />
+                    {line.trim()}
+                  </li>
+                ))}
             </ul>
           </div>
         )}
@@ -839,108 +740,108 @@ export function CreateDeal() {
     );
   }
 
-  function renderStep5() {
+  // ---- Step: Description ----
+
+  function renderStep4() {
+    const includedServices = form.services
+      .map((s, i) => ({ ...s, originalIndex: i }))
+      .filter((s) => s.included && s.name);
+
     return (
       <div className="space-y-6">
         <div>
           <h2 className="font-heading text-lg font-bold text-gray-900">Description</h2>
-          <p className="text-sm text-gray-500 mt-1">Write a detailed description for each service option.</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Describe what each service includes so customers know exactly what they are getting.
+          </p>
         </div>
 
-        <div className="grid grid-cols-[1fr_280px] gap-6">
-          <div className="space-y-4">
-            {form.services.filter((s) => s.name).map((svc, i) => (
-              <Card key={i}>
-                <CardHeader className="border-b">
-                  <CardTitle className="text-sm font-bold">{svc.name || `Option ${i + 1}`}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Textarea
-                    value={form.descriptions[i] ?? ''}
-                    onChange={(e) =>
+        {includedServices.map((svc) => {
+          const idx = svc.originalIndex;
+          const isGenerating = inspiringField === `description-${idx}`;
+
+          return (
+            <Card key={idx}>
+              <CardHeader className="border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-bold">{svc.name}</CardTitle>
+                  {svc.grouponPrice && (
+                    <Badge className="bg-groupon-green/10 text-groupon-green border-0 text-xs">
+                      ${svc.grouponPrice}
+                    </Badge>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                {isGenerating && !form.descriptions[idx] && (
+                  <div className="flex items-center gap-2 mb-3 text-sm text-groupon-green">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Writing description...
+                  </div>
+                )}
+                <Textarea
+                  value={form.descriptions[idx] ?? ''}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      descriptions: {
+                        ...prev.descriptions,
+                        [idx]: (e.target as HTMLTextAreaElement).value,
+                      },
+                    }))
+                  }
+                  placeholder="Describe this service in detail. What does the customer get? What's the experience like?"
+                  rows={4}
+                />
+                <p className="mt-1.5 text-xs text-gray-400">
+                  Include what the service covers, how long it lasts, and what products or techniques are used.
+                </p>
+                <div className="mt-3 flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleInspireMe('description', idx)}
+                    disabled={isGenerating}
+                    className="rounded-lg text-xs"
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                    ) : (
+                      <Sparkles className="mr-1 h-3 w-3" />
+                    )}
+                    Inspire Me
+                  </Button>
+                  <VoiceInput
+                    onTranscript={(t) =>
                       setForm((prev) => ({
                         ...prev,
-                        descriptions: { ...prev.descriptions, [i]: (e.target as HTMLTextAreaElement).value },
+                        descriptions: {
+                          ...prev.descriptions,
+                          [idx]: (prev.descriptions[idx] || '') + ' ' + t,
+                        },
                       }))
                     }
-                    placeholder="Describe this service in detail. What does the customer get? What's the experience like?"
-                    rows={4}
                   />
-                  <div className="mt-2 flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleInspireMe('description', i)}
-                      disabled={inspiringField === `description-${i}`}
-                      className="rounded-lg text-xs"
-                    >
-                      {inspiringField === `description-${i}` ? (
-                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                      ) : (
-                        <Sparkles className="mr-1 h-3 w-3" />
-                      )}
-                      Inspire Me
-                    </Button>
-                    <VoiceInput
-                      onTranscript={(t) =>
-                        setForm((prev) => ({
-                          ...prev,
-                          descriptions: { ...prev.descriptions, [i]: (prev.descriptions[i] || '') + ' ' + t },
-                        }))
-                      }
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
 
-          {/* Guidelines sidebar */}
-          <div className="space-y-4">
-            <Card>
-              <CardHeader className="border-b">
-                <CardTitle className="text-xs font-bold text-groupon-green">Essential Info</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-xs text-gray-600">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-groupon-green" />
-                    What the service includes
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-groupon-green" />
-                    Duration of the service
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-groupon-green" />
-                    Products or techniques used
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-groupon-green" />
-                    What to expect during the visit
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="border-b">
-                <CardTitle className="text-xs font-bold text-gray-500">Non-Essential</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-xs text-gray-400">
-                  <li>-- Company history</li>
-                  <li>-- Promotional language</li>
-                  <li>-- Pricing details (shown separately)</li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        {includedServices.length === 0 && (
+          <Card className="border-amber-200 bg-amber-50/50">
+            <CardContent className="py-6 text-center">
+              <p className="text-sm text-gray-600">No services selected. Go back to Step 1 to include services.</p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     );
   }
 
-  function renderStep6() {
+  // ---- Step: Fine Print ----
+
+  function renderStep5() {
     return (
       <div className="space-y-6">
         <div>
@@ -948,17 +849,17 @@ export function CreateDeal() {
           <p className="text-sm text-gray-500 mt-1">Set the terms and conditions for your deal.</p>
         </div>
 
-        {/* Voucher limit */}
+        {/* Vouchers per purchase */}
         <div>
-          <Label>Voucher Limit Per Customer</Label>
+          <Label>Vouchers Per Purchase</Label>
           <div className="mt-2 flex gap-3">
             {[1, 2, 3].map((n) => (
               <button
                 key={n}
-                onClick={() => updateForm({ voucherLimit: n })}
-                className={`flex h-10 w-16 items-center justify-center rounded-lg border-2 text-sm font-bold transition-colors ${
-                  form.voucherLimit === n
-                    ? 'border-groupon-green bg-groupon-green-light text-groupon-green'
+                onClick={() => updateForm({ vouchersPerPurchase: n })}
+                className={`flex h-11 w-20 items-center justify-center rounded-xl border-2 text-sm font-bold transition-all ${
+                  form.vouchersPerPurchase === n
+                    ? 'border-groupon-green bg-groupon-green-light text-groupon-green shadow-sm'
                     : 'border-gray-200 text-gray-600 hover:border-gray-300'
                 }`}
               >
@@ -968,6 +869,8 @@ export function CreateDeal() {
           </div>
         </div>
 
+        <Separator />
+
         {/* Expiry */}
         <div>
           <Label>Voucher Expiry</Label>
@@ -976,15 +879,15 @@ export function CreateDeal() {
               <button
                 key={days}
                 onClick={() => updateForm({ expiryDays: days })}
-                className={`relative flex h-10 items-center justify-center rounded-lg border-2 px-5 text-sm font-bold transition-colors ${
+                className={`relative flex h-11 items-center justify-center rounded-xl border-2 px-6 text-sm font-bold transition-all ${
                   form.expiryDays === days
-                    ? 'border-groupon-green bg-groupon-green-light text-groupon-green'
+                    ? 'border-groupon-green bg-groupon-green-light text-groupon-green shadow-sm'
                     : 'border-gray-200 text-gray-600 hover:border-gray-300'
                 }`}
               >
                 {days} days
                 {days === 90 && (
-                  <Badge className="absolute -top-2 -right-2 bg-groupon-green text-white text-[9px] px-1.5">
+                  <Badge className="absolute -top-2.5 -right-3 bg-groupon-green text-white text-[9px] px-1.5 py-0.5">
                     Recommended
                   </Badge>
                 )}
@@ -993,35 +896,60 @@ export function CreateDeal() {
           </div>
         </div>
 
+        <Separator />
+
         {/* Cancellation policy */}
         <div>
-          <Label>Cancellation Policy</Label>
+          <div className="flex items-center gap-2 mb-1.5">
+            <Label>Cancellation Policy</Label>
+            <Badge variant="secondary" className="text-[10px]">AI Pre-filled</Badge>
+          </div>
           <Textarea
             value={form.cancellationPolicy}
-            onChange={(e) => updateForm({ cancellationPolicy: (e.target as HTMLTextAreaElement).value })}
+            onChange={(e) =>
+              updateForm({ cancellationPolicy: (e.target as HTMLTextAreaElement).value })
+            }
             placeholder="24-hour cancellation policy. No-shows will forfeit their voucher."
             rows={3}
-            className="mt-1.5"
           />
         </div>
 
+        <Separator />
+
         {/* Restrictions */}
         <div>
-          <Label>Optional Restrictions</Label>
-          <div className="mt-2 space-y-2">
-            {[
-              { key: 'restrictionNewCustomers' as const, label: 'New customers only' },
-              { key: 'restrictionAppointment' as const, label: 'Appointment required' },
-              { key: 'restrictionNoRefund' as const, label: 'No refunds after purchase' },
-            ].map(({ key, label }) => (
-              <label key={key} className="flex items-center gap-3 cursor-pointer">
+          <Label>Restrictions</Label>
+          <div className="mt-3 space-y-3">
+            {([
+              {
+                key: 'restrictionNewCustomers' as const,
+                label: 'New customers only',
+              },
+              {
+                key: 'restrictionAppointment' as const,
+                label: 'Appointment required',
+              },
+              {
+                key: 'restrictionNoOtherOffers' as const,
+                label: 'Not valid with other offers',
+              },
+              {
+                key: 'restrictionGratuity' as const,
+                label: 'Gratuity not included',
+              },
+              {
+                key: 'restrictionWaiver' as const,
+                label: 'Must sign waiver',
+              },
+            ] as const).map(({ key, label }) => (
+              <label key={key} className="flex items-center gap-3 cursor-pointer group">
                 <input
                   type="checkbox"
                   checked={form[key]}
-                  onChange={(e) => updateForm({ [key]: e.target.checked })}
+                  onChange={(e) => updateForm({ [key]: e.target.checked } as Partial<DealFormState>)}
                   className="h-4 w-4 rounded border-gray-300 text-groupon-green focus:ring-groupon-green"
                 />
-                <span className="text-sm text-gray-700">{label}</span>
+                <span className="text-sm text-gray-700 group-hover:text-gray-900">{label}</span>
               </label>
             ))}
           </div>
@@ -1030,7 +958,9 @@ export function CreateDeal() {
     );
   }
 
-  function renderStep7() {
+  // ---- Step: Voucher Instructions ----
+
+  function renderStep6() {
     return (
       <div className="space-y-6">
         <div>
@@ -1041,240 +971,290 @@ export function CreateDeal() {
         {/* Redemption method */}
         <div>
           <Label>Redemption Method</Label>
-          <div className="mt-2 flex gap-3">
+          <div className="mt-2 grid grid-cols-3 gap-3">
             {([
-              { id: 'physical', label: 'In Person' },
-              { id: 'travel', label: 'Travel / On-site' },
-              { id: 'online', label: 'Online' },
-            ] as const).map(({ id, label }) => (
+              { id: 'physical' as const, label: 'In Person', desc: 'Customer visits your location' },
+              { id: 'travel' as const, label: 'Travel / On-site', desc: 'You go to the customer' },
+              { id: 'online' as const, label: 'Online', desc: 'Redeemed digitally' },
+            ]).map(({ id, label, desc }) => (
               <button
                 key={id}
                 onClick={() => updateForm({ redemptionMethod: id })}
-                className={`flex-1 rounded-lg border-2 px-4 py-3 text-sm font-medium transition-colors ${
+                className={`flex flex-col items-center gap-1 rounded-xl border-2 px-4 py-4 text-center transition-all ${
                   form.redemptionMethod === id
-                    ? 'border-groupon-green bg-groupon-green-light text-groupon-green'
+                    ? 'border-groupon-green bg-groupon-green-light/30 shadow-sm'
                     : 'border-gray-200 text-gray-600 hover:border-gray-300'
                 }`}
               >
-                {label}
+                <span
+                  className={`text-sm font-medium ${
+                    form.redemptionMethod === id ? 'text-groupon-green' : 'text-gray-700'
+                  }`}
+                >
+                  {label}
+                </span>
+                <span className="text-xs text-gray-400">{desc}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Address */}
+        <Separator />
+
+        {/* Address - pre-filled from profile */}
         {form.redemptionMethod !== 'online' && (
-          <div className="space-y-4">
-            <div>
-              <Label>Address</Label>
-              <Input
-                value={form.redemptionAddress}
-                onChange={(e) => updateForm({ redemptionAddress: (e.target as HTMLInputElement).value })}
-                placeholder="123 Main Street"
-                className="mt-1.5"
-              />
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <Label>Business Address</Label>
+              {form.redemptionAddress && (
+                <Badge variant="secondary" className="text-[10px]">From profile</Badge>
+              )}
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label>City</Label>
-                <Input
-                  value={form.redemptionCity}
-                  onChange={(e) => updateForm({ redemptionCity: (e.target as HTMLInputElement).value })}
-                  placeholder="Chicago"
-                  className="mt-1.5"
-                />
-              </div>
-              <div>
-                <Label>State</Label>
-                <Input
-                  value={form.redemptionState}
-                  onChange={(e) => updateForm({ redemptionState: (e.target as HTMLInputElement).value })}
-                  placeholder="IL"
-                  className="mt-1.5"
-                />
-              </div>
-              <div>
-                <Label>ZIP</Label>
-                <Input
-                  value={form.redemptionZip}
-                  onChange={(e) => updateForm({ redemptionZip: (e.target as HTMLInputElement).value })}
-                  placeholder="60601"
-                  className="mt-1.5"
-                />
-              </div>
-            </div>
+            <Input
+              value={form.redemptionAddress}
+              onChange={(e) =>
+                updateForm({ redemptionAddress: (e.target as HTMLInputElement).value })
+              }
+              placeholder="123 Main Street, Chicago, IL 60601"
+            />
           </div>
         )}
 
         {/* Appointment toggle */}
         <div>
           <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.redemptionAppointment}
-              onChange={(e) => updateForm({ redemptionAppointment: e.target.checked })}
-              className="h-4 w-4 rounded border-gray-300 text-groupon-green focus:ring-groupon-green"
-            />
-            <span className="text-sm text-gray-700">Appointment required for redemption</span>
+            <div
+              onClick={() => updateForm({ redemptionAppointment: !form.redemptionAppointment })}
+              className={`relative h-6 w-11 rounded-full cursor-pointer transition-colors ${
+                form.redemptionAppointment ? 'bg-groupon-green' : 'bg-gray-300'
+              }`}
+            >
+              <div
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                  form.redemptionAppointment ? 'translate-x-5' : 'translate-x-0.5'
+                }`}
+              />
+            </div>
+            <div>
+              <span className="text-sm font-medium text-gray-700">Appointment required</span>
+              <p className="text-xs text-gray-400">Customers must book before visiting</p>
+            </div>
           </label>
         </div>
 
-        {/* Phone */}
+        <Separator />
+
+        {/* Phone - pre-filled from profile */}
         <div>
-          <Label>Phone Number</Label>
+          <div className="flex items-center gap-2 mb-1.5">
+            <Label>Phone Number</Label>
+            {form.redemptionPhone && (
+              <Badge variant="secondary" className="text-[10px]">From profile</Badge>
+            )}
+          </div>
           <Input
             value={form.redemptionPhone}
-            onChange={(e) => updateForm({ redemptionPhone: (e.target as HTMLInputElement).value })}
+            onChange={(e) =>
+              updateForm({ redemptionPhone: (e.target as HTMLInputElement).value })
+            }
             placeholder="(312) 555-0123"
-            className="mt-1.5 max-w-[280px]"
+            className="max-w-[280px]"
           />
         </div>
       </div>
     );
   }
 
-  function renderStep8() {
-    const activeServices = form.services.filter((s) => s.name);
+  // ---- Step: Review & Publish ----
+
+  function renderStep7() {
+    const includedServices = form.services.filter((s) => s.included && s.name);
+    const highlightLines = form.highlights.split('\n').filter(Boolean);
+
+    // Completion checklist
+    const checks = [
+      { label: 'At least one service with pricing', done: includedServices.some((s) => parseFloat(s.grouponPrice) > 0) },
+      { label: 'Highlights added', done: highlightLines.length > 0 },
+      { label: 'Service descriptions written', done: includedServices.every((s) => {
+        const idx = form.services.indexOf(s);
+        return Boolean(form.descriptions[idx]);
+      })},
+      { label: 'Fine print configured', done: form.expiryDays > 0 },
+      { label: 'Redemption instructions set', done: Boolean(form.redemptionAddress || form.redemptionMethod === 'online') },
+    ];
+    const allComplete = checks.every((c) => c.done);
 
     return (
       <div className="space-y-6">
         <div>
           <h2 className="font-heading text-lg font-bold text-gray-900">Review & Publish</h2>
-          <p className="text-sm text-gray-500 mt-1">Review all details before publishing your deal.</p>
+          <p className="text-sm text-gray-500 mt-1">Review your deal before it goes live.</p>
         </div>
 
-        {/* Summary sections */}
-        <div className="space-y-4">
-          {/* Setup */}
-          <Card>
-            <CardHeader className="border-b">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-bold">Setup</CardTitle>
-                <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="text-xs text-groupon-green">
-                  Edit
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-gray-500">Business:</span>{' '}
-                  <span className="font-medium">{form.businessName || '--'}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Category:</span>{' '}
-                  <span className="font-medium">{form.selectedCategory || form.aiCategory || '--'}</span>
-                </div>
-                <div>
-                  <span className="text-gray-500">Booking:</span>{' '}
-                  <span className="font-medium">{form.bookingPlatform}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Options */}
-          <Card>
-            <CardHeader className="border-b">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-bold">Options ({activeServices.length})</CardTitle>
-                <Button variant="ghost" size="sm" onClick={() => setStep(2)} className="text-xs text-groupon-green">
-                  Edit
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {activeServices.map((svc, i) => (
-                <div key={i} className={`flex items-center justify-between py-2 ${i > 0 ? 'border-t border-gray-100' : ''}`}>
-                  <span className="text-sm font-medium">{svc.name}</span>
-                  <div className="flex items-center gap-3 text-sm">
-                    <span className="text-gray-400 line-through">${svc.regularPrice}</span>
-                    <span className="font-bold text-groupon-green">${svc.grouponPrice}</span>
-                    {svc.discountPct > 0 && (
-                      <Badge className="bg-groupon-green/10 text-groupon-green border-0 text-[11px]">
-                        {svc.discountPct}% Off
-                      </Badge>
-                    )}
-                  </div>
+        {/* Completion checklist */}
+        <Card className={allComplete ? 'border-groupon-green/30 bg-groupon-green-light/20' : 'border-amber-200 bg-amber-50/30'}>
+          <CardContent className="py-4">
+            <h3 className="font-heading text-sm font-bold text-gray-900 mb-3">Completion Checklist</h3>
+            <div className="space-y-2">
+              {checks.map((check, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm">
+                  {check.done ? (
+                    <CheckCircle2 className="h-4 w-4 text-groupon-green shrink-0" />
+                  ) : (
+                    <div className="h-4 w-4 rounded-full border-2 border-gray-300 shrink-0" />
+                  )}
+                  <span className={check.done ? 'text-gray-700' : 'text-gray-400'}>{check.label}</span>
                 </div>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Highlights */}
-          {form.highlights && (
+        <div className="grid grid-cols-[1fr_320px] gap-6">
+          {/* Left: summary sections */}
+          <div className="space-y-4">
+            {/* Services */}
             <Card>
               <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-bold">Highlights</CardTitle>
-                  <Button variant="ghost" size="sm" onClick={() => setStep(4)} className="text-xs text-groupon-green">
+                  <CardTitle className="text-sm font-bold">
+                    Services ({includedServices.length})
+                  </CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setStep(1)}
+                    className="text-xs text-groupon-green"
+                  >
                     Edit
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <ul className="space-y-1">
-                  {form.highlights.split('\n').filter(Boolean).map((line, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-groupon-green" />
-                      {line.trim()}
-                    </li>
-                  ))}
-                </ul>
+                {includedServices.map((svc, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-center justify-between py-2.5 ${
+                      i > 0 ? 'border-t border-gray-100' : ''
+                    }`}
+                  >
+                    <span className="text-sm font-medium">{svc.name}</span>
+                    <div className="flex items-center gap-3 text-sm">
+                      <span className="text-gray-400 line-through">${svc.regularPrice}</span>
+                      <span className="font-bold text-groupon-green">${svc.grouponPrice}</span>
+                      {svc.discountPct > 0 && (
+                        <Badge className="bg-groupon-green/10 text-groupon-green border-0 text-[11px]">
+                          {svc.discountPct}% Off
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </CardContent>
             </Card>
-          )}
 
-          {/* Fine Print */}
-          <Card>
-            <CardHeader className="border-b">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-bold">Fine Print</CardTitle>
-                <Button variant="ghost" size="sm" onClick={() => setStep(6)} className="text-xs text-groupon-green">
-                  Edit
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1 text-sm text-gray-600">
-                <p>Limit {form.voucherLimit} per person</p>
-                <p>Expires {form.expiryDays} days after purchase</p>
-                {form.restrictionAppointment && <p>Appointment required</p>}
-                {form.restrictionNewCustomers && <p>New customers only</p>}
-                {form.cancellationPolicy && <p>Cancellation: {form.cancellationPolicy}</p>}
-              </div>
-            </CardContent>
-          </Card>
+            {/* Highlights */}
+            {highlightLines.length > 0 && (
+              <Card>
+                <CardHeader className="border-b">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-bold">Highlights</CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setStep(3)}
+                      className="text-xs text-groupon-green"
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-1.5">
+                    {highlightLines.map((line, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                        <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-groupon-green" />
+                        {line.trim()}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
 
-          {/* Redemption */}
-          <Card>
-            <CardHeader className="border-b">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-bold">Redemption</CardTitle>
-                <Button variant="ghost" size="sm" onClick={() => setStep(7)} className="text-xs text-groupon-green">
-                  Edit
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1 text-sm text-gray-600">
-                <p>Method: {form.redemptionMethod}</p>
-                {form.redemptionAddress && (
-                  <p>
-                    {form.redemptionAddress}, {form.redemptionCity}, {form.redemptionState} {form.redemptionZip}
+            {/* Fine Print */}
+            <Card>
+              <CardHeader className="border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-bold">Fine Print</CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setStep(5)}
+                    className="text-xs text-groupon-green"
+                  >
+                    Edit
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-1.5 text-sm text-gray-600">
+                  <p>Limit {form.vouchersPerPurchase} per person</p>
+                  <p>Expires {form.expiryDays} days after purchase</p>
+                  {form.restrictionAppointment && <p>Appointment required</p>}
+                  {form.restrictionNewCustomers && <p>New customers only</p>}
+                  {form.restrictionNoOtherOffers && <p>Not valid with other offers</p>}
+                  {form.restrictionGratuity && <p>Gratuity not included</p>}
+                  {form.restrictionWaiver && <p>Must sign waiver</p>}
+                  {form.cancellationPolicy && (
+                    <p className="text-gray-400 italic">{form.cancellationPolicy}</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Redemption */}
+            <Card>
+              <CardHeader className="border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-bold">Redemption</CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setStep(6)}
+                    className="text-xs text-groupon-green"
+                  >
+                    Edit
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-1.5 text-sm text-gray-600">
+                  <p className="capitalize">
+                    Method: {form.redemptionMethod === 'physical' ? 'In Person' : form.redemptionMethod === 'travel' ? 'Travel / On-site' : 'Online'}
                   </p>
-                )}
-                {form.redemptionPhone && <p>Phone: {form.redemptionPhone}</p>}
-              </div>
-            </CardContent>
-          </Card>
+                  {form.redemptionAddress && <p>{form.redemptionAddress}</p>}
+                  {form.redemptionPhone && <p>Phone: {form.redemptionPhone}</p>}
+                  <p>{form.redemptionAppointment ? 'Appointment required' : 'Walk-ins welcome'}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right: customer preview card in review step */}
+          <div>
+            <div className="sticky top-20">
+              <h3 className="text-xs font-bold text-gray-500 uppercase mb-3">Customer Preview</h3>
+              {renderPreviewCard()}
+            </div>
+          </div>
         </div>
 
         {/* Publish button */}
         <div className="flex gap-3 pt-4 border-t border-gray-200">
           <Button
             onClick={handlePublish}
-            disabled={publishing}
+            disabled={publishing || !allComplete}
             className="rounded-lg bg-groupon-green px-8 font-bold text-white hover:bg-groupon-green-dark"
           >
             {publishing ? (
@@ -1283,7 +1263,7 @@ export function CreateDeal() {
                 Publishing...
               </>
             ) : (
-              'Publish Campaign'
+              'Publish Deal'
             )}
           </Button>
           <Button variant="outline" onClick={() => navigate('/portal/campaigns')} className="rounded-lg">
@@ -1294,11 +1274,104 @@ export function CreateDeal() {
     );
   }
 
-  // ---- Live Preview ----
-  function renderLivePreview() {
-    const activeServices = form.services.filter((s) => s.name);
-    const highlightLines = form.highlights.split('\n').filter(Boolean);
+  // ---- Customer Preview Card ----
 
+  function renderPreviewCard() {
+    const includedServices = form.services.filter((s) => s.included && s.name);
+    const highlightLines = form.highlights.split('\n').filter(Boolean);
+    const firstService = includedServices[0];
+
+    return (
+      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+        {/* Photo placeholder */}
+        <div className="h-40 bg-gradient-to-br from-groupon-green-light to-gray-100 flex items-center justify-center relative">
+          <Camera className="h-10 w-10 text-gray-300" />
+          {firstService && firstService.discountPct > 0 && (
+            <div className="absolute top-3 left-3 bg-groupon-green text-white text-xs font-bold px-2 py-1 rounded-lg">
+              {firstService.discountPct}% Off
+            </div>
+          )}
+        </div>
+
+        <div className="p-4 space-y-3">
+          {/* Title */}
+          <h4 className="font-heading text-sm font-bold text-gray-900 leading-snug">
+            {firstService?.name
+              ? `${firstService.name} at ${form.businessName || 'Your Business'}`
+              : 'Your Deal Title'}
+          </h4>
+
+          {/* Business + rating */}
+          <div className="flex items-center gap-2 text-xs">
+            <span className="font-medium text-groupon-green">
+              {form.businessName || 'Business Name'}
+            </span>
+            <div className="flex gap-0.5">
+              {[1, 2, 3, 4].map((i) => (
+                <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
+              ))}
+              <Star className="h-3 w-3 text-gray-300" />
+            </div>
+            <span className="text-gray-400">4.0</span>
+          </div>
+
+          {/* First service price */}
+          {firstService && (
+            <div className="rounded-lg bg-gray-50 p-3">
+              <div className="flex items-baseline gap-2">
+                {firstService.regularPrice > 0 && (
+                  <span className="text-xs text-gray-400 line-through">
+                    ${firstService.regularPrice}
+                  </span>
+                )}
+                {firstService.grouponPrice && (
+                  <span className="text-lg font-extrabold text-groupon-green">
+                    ${firstService.grouponPrice}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-0.5">{firstService.name}</p>
+            </div>
+          )}
+
+          {/* Highlights preview */}
+          {highlightLines.length > 0 && (
+            <ul className="space-y-1">
+              {highlightLines.slice(0, 3).map((line, i) => (
+                <li key={i} className="flex items-start gap-1.5 text-[11px] text-gray-600">
+                  <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-groupon-green" />
+                  {line.trim()}
+                </li>
+              ))}
+              {highlightLines.length > 3 && (
+                <li className="text-[11px] text-gray-400">
+                  +{highlightLines.length - 3} more
+                </li>
+              )}
+            </ul>
+          )}
+
+          {/* Location */}
+          {(form.redemptionAddress || form.location) && (
+            <div className="flex items-center gap-2 text-[11px] text-gray-500">
+              <MapPin className="h-3 w-3 shrink-0" />
+              <span className="truncate">{form.redemptionAddress || form.location}</span>
+            </div>
+          )}
+
+          {/* Buy button */}
+          <Button className="w-full h-9 rounded-lg bg-groupon-green text-xs font-bold text-white hover:bg-groupon-green-dark">
+            <ShoppingCart className="mr-1 h-3 w-3" />
+            Buy Now
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Live Preview Sidebar ----
+
+  function renderLivePreview() {
     return (
       <div className="w-[320px] shrink-0">
         <div className="sticky top-20">
@@ -1310,103 +1383,51 @@ export function CreateDeal() {
               onClick={() => setShowPreview(!showPreview)}
               title={showPreview ? 'Hide preview' : 'Show preview'}
             >
-              {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPreview ? (
+                <EyeOff className="h-4 w-4 text-gray-400" />
+              ) : (
+                <Eye className="h-4 w-4 text-gray-400" />
+              )}
             </Button>
           </div>
 
-          {showPreview && (
-            <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
-              {/* Photo placeholder */}
-              <div className="h-40 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                <Camera className="h-10 w-10 text-gray-300" />
-              </div>
-
-              <div className="p-4 space-y-3">
-                {/* Title */}
-                <h4 className="font-heading text-sm font-bold text-gray-900 leading-snug">
-                  {activeServices[0]?.name
-                    ? `${activeServices[0].name} at ${form.businessName || 'Your Business'}`
-                    : 'Your Deal Title'}
-                </h4>
-
-                {/* Business */}
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="font-medium text-groupon-green">{form.businessName || 'Business Name'}</span>
-                  <div className="flex gap-0.5">
-                    {[1, 2, 3, 4].map((i) => (
-                      <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
-                    ))}
-                    <Star className="h-3 w-3 text-gray-300" />
-                  </div>
-                </div>
-
-                {/* Options */}
-                {activeServices.length > 0 && (
-                  <div className="space-y-2">
-                    {activeServices.map((svc, i) => (
-                      <div key={i} className="rounded-lg border border-gray-100 p-2.5">
-                        <p className="text-xs font-medium text-gray-900">{svc.name}</p>
-                        <div className="flex items-baseline gap-2 mt-1">
-                          {svc.regularPrice && (
-                            <span className="text-[11px] text-gray-400 line-through">${svc.regularPrice}</span>
-                          )}
-                          {svc.grouponPrice && (
-                            <span className="text-sm font-extrabold text-groupon-green">${svc.grouponPrice}</span>
-                          )}
-                          {svc.discountPct > 0 && (
-                            <Badge className="bg-groupon-green/10 text-groupon-green border-0 text-[9px]">
-                              {svc.discountPct}% Off
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Highlights */}
-                {highlightLines.length > 0 && (
-                  <div className="rounded-lg bg-gray-50 p-2.5">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Highlights</p>
-                    <ul className="space-y-1">
-                      {highlightLines.slice(0, 3).map((line, i) => (
-                        <li key={i} className="flex items-start gap-1.5 text-[11px] text-gray-600">
-                          <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-groupon-green" />
-                          {line.trim()}
-                        </li>
-                      ))}
-                      {highlightLines.length > 3 && (
-                        <li className="text-[11px] text-gray-400">+{highlightLines.length - 3} more</li>
-                      )}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Location */}
-                {(form.redemptionAddress || form.redemptionCity) && (
-                  <div className="flex items-center gap-2 text-[11px] text-gray-500">
-                    <MapPin className="h-3 w-3" />
-                    <span>
-                      {form.redemptionAddress ? `${form.redemptionAddress}, ` : ''}
-                      {form.redemptionCity} {form.redemptionState}
-                    </span>
-                  </div>
-                )}
-
-                {/* Buy button */}
-                <Button className="w-full h-9 rounded-lg bg-groupon-green text-xs font-bold text-white hover:bg-groupon-green-dark">
-                  <ShoppingCart className="mr-1 h-3 w-3" />
-                  Buy Now
-                </Button>
-              </div>
-            </div>
-          )}
+          {showPreview && renderPreviewCard()}
         </div>
       </div>
     );
   }
 
   // ---- Main Render ----
+
+  if (profileLoading) {
+    return (
+      <div className="flex items-center justify-center py-20 text-gray-400">
+        <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading your profile...
+      </div>
+    );
+  }
+
+  if (noServices) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 animate-fade-in-up">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100 mb-4">
+          <AlertCircle className="h-8 w-8 text-amber-500" />
+        </div>
+        <h2 className="font-heading text-lg font-bold text-gray-900 mb-2">Add your services first</h2>
+        <p className="text-sm text-gray-500 mb-6 text-center max-w-sm">
+          Before creating a deal, set up your business profile with the services you offer and their regular prices.
+        </p>
+        <Button
+          onClick={() => navigate('/portal/profile')}
+          className="rounded-lg bg-groupon-green px-6 font-bold text-white hover:bg-groupon-green-dark"
+        >
+          Go to Profile
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
   const stepRenderers: Record<number, () => React.ReactNode> = {
     1: renderStep1,
     2: renderStep2,
@@ -1415,7 +1436,6 @@ export function CreateDeal() {
     5: renderStep5,
     6: renderStep6,
     7: renderStep7,
-    8: renderStep8,
   };
 
   return (
@@ -1424,7 +1444,7 @@ export function CreateDeal() {
         {/* Step sidebar */}
         <div className="w-[200px] shrink-0">
           <div className="sticky top-20">
-            <h2 className="font-heading text-sm font-bold text-gray-900 mb-4">Create Campaign</h2>
+            <h2 className="font-heading text-sm font-bold text-gray-900 mb-4">Create Deal</h2>
             <nav className="space-y-0.5">
               {STEPS.map((s) => {
                 const isActive = s.id === step;
@@ -1445,7 +1465,7 @@ export function CreateDeal() {
                       <CheckCircle2 className="h-4 w-4 shrink-0 text-groupon-green" />
                     ) : (
                       <div
-                        className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold ${
+                        className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
                           isActive
                             ? 'bg-groupon-green text-white'
                             : 'border border-gray-300 text-gray-400'
@@ -1455,6 +1475,9 @@ export function CreateDeal() {
                       </div>
                     )}
                     <span className="truncate">{s.short}</span>
+                    {s.optional && (
+                      <span className="ml-auto text-[9px] text-gray-400 font-normal">Optional</span>
+                    )}
                   </button>
                 );
               })}
@@ -1463,14 +1486,14 @@ export function CreateDeal() {
         </div>
 
         {/* Main content */}
-        <div className="flex-1 min-w-0 max-w-2xl">
+        <div className="flex-1 min-w-0 max-w-[700px]">
           {/* Step content */}
           <div className="rounded-xl border border-gray-200 bg-white p-6">
             {stepRenderers[step]?.()}
           </div>
 
           {/* Navigation */}
-          {step < 8 && (
+          {step < 7 && (
             <div className="flex items-center justify-between mt-4">
               <Button
                 variant="outline"
@@ -1485,7 +1508,7 @@ export function CreateDeal() {
                 Step {step} of {STEPS.length}
               </div>
               <Button
-                onClick={() => setStep(Math.min(8, step + 1))}
+                onClick={() => setStep(Math.min(7, step + 1))}
                 className="rounded-lg bg-groupon-green font-bold text-white hover:bg-groupon-green-dark"
               >
                 Continue
@@ -1493,10 +1516,24 @@ export function CreateDeal() {
               </Button>
             </div>
           )}
+
+          {/* Back button on review step */}
+          {step === 7 && (
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setStep(6)}
+                className="rounded-lg"
+              >
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                Back
+              </Button>
+            </div>
+          )}
         </div>
 
-        {/* Live preview */}
-        {step <= 7 && renderLivePreview()}
+        {/* Live preview (steps 1-6 only, step 7 has its own embedded preview) */}
+        {step < 7 && renderLivePreview()}
       </div>
     </div>
   );

@@ -1,36 +1,24 @@
 {
-  "business_name": "LI Consulting",
-  "business_description": "LI Consulting is a data analytics and technology consulting firm specializing in data wrangling, data extraction, and custom product development for businesses. The company provides both project-based solutions and ongoing consultation services to help clients optimize their data processes and software systems.",
-  "location": "Toronto",
-  "full_address": null,
-  "phone": "647-784-7978",
-  "website": "http://liconsulting.ca/",
-  "category": "Business Services > Data Analytics & Consulting",
+  "business_name": "Sakura Spa",
+  "business_description": "Sakura Spa is a professional massage therapy clinic offering registered massage therapy services. The spa specializes in therapeutic massage treatments and accepts insurance coverage for client convenience.",
+  "location": "Barrie, ON",
+  "full_address": "384 Yonge St #12, Barrie, ON L4N 4C8",
+  "phone": "+17052414943",
+  "website": null,
+  "category": "Health, Beauty & Wellness > Massage Therapy",
   "services": [
     {
-      "name": "Data Analytics Consulting",
-      "price": 150
-    },
-    {
-      "name": "Data Wrangling & Extraction",
-      "price": 150
-    },
-    {
-      "name": "Custom Product Development",
-      "price": 150
-    },
-    {
-      "name": "Ongoing Software Consultation",
-      "price": 150
+      "name": "Registered Massage Therapy",
+      "price": 90
     }
   ],
-  "scheduling_insight": null,
+  "scheduling_insight": "weekdays 9am-5pm are slowest, weekends fully booked, closed Tuesdays and Wednesdays",
   "experience_years": null,
   "business_type": "company",
   "highlights": [
-    "Comprehensive data analytics and product development services",
-    "Flexible engagement models - both project-based and ongoing consultation",
-    "Remote service delivery across Canada with potential for global expansion"
+    "Registered massage therapists on staff",
+    "Insurance coverage accepted",
+    "Professional spa environment"
   ],
   "onboarded": true
 }
