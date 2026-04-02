@@ -411,3 +411,47 @@ A standalone deal creator demonstrates one feature. A complete portal demonstrat
 **What we trade:** Development time on pages that aren't the core thesis. Mitigated by keeping mock pages lightweight (static data, minimal interactivity).
 
 **What we'd say in the video:** "We didn't just build the AI deal creator in isolation. We built the full merchant portal so you can see how this feature fits into the merchant's daily workflow - onboarding, campaigns, vouchers, payments, all in one place."
+
+---
+
+## Decision 017: Client-Side Intent Parsing (Prototype) vs LLM Intent Classification (Production)
+
+**Date:** 2026-04-02
+**Status:** Accepted (prototype), needs migration for production
+
+**Options considered:**
+1. Client-side regex/keyword parsing for user input (chosen for prototype)
+2. LLM-powered intent classification + entity extraction per message (production target)
+3. Hybrid: client-side for structured questions, LLM for freeform (middle ground)
+
+**Decision:** Use client-side JavaScript parsing (regex, keyword matching) to detect what the user is saying during the deal creation chat. No LLM call per message.
+
+**Reasoning:**
+
+The deal creation chat asks 5 specific questions (services, discount, duration, scheduling, terms). The client detects answers using pattern matching — `(\d+)\s*%` for discounts, day names for scheduling, keywords like "new customer" or "appointment" for terms. This works because:
+
+1. **The population is self-selecting.** Unlike a consumer shopping app where anyone can type anything, merchants on this page are here specifically to create a deal. The intent space is narrow.
+2. **The conversation is guided.** We ask one question at a time. The user's response is almost always answering what we asked, not sending open-ended freeform text.
+3. **Cost and latency.** A Haiku call per message adds ~$0.001 and ~500ms. For 5 questions, that's 5 extra API calls that don't improve the prototype demo.
+4. **Predictability.** Regex either matches or it doesn't — no hallucination risk, no JSON parsing failures, no prompt engineering needed for a simple pattern match.
+
+**What we trade:** Robustness on edge cases. If a user says "I'm thinking maybe around a third off, something like what my competitor does on Wednesdays" — the regex misses the discount (no explicit %) and might not associate "Wednesdays" with scheduling if the phrasing is unusual. The fallback is fine: we just ask the question again.
+
+**Where this breaks down at scale:**
+
+In a production AI product (e.g., an AI shopping assistant handling open-ended consumer queries), client-side parsing is insufficient. Real-world input includes:
+- **Ambiguous intent:** "I want something nice for my wife" (gift? restaurant? spa?)
+- **Multi-intent messages:** "Cancel my last order and show me something cheaper"
+- **Garbage/adversarial input:** prompt injection, off-topic queries, nonsensical text
+- **Context-dependent meaning:** "the same thing" (same as what?)
+
+These require an LLM intent classifier upstream — a cheap, fast model (Haiku) that categorizes the message before routing it to expensive generation endpoints.
+
+**Production path:**
+- **Intent classifier endpoint** — Haiku call to categorize: deal-related / off-topic / clarification-needed / multi-intent
+- **Entity extraction** — structured extraction of services, percentages, dates, terms from freeform text
+- **Guardrails** — reject or redirect before hitting expensive Sonnet endpoints
+- **Graceful fallback** — "I didn't quite catch that. Could you tell me the discount you'd like to offer?" instead of silently filling the wrong field
+- **Cost:** ~$0.001 per Haiku classification call. At Groupon's merchant volume, negligible vs. the cost of a bad deal going live.
+
+**What we'd say in the video:** "The deal chat uses client-side parsing for the prototype — it's fast and predictable for a guided conversation. In production, you'd add an intent classifier upstream, especially as the conversation becomes more freeform. We've seen this pattern in production AI products where the intent space is much wider — the classifier is what keeps garbage out of your expensive generation endpoints."
