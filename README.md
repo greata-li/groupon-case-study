@@ -2,40 +2,65 @@
 
 A complete AI-powered merchant platform that replaces Groupon's 21-screen deal creation flow with a conversational AI experience. Merchants describe their business in natural language - the AI extracts everything, builds the deal, and lets them review and publish in under 5 minutes.
 
+Built with real Claude API calls (not mocks) across 7 configurable LLM endpoints.
+
 ## Quick Start
 
-### 1. Set up your API key
+### Prerequisites
+
+- **Python 3.10+** - [Download](https://www.python.org/downloads/)
+- **Node.js 18+** - [Download](https://nodejs.org/)
+- **Anthropic API key** - [Get one](https://console.anthropic.com)
+
+### 1. Clone and set up your API key
 
 ```bash
-# Edit backend/.env and add your Anthropic API key
-# Get one at https://console.anthropic.com
-ANTHROPIC_API_KEY=your-key-here
+git clone https://github.com/greata-li/groupon-case-study.git
+cd groupon-case-study
+
+# Copy the example env file and add your API key
+cp backend/.env.example backend/.env
+# Edit backend/.env and replace "your-api-key-here" with your Anthropic API key
 ```
 
 ### 2. Install dependencies
 
+**Windows (CMD or PowerShell):**
 ```bash
-# Backend
 cd backend
 python -m venv venv
-venv\Scripts\activate           # Windows CMD/PowerShell
-# source venv/bin/activate      # Mac/Linux
+venv\Scripts\activate
 pip install -r requirements.txt
 
-# Frontend
+cd ..\frontend
+npm install
+```
+
+**Mac / Linux:**
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
 cd ../frontend
 npm install
 ```
 
 ### 3. Run both servers
 
-```bash
-# Terminal 1: Backend
-cd backend
-venv\Scripts\activate
-uvicorn main:app --reload --port 8000
+You need two terminal windows:
 
-# Terminal 2: Frontend
+**Terminal 1 - Backend:**
+```bash
+cd backend
+venv\Scripts\activate           # Windows
+# source venv/bin/activate      # Mac/Linux
+uvicorn main:app --reload --port 8000
+```
+
+**Terminal 2 - Frontend:**
+```bash
 cd frontend
 npm run dev
 ```
@@ -44,75 +69,45 @@ npm run dev
 
 | URL | What |
 |-----|------|
-| http://localhost:5173/ | Landing page |
-| http://localhost:5173/onboarding | AI business onboarding (chat + voice) |
-| http://localhost:5173/portal | Full merchant portal (12 pages) |
-| http://localhost:5173/portal/create | AI deal creation (chat → builder) |
-| http://localhost:5173/admin | Pipeline admin (7 endpoints, test panel, analytics) |
-| http://localhost:8000/docs | API documentation (auto-generated Swagger) |
+| http://localhost:5173/ | Landing page (start here) |
+| http://localhost:5173/onboarding | AI onboarding (chat + voice) |
+| http://localhost:5173/portal/home | Merchant portal dashboard |
+| http://localhost:5173/portal/create | AI deal creation (chat + 7-step builder) |
+| http://localhost:5173/admin | Pipeline admin panel |
+| http://localhost:8000/docs | API documentation (Swagger) |
 
-### For Demo
+### Demo Walkthrough
 
-Use the **Reset Profile** button in the Admin panel to simulate a new merchant. This clears the profile and deals so you can walk through the full onboarding → deal creation flow from scratch.
+1. Start at the **landing page** (http://localhost:5173/)
+2. Click **Get Started** to begin AI onboarding
+3. Describe a business (or use the example prompts)
+4. Review the AI-extracted profile, then continue to deal creation
+5. Walk through the 7-step deal builder with AI pre-filled content
+6. Publish and manage deals from the **Campaigns** page
+
+Use the **Reset Profile** button in the Admin panel to start over with a fresh merchant.
 
 ## What This Solves
 
-Sofia owns a waxing and lash studio. She has 20 minutes between clients. Groupon's current campaign builder asks her to fill out **21 screens** of forms - booking platform, 3-level categories, pricing, copy, photos, highlights, descriptions, fine print, voucher instructions, business info, payment, tax compliance. She drops off.
+Sofia owns a waxing and lash studio. She has 20 minutes between clients. Groupon's current campaign builder asks her to fill out **21 screens** of forms - booking platform, categories, pricing, copy, photos, highlights, descriptions, fine print, voucher instructions, business info, payment, tax compliance. She drops off.
 
 **Our approach:** Sofia tells us about her business in her own words (text or voice). The AI extracts her profile, creates a complete deal, and lets her review. Under 5 minutes, no marketing expertise needed.
 
-## Project Structure
-
-```
-groupon-case-study/
-├── case-study/                   # Documentation
-│   ├── deliverables/             # Case study submission docs
-│   │   ├── CASE_STUDY.md         # Main case study document (PSD)
-│   │   ├── iteration-log.md      # What changed, what broke, what we learned
-│   │   ├── video-script.md       # Video walkthrough script
-│   │   ├── findings.md           # Real bugs in Groupon's merchant flow
-│   │   └── flow-mapping.md       # Their 21 screens → our AI approach
-│   ├── planning/                 # Architecture and design plans
-│   │   ├── PRD.md                # Product requirements
-│   │   ├── platform-rebuild-plan.md
-│   │   ├── merchant-portal-plan.md
-│   │   └── conversational-intake-plan.md
-│   └── internal/                 # Build instructions
-│       ├── CLAUDE.md
-│       └── design-notes.md
-├── frontend/                     # React + Vite + TypeScript + Tailwind + shadcn/ui
-│   └── src/
-│       ├── pages/portal/         # Merchant portal (12 pages)
-│       ├── pages/onboarding/     # Conversational AI onboarding
-│       ├── pages/admin/          # Admin panel (endpoints, test, analytics)
-│       ├── pages/merchant/       # Landing page
-│       ├── components/           # Layouts + shared UI
-│       └── lib/                  # API client, validation, checklist helpers
-├── backend/                      # FastAPI + Python
-│   ├── app/
-│   │   ├── endpoints/            # Pipeline endpoint handlers
-│   │   ├── config/               # Prompt configs (JSON, editable via admin)
-│   │   └── data/                 # Benchmarks, profile, deals (JSON persistence)
-│   └── main.py                   # FastAPI app + all routes
-├── decisions.md                  # Technical decision log with reasoning
-└── README.md
-```
-
 ## Architecture
 
-### AI Pipeline (7 endpoints)
+### AI Pipeline (7 Endpoints)
 
 | Endpoint | Model | Purpose |
 |----------|-------|---------|
 | Story Extractor | Sonnet | Parse natural language into structured business profile |
-| Deal Extractor | Sonnet | Parse deal description into complete deal data |
+| Deal Extractor | Sonnet | Parse deal chat into complete deal data |
 | Business Classifier | Haiku | Categorize business from description |
 | Service Suggester | Haiku | Suggest services with typical prices |
 | Market Intelligence | Haiku | Recommend discount depth and deal structure |
 | Deal Generator | Sonnet | Create complete deal as structured JSON |
 | Text Enhancer | Haiku | "Inspire Me" copywriting for any field |
 
-All prompts, models, and temperatures are configurable via the admin panel - no code changes needed.
+All prompts, models, and temperatures are configurable via the admin panel without code changes.
 
 ### Tech Stack
 
@@ -121,62 +116,84 @@ All prompts, models, and temperatures are configurable via the admin panel - no 
 | Frontend | React + TypeScript + Vite | Modern, type-safe, fast hot-reload |
 | Styling | Tailwind CSS + shadcn/ui | Plus Jakarta Sans, Groupon green brand |
 | Backend | Python + FastAPI | AI ecosystem, auto-generated API docs |
-| LLM | Claude API (Anthropic) | Reliable structured JSON, tiered pricing (Haiku/Sonnet) |
-| Data | JSON file store | Profile, deals, configs persist across restarts |
+| LLM | Claude API (Anthropic) | Reliable structured JSON, tiered pricing |
+| Data | JSON file persistence | Profile, deals, configs - no database setup needed |
 
 ## Key Features
 
 ### Conversational AI Onboarding
-- Chat/voice interface: "Tell me about your business"
-- AI extracts: name, category, services, prices, location, highlights
-- Follow-up questions for missing info (address and phone are required - AI asks if missing)
+- Chat or voice: "Tell me about your business"
+- AI extracts name, category, services, prices, location, highlights
+- Follow-up questions for missing info (full address and phone are required)
 - Profile review with live customer preview
+- Photo upload with server-side persistence
 - Flows directly into first deal creation
 
 ### AI-Assisted Deal Creation
-- Multi-turn chat: services → discount → duration → scheduling → terms
+- Multi-turn chat: services, discount, duration, scheduling, terms
 - AI generates complete deal (title, highlights, descriptions, pricing, fine print)
 - 7-step review builder with all fields pre-filled
-- "Inspire Me" + Voice Dictation on every text field
+- "Inspire Me" AI copywriting + Voice Dictation on text fields
 - Live customer preview sidebar
 - Save as Draft or Publish
 
-### Complete Merchant Portal
-12 pages matching Groupon's actual merchant portal:
+### Merchant Portal (12 Pages)
+Matches Groupon's actual merchant portal structure:
 - **Home**: Onboarding checklist with progress tracking
 - **Campaigns**: Active/Drafts with status toggle, edit, preview, delete
-- **Booking**: Platform integration info with connect dialogs
+- **Booking**: Platform integrations with credential dialogs
 - **Voucher List**: Filterable table with status badges
-- **Customer Reviews**: AI-suggested response generation
-- **Payments**: Payout tracking with expandable drill-down
+- **Customer Reviews**: Review management
+- **Payments**: Payout tracking with expandable detail
 - **Reports**: Downloadable CSV reports
-- **Support**: Knowledge base + AI chatbot
-- **Connections**: Credential management (Booker, Mindbody, Square, Google, Yelp)
-
-### Mobile Responsive Design
-- Hamburger menus on small screens, responsive grids, collapsible sidebar
-- Works on phone, tablet, and desktop
-
-### Photo Upload
-- Drag-and-drop or file picker, uploads to server, persists in profile, served as static files
+- **Support**: Knowledge base
+- **Connections**: Third-party credential management (Booker, Mindbody, Square, Google, Yelp)
 
 ### Pipeline Admin Panel
-- 7 configurable LLM endpoints with model dropdown (Haiku/Sonnet/Opus)
-- Prompt editor with temperature and token controls
-- Test panel: run any endpoint, compare outputs
-- Analytics: pipeline costs, latency, field acceptance rates
-- Benchmark data editor (collapsible raw JSON)
-- API Docs link (auto-generated Swagger)
+- 7 configurable LLM endpoints with model/temperature/token controls
+- Prompt editor - iterate on prompts without touching code
+- Test panel: run any endpoint with sample input
+- Analytics dashboard with pipeline metrics
+- Benchmark data editor
 - Reset Profile button for demo walkthroughs
+
+## Project Structure
+
+```
+groupon-case-study/
+├── frontend/                     # React + Vite + TypeScript + Tailwind
+│   └── src/
+│       ├── pages/portal/         # Merchant portal (12 pages)
+│       ├── pages/onboarding/     # Conversational AI onboarding
+│       ├── pages/admin/          # Pipeline admin panel
+│       ├── pages/merchant/       # Landing page
+│       ├── components/           # Layouts + shared UI
+│       └── lib/                  # API client, validation, helpers
+├── backend/                      # FastAPI + Python
+│   ├── main.py                   # All API routes
+│   ├── app/
+│   │   ├── endpoints/            # LLM pipeline handlers
+│   │   ├── config/               # Prompt configs (JSON, admin-editable)
+│   │   └── data/                 # Benchmarks, profile, deals
+│   └── uploads/                  # Uploaded photos (gitignored)
+├── case-study/                   # Documentation
+│   ├── deliverables/             # Handoff documents
+│   │   ├── CASE_STUDY.md         # Main case study document
+│   │   ├── decisions.md          # 16 technical decisions with reasoning
+│   │   ├── iteration-log.md      # Development phases and learnings
+│   │   ├── findings.md           # Real bugs in Groupon's merchant flow
+│   │   └── flow-mapping.md       # Their 21 screens → our AI approach
+│   ├── planning/                 # Architecture plans
+│   └── internal/                 # Build notes (not part of submission)
+└── README.md
+```
 
 ## Documentation
 
 | Document | Description |
 |----------|-------------|
-| [CASE_STUDY.md](case-study/deliverables/CASE_STUDY.md) | Main deliverable: problem, metrics, solution, what to change/kill |
-| [iteration-log.md](case-study/deliverables/iteration-log.md) | 8 phases: what changed, what broke, prompt engineering |
-| [video-script.md](case-study/deliverables/video-script.md) | 10-minute walkthrough script |
-| [findings.md](case-study/deliverables/findings.md) | Real bugs found in Groupon's merchant flow |
-| [flow-mapping.md](case-study/deliverables/flow-mapping.md) | Their 21 screens mapped to our AI approach |
-| [decisions.md](case-study/deliverables/decisions.md) | Technical decisions with reasoning |
-| [PRD.md](case-study/planning/PRD.md) | Product requirements and success metrics |
+| [CASE_STUDY.md](case-study/deliverables/CASE_STUDY.md) | Main deliverable: problem, metrics, solution, iteration |
+| [decisions.md](case-study/deliverables/decisions.md) | 16 technical decisions with options, tradeoffs, production paths |
+| [iteration-log.md](case-study/deliverables/iteration-log.md) | Development phases: what changed, what we learned |
+| [findings.md](case-study/deliverables/findings.md) | Real bugs found in Groupon's current merchant flow |
+| [flow-mapping.md](case-study/deliverables/flow-mapping.md) | Field-by-field mapping of 21 screens to our AI approach |
