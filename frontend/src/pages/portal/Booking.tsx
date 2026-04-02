@@ -1,6 +1,4 @@
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -64,8 +62,6 @@ const FEATURES = [
 ];
 
 export function Booking() {
-  const navigate = useNavigate();
-
   return (
     <div className="p-6 max-w-5xl animate-fade-in-up">
       <div className="mb-6">
@@ -75,7 +71,6 @@ export function Booking() {
         </p>
       </div>
 
-      {/* Features */}
       <div className="grid grid-cols-2 gap-4 mb-8">
         {FEATURES.map((feature) => {
           const Icon = feature.icon;
@@ -99,10 +94,8 @@ export function Booking() {
 
       <Separator className="mb-8" />
 
-      {/* Integration cards */}
-      <div>
-        <h2 className="font-heading text-base font-bold text-gray-900 mb-4">Connect Your Platform</h2>
-        <div className="grid grid-cols-3 gap-4 mb-8">
+      <h2 className="font-heading text-base font-bold text-gray-900 mb-4">Connect Your Platform</h2>
+      <div className="grid grid-cols-3 gap-4 mb-8">
           {PLATFORMS.map((platform) => (
             <Card key={platform.name}>
               <CardContent>
@@ -133,9 +126,7 @@ export function Booking() {
             </Card>
           ))}
         </div>
-      </div>
 
-      {/* Square promo */}
       <Card className="bg-gradient-to-r from-gray-900 to-gray-800">
         <CardContent>
           <div className="flex items-center gap-6 py-2">

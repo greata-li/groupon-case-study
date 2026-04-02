@@ -18,9 +18,10 @@ export function AdminLayout() {
     if (!confirm('Reset the merchant profile? This simulates a new merchant for demo purposes.')) return;
     setResetting(true);
     try {
-      await updateProfile({ onboarded: false });
-      // Also clear deals
-      await fetch('/api/deals/reset', { method: 'POST' }).catch(() => {});
+      await Promise.all([
+        updateProfile({ onboarded: false }),
+        fetch('/api/deals/reset', { method: 'POST' }).catch(() => {}),
+      ]);
       setResetDone(true);
       setTimeout(() => setResetDone(false), 3000);
     } catch {

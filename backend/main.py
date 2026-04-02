@@ -506,10 +506,9 @@ class PublishDealRequest(BaseModel):
 
 @app.post("/api/deals/reset")
 async def reset_deals():
-    """Reset all deals and profile — for demo purposes."""
+    """Reset all deals — for demo purposes. Profile reset is handled separately via PUT /api/profile."""
     app.state.deals = []
     save_deals([])
-    save_profile({"onboarded": False})
     return {"reset": True}
 
 
