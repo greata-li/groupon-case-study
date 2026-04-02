@@ -59,7 +59,7 @@ export function MerchantFlow({ onPublish }: MerchantFlowProps) {
           website: intake.website,
         });
       } catch {
-        // Save failed — still show published page locally
+        // Save failed - still show published page locally
       }
       if (onPublish) {
         onPublish(result.deal, intake);

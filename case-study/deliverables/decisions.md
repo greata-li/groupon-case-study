@@ -294,7 +294,7 @@ groupon-case-study/
 - **Number ranges:** `temperature` 0.0-2.0, `max_tokens` 1-4096, `expiryDays` 1-365, prices non-negative
 - **Sanitization:** Strip HTML tags from all text inputs at the API boundary
 
-## Decision 009: Required Fields in AI Onboarding - Full Address & Phone
+## Decision 013: Required Fields in AI Onboarding - Full Address & Phone
 
 **Date:** 2026-04-02
 **Status:** Accepted
@@ -327,7 +327,7 @@ Phone is required because:
 
 ---
 
-## Decision 010: Conversational AI Instead of Forms
+## Decision 014: Conversational AI Instead of Forms
 
 **Date:** 2026-03-30
 **Status:** Locked
@@ -355,7 +355,7 @@ Key insight from user research: small business owners don't think in form fields
 
 ---
 
-## Decision 011: Profile/Deal Separation — One-Time Profile, Repeatable Deals
+## Decision 015: Profile/Deal Separation — One-Time Profile, Repeatable Deals
 
 **Date:** 2026-03-31
 **Status:** Locked
@@ -378,7 +378,7 @@ The separation mirrors how merchants actually think:
 
 ---
 
-## Decision 012: Platform Expansion — Full Merchant Portal, Not Just Deal Creator
+## Decision 016: Platform Expansion — Full Merchant Portal, Not Just Deal Creator
 
 **Date:** 2026-03-31
 **Status:** Locked

@@ -1,4 +1,4 @@
-# Conversational Intake Plan — AI-First Merchant Onboarding
+# Conversational Intake Plan - AI-First Merchant Onboarding
 
 *The core insight: Sofia tells her story once. The AI does the rest.*
 
@@ -6,7 +6,7 @@
 
 ## The Problem with What We Built
 
-We built forms with AI buttons. That's not AI-assisted onboarding — that's a form.
+We built forms with AI buttons. That's not AI-assisted onboarding - that's a form.
 
 Real AI-assisted onboarding means: **Sofia talks, the system listens, and everything gets filled in automatically.** She reviews and adjusts, not types and submits.
 
@@ -20,7 +20,7 @@ Real AI-assisted onboarding means: **Sofia talks, the system listens, and everyt
 
 Sofia sees a clean chat-like interface:
 
-> "Welcome to Groupon! Tell me about your business — what you do, where you are, what services you offer, and what you charge. You can type or use voice."
+> "Welcome to Groupon! Tell me about your business - what you do, where you are, what services you offer, and what you charge. You can type or use voice."
 
 Sofia speaks or types:
 > "I'm Sofia, I run a waxing and lash studio called Sofia's Studio in Lincoln Park, Chicago. Been doing this 12 years. I have two chairs. I do Brazilian waxes for $65, lash lifts for $85, and a wax + lash bundle for $140. My regulars love me but Tuesdays and Wednesdays are always slow."
@@ -38,7 +38,7 @@ Sofia speaks or types:
     { "name": "Lash Lift", "price": 85 },
     { "name": "Wax + Lash Bundle", "price": 140 }
   ],
-  "scheduling_insight": "Slow Tuesdays and Wednesdays — ideal for Groupon deal scheduling",
+  "scheduling_insight": "Slow Tuesdays and Wednesdays - ideal for Groupon deal scheduling",
   "experience_years": 12,
   "business_type": "sole_provider",
   "extracted_fields": ["business_name", "business_description", "location", "category", "services", "scheduling_insight", "experience_years"]
@@ -68,13 +68,13 @@ Every field is pre-filled. Sofia scans, maybe tweaks one thing, clicks "Save Pro
 
 ### Phase 3: Create a Deal (Repeatable)
 
-**Starts from the saved profile.** No business name, no description, no category — those are known.
+**Starts from the saved profile.** No business name, no description, no category - those are known.
 
 The deal creation flow is:
 
 1. **Which services?** Shows her saved services. She checks the ones she wants to include in this deal. Can add new ones.
-2. **AI generates the deal** — calls the pipeline with her profile + selected services. Returns: title, highlights, per-option descriptions, pricing (with market-recommended discounts), fine print, voucher instructions.
-3. **Review & Edit** — the multi-tab deal builder we already have, but pre-filled with AI output. She can edit anything, add photos, adjust pricing.
+2. **AI generates the deal** - calls the pipeline with her profile + selected services. Returns: title, highlights, per-option descriptions, pricing (with market-recommended discounts), fine print, voucher instructions.
+3. **Review & Edit** - the multi-tab deal builder we already have, but pre-filled with AI output. She can edit anything, add photos, adjust pricing.
 4. **Publish**
 
 That's it. Steps 1-4 every time she creates a deal. Profile info is never re-asked.
@@ -106,13 +106,13 @@ System prompt: "You are a business intake specialist for Groupon. Extract struct
 - Business info fields in deal creation → pulled from saved profile
 
 ### New Components
-- `ConversationalIntake.tsx` — chat/voice interface for telling your story
-- `ProfileReview.tsx` — review extracted profile, edit, save
-- `ServiceSelector.tsx` — pick services from saved profile for a new deal
+- `ConversationalIntake.tsx` - chat/voice interface for telling your story
+- `ProfileReview.tsx` - review extracted profile, edit, save
+- `ServiceSelector.tsx` - pick services from saved profile for a new deal
 - `StoryExtractor` backend endpoint
 
 ### Modified
-- `CreateDeal.tsx` — reads from profile, skips business info, only asks deal-specific questions
+- `CreateDeal.tsx` - reads from profile, skips business info, only asks deal-specific questions
 - Portal "Admin" sidebar link → merchant settings (not pipeline admin)
 - Profile API → stores extracted services as part of profile
 
@@ -120,19 +120,19 @@ System prompt: "You are a business intake specialist for Groupon. Extract struct
 
 ## What This Demonstrates in the Case Study
 
-1. **True AI assistance** — not forms with buttons, but natural language → structured data
-2. **Dramatic UX improvement** — Groupon: 21 screens of manual input. Us: tell your story once, review, done.
-3. **Persistent profile** — information captured once, reused forever
-4. **Measurable impact** — time to first deal: 45 min → under 5 min. That's the metric.
-5. **Voice-first design** — "Tell me about your business" is more natural than "Fill out this form"
+1. **True AI assistance** - not forms with buttons, but natural language → structured data
+2. **Dramatic UX improvement** - Groupon: 21 screens of manual input. Us: tell your story once, review, done.
+3. **Persistent profile** - information captured once, reused forever
+4. **Measurable impact** - time to first deal: 45 min → under 5 min. That's the metric.
+5. **Voice-first design** - "Tell me about your business" is more natural than "Fill out this form"
 
 ---
 
 ## Build Order
 
-1. **Story extractor endpoint** (backend) — new LLM call that parses free-form text into structured profile
-2. **Conversational intake** (frontend) — chat interface with voice, sends story to extractor
-3. **Profile review** (frontend) — show extracted data, let merchant edit, save
-4. **Rewire deal creation** — reads from profile, skips business setup, only asks deal-specific questions
-5. **Fix sidebar Admin link** — merchant settings, not pipeline admin
+1. **Story extractor endpoint** (backend) - new LLM call that parses free-form text into structured profile
+2. **Conversational intake** (frontend) - chat interface with voice, sends story to extractor
+3. **Profile review** (frontend) - show extracted data, let merchant edit, save
+4. **Rewire deal creation** - reads from profile, skips business setup, only asks deal-specific questions
+5. **Fix sidebar Admin link** - merchant settings, not pipeline admin
 6. **Test end-to-end**

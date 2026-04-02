@@ -145,7 +145,7 @@ export function BookingStep({ data, onUpdate }: BookingStepProps) {
                 <div className="shrink-0">
                   {connectingId === platform.id ? (
                     <Badge className="bg-amber-100 text-amber-700 border-0 text-xs font-semibold">
-                      Coming soon — prototype
+                      Coming soon - prototype
                     </Badge>
                   ) : (
                     <Button

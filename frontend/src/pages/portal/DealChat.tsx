@@ -45,9 +45,9 @@ function buildGreeting(businessName: string, services: ProfileService[]): string
     return `Hi ${name}! Let's create a deal for your business. First, what services would you like to offer?`;
   }
   const serviceList = services
-    .map((s) => `${s.name} ($${s.price})`)
-    .join(', ');
-  return `Hi ${name}! I can see you offer: ${serviceList}.\n\nWhich of these would you like to include in your deal? You can say "all of them" or pick specific ones.`;
+    .map((s) => `  • ${s.name} - $${s.price}`)
+    .join('\n');
+  return `Hi ${name}! I can see you offer:\n\n${serviceList}\n\nWhich of these would you like to include in your deal? You can say "all of them" or pick specific ones.`;
 }
 
 function getNextQuestion(info: DealInfo): string | null {
@@ -62,7 +62,7 @@ function getNextQuestion(info: DealInfo): string | null {
     return "Are there specific days or times you want to target? For example, if Tuesdays are slow, we can recommend the deal for midweek bookings. Or say 'anytime' if you're flexible.";
   }
   if (!info.specialTerms) {
-    return "Last thing — any special terms? For example: new customers only, appointment required, not valid with other offers. Or say 'standard terms' and I'll set sensible defaults.";
+    return "Last thing - any special terms? For example: new customers only, appointment required, not valid with other offers. Or say 'standard terms' and I'll set sensible defaults.";
   }
   return null; // all questions answered
 }
@@ -73,14 +73,14 @@ function parseUserResponse(text: string, info: DealInfo): Partial<DealInfo> {
 
   // Try to detect ALL fields in one message
 
-  // Services — if we haven't captured services yet, the whole message is about services
+  // Services - if we haven't captured services yet, the whole message is about services
   // But also check if they mentioned discount/duration/etc. in the same message
   if (!info.services) {
     updates.services = text;
   }
 
-  // Discount — look for percentage mentions
-  const discountMatch = lower.match(/(\d+)\s*%\s*off/);
+  // Discount - look for percentage mentions (e.g. "30% off", "30% discount", "30 percent", bare "30%")
+  const discountMatch = lower.match(/(\d+)\s*(%\s*(off|discount)?|percent)/);
   if (discountMatch && !info.discount) {
     updates.discount = text;
     // If services weren't set yet but they mentioned both, capture services too
@@ -89,19 +89,19 @@ function parseUserResponse(text: string, info: DealInfo): Partial<DealInfo> {
     }
   }
 
-  // Duration — look for day/month mentions
+  // Duration - look for day/month mentions
   const durationMatch = lower.match(/(\d+)\s*(day|days|month|months)/);
   if (durationMatch && !info.duration) {
     updates.duration = text;
   }
 
-  // Scheduling — look for day names or "anytime"
+  // Scheduling - look for day names or "anytime"
   const schedWords = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'weekday', 'weekend', 'midweek', 'anytime', 'flexible'];
   if (schedWords.some((w) => lower.includes(w)) && !info.scheduling) {
     updates.scheduling = text;
   }
 
-  // Special terms — look for restriction keywords
+  // Special terms - look for restriction keywords
   const termWords = ['new customer', 'appointment', 'standard', 'no refund', 'waiver', 'default'];
   if (termWords.some((w) => lower.includes(w)) && !info.specialTerms) {
     updates.specialTerms = text;
@@ -147,7 +147,7 @@ export function DealChat({ businessName, services, onDealExtracted, onSkip }: De
 
     setMessages((prev) => [...prev, { role: 'user', text: userText }]);
 
-    // Update deal info with the user's response — detects multiple fields in one message
+    // Update deal info with the user's response - detects multiple fields in one message
     const updatedFields = parseUserResponse(userText, dealInfo);
     const newInfo = { ...dealInfo, ...updatedFields };
     setDealInfo(newInfo);
@@ -161,7 +161,7 @@ export function DealChat({ businessName, services, onDealExtracted, onSkip }: De
         setMessages((prev) => [...prev, { role: 'assistant', text: nextQ }]);
       }, 500);
     } else {
-      // All info gathered — extract the deal
+      // All info gathered - extract the deal
       await extractFullDeal(newInfo);
     }
   }
@@ -190,7 +190,7 @@ export function DealChat({ businessName, services, onDealExtracted, onSkip }: De
           ...prev.slice(0, -1),
           {
             role: 'assistant',
-            text: "I had some trouble setting that up. Let me try again — could you describe the deal in one sentence?",
+            text: "I had some trouble setting that up. Let me try again - could you describe the deal in one sentence?",
           },
         ]);
         // Reset to allow retry

@@ -58,7 +58,7 @@ const stepMeta = [
     field: 'location' as const,
     label: 'Where are you located?',
     placeholder: 'e.g., Lincoln Park, Chicago',
-    hint: 'City or neighborhood — helps us find the right customers near you.',
+    hint: 'City or neighborhood - helps us find the right customers near you.',
     type: 'input' as const,
     icon: MapPin,
   },
@@ -75,7 +75,7 @@ const stepMeta = [
     label: 'Anything else customers should know?',
     placeholder:
       'e.g., Loyal regulars, slow Tuesdays and Wednesdays, parking available',
-    hint: 'Optional — hours, specialties, what days you want to fill.',
+    hint: 'Optional - hours, specialties, what days you want to fill.',
     type: 'textarea' as const,
     icon: MessageCircle,
   },
@@ -159,7 +159,7 @@ export function IntakeForm({ onResult }: IntakeFormProps) {
             .trim();
           output = JSON.parse(raw);
         } catch {
-          // couldn't parse — fall through
+          // couldn't parse - fall through
         }
       }
 
@@ -167,7 +167,7 @@ export function IntakeForm({ onResult }: IntakeFormProps) {
         setSuggestions(output.suggestions as ServiceSuggestion[]);
       }
     } catch {
-      // Silently fail — suggestions are a nicety, not required
+      // Silently fail - suggestions are a nicety, not required
     } finally {
       setLoadingSuggestions(false);
     }
@@ -528,7 +528,7 @@ function ServicePicker({
             <Sparkles className="h-3.5 w-3.5" />
             {loadingSuggestions
               ? 'Finding services for your business...'
-              : 'Suggested services — tap to add'}
+              : 'Suggested services - tap to add'}
           </div>
 
           {loadingSuggestions ? (

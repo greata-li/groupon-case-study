@@ -63,8 +63,8 @@ export function MyDeals() {
       {/* Stats row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <StatCard icon={TrendingUp} label="Active Deals" value={String(deals.length)} />
-        <StatCard icon={Users} label="Total Views" value="—" subtitle="Goes live in 24h" />
-        <StatCard icon={DollarSign} label="Revenue" value="—" subtitle="No sales yet" />
+        <StatCard icon={Users} label="Total Views" value="-" subtitle="Goes live in 24h" />
+        <StatCard icon={DollarSign} label="Revenue" value="-" subtitle="No sales yet" />
       </div>
 
       {/* Deals list */}
@@ -110,7 +110,7 @@ export function MyDeals() {
                     </Badge>
                   </div>
                   <p className="text-sm text-gray-500">
-                    {item.intake?.business_name} — {item.intake?.location}
+                    {item.intake?.business_name} - {item.intake?.location}
                   </p>
                   <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
                     <span className="flex items-center gap-1">

@@ -68,7 +68,7 @@ export function EndpointList() {
             <p className="font-medium">How the pipeline works</p>
             <p className="mt-1 text-blue-600">
               Merchant input flows through these endpoints in order. Each has a configurable
-              prompt, model, and parameters — no code changes required.
+              prompt, model, and parameters - no code changes required.
             </p>
           </div>
           <button

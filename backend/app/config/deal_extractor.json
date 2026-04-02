@@ -1,7 +1,7 @@
 {
   "id": "deal_extractor",
   "name": "Deal Extractor",
-  "description": "Extracts structured deal data from a merchant's free-form description of what deal they want to run. Uses saved profile for context — knows the merchant's services and prices.",
+  "description": "Extracts structured deal data from a merchant's free-form description of what deal they want to run. Uses saved profile for context - knows the merchant's services and prices.",
   "model": "claude-sonnet-4-20250514",
   "provider": "anthropic",
   "temperature": 0.4,

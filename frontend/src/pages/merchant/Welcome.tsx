@@ -45,7 +45,7 @@ export function Welcome() {
 
             <p className="mt-5 text-lg leading-relaxed text-gray-500 md:text-xl">
               Just describe your business. Our AI builds your complete Groupon deal
-              — pricing, copy, categories, fine print, everything. You review and publish.
+              - pricing, copy, categories, fine print, everything. You review and publish.
             </p>
 
             {/* CTA */}
@@ -86,13 +86,13 @@ export function Welcome() {
             <StepCard
               number="01"
               title="Tell us your story"
-              description="Describe your business in your own words — type or use voice. Our AI captures your name, services, prices, and everything else."
+              description="Describe your business in your own words - type or use voice. Our AI captures your name, services, prices, and everything else."
               icon={<MessageCircle className="h-5 w-5" />}
             />
             <StepCard
               number="02"
               title="AI builds your deal"
-              description="We classify your business, analyze your market, set optimal pricing, and write professional copy — all in seconds."
+              description="We classify your business, analyze your market, set optimal pricing, and write professional copy - all in seconds."
               icon={<Sparkles className="h-5 w-5" />}
             />
             <StepCard

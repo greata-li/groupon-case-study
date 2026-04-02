@@ -12,6 +12,6 @@ export async function markChecklistComplete(itemId: string): Promise<void> {
     completed[itemId] = true;
     await updateProfile({ ...profile, checklist_completed: completed });
   } catch {
-    // silently fail — checklist is a nicety, not critical
+    // silently fail - checklist is a nicety, not critical
   }
 }

@@ -45,7 +45,7 @@ export function Published({ deal, intake }: PublishedProps) {
               {deal?.title || 'Your Deal'}
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              {intake.business_name} — {intake.location}
+              {intake.business_name} - {intake.location}
             </p>
             {services.length > 0 && (
               <div className="mt-4 space-y-2.5">

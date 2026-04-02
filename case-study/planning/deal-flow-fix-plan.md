@@ -2,12 +2,12 @@
 
 ## Current Problems
 
-1. **Auto-publish as Active** — deals created via chat go straight to Active with no review
-2. **One-question chat** — AI extracts after one message, no follow-ups
-3. **Raw JSON in highlights** — enhance-text returns JSON array, displayed as raw text
-4. **Edit goes to chat** — clicking Edit on a campaign opens the chat instead of the builder
-5. **Chat skips builder** — chat -> auto-publish, never shows the 7-step review
-6. **No approval screen** — Sofia never sees the complete deal before it goes live
+1. **Auto-publish as Active** - deals created via chat go straight to Active with no review
+2. **One-question chat** - AI extracts after one message, no follow-ups
+3. **Raw JSON in highlights** - enhance-text returns JSON array, displayed as raw text
+4. **Edit goes to chat** - clicking Edit on a campaign opens the chat instead of the builder
+5. **Chat skips builder** - chat -> auto-publish, never shows the 7-step review
+6. **No approval screen** - Sofia never sees the complete deal before it goes live
 
 ## Fixed Flow
 
@@ -23,9 +23,9 @@
 4. **Transitions to step-by-step builder** with all 7 steps pre-filled
 5. Sofia reviews each step, makes adjustments
 6. Step 7 (Review): complete summary + customer preview
-7. "Save as Draft" or "Publish" — both save first, "Publish" sets status to Active
+7. "Save as Draft" or "Publish" - both save first, "Publish" sets status to Active
 
-### B. Returning merchant — Create Deal
+### B. Returning merchant - Create Deal
 1. Portal → Create Deal → deal chat (services pre-loaded)
 2. Same conversational flow with follow-ups
 3. → Builder (pre-filled) → Review → Save/Publish

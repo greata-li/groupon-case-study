@@ -46,7 +46,7 @@ export function PaymentStep({ data, onUpdate }: PaymentStepProps) {
       </p>
 
       <Badge className="mt-3 bg-amber-50 text-amber-700 border-0 text-xs font-semibold">
-        Prototype — payment processing simulated
+        Prototype - payment processing simulated
       </Badge>
 
       <div className="mt-8 max-w-md space-y-5">

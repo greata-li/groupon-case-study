@@ -1,7 +1,7 @@
 {
   "id": "business_classifier",
   "name": "Business Classifier",
-  "description": "Classifies a business into Groupon categories based on description and location. Fast, cheap model — this is a classification task, not generation.",
+  "description": "Classifies a business into Groupon categories based on description and location. Fast, cheap model - this is a classification task, not generation.",
   "model": "claude-haiku-4-5-20251001",
   "provider": "anthropic",
   "temperature": 0.2,

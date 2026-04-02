@@ -24,7 +24,7 @@ export function validateLocation(value: string): string | null {
 
 export function validatePhone(value: string): string | null {
   if (!value.trim()) return null; // optional at this stage
-  // Basic phone validation — digits, spaces, dashes, parens, plus
+  // Basic phone validation - digits, spaces, dashes, parens, plus
   const cleaned = value.replace(/[\s\-\(\)\+\.]/g, '');
   if (cleaned.length > 0 && (cleaned.length < 7 || !/^\d+$/.test(cleaned))) {
     return 'Please enter a valid phone number';
@@ -41,7 +41,7 @@ export function validateServicePrice(price: string): string | null {
   if (!price.trim()) return 'Price is required';
   const num = parseFloat(price.replace('$', ''));
   if (isNaN(num) || num <= 0) return 'Price must be greater than $0';
-  if (num > 10000) return 'Price seems too high — please double-check';
+  if (num > 10000) return 'Price seems too high - please double-check';
   return null;
 }
 

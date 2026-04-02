@@ -2,7 +2,7 @@
 
 ## What this is
 
-A working prototype for a Groupon interview case study. An AI-powered deal creation tool that helps small merchants (like Sofia, a waxing/lash studio owner in Chicago) go from "I want more customers" to a published Groupon deal in under 5 minutes — without needing marketing expertise.
+A working prototype for a Groupon interview case study. An AI-powered deal creation tool that helps small merchants (like Sofia, a waxing/lash studio owner in Chicago) go from "I want more customers" to a published Groupon deal in under 5 minutes - without needing marketing expertise.
 
 ## The PRD
 
@@ -13,7 +13,7 @@ Read `PRD.md` in this folder first. It has the full problem statement, metrics, 
 ### 1. Merchant Experience (Sofia's side)
 - Simple intake: 5 questions about her business (name, services, location, prices, anything else)
 - AI generates a complete deal: title, description, fine print, pricing with discount, category, scheduling recommendation
-- Deal preview that looks like a real listing — she reviews, edits any field, publishes
+- Deal preview that looks like a real listing - she reviews, edits any field, publishes
 - Must feel fast, professional, and trustworthy. She has 20 minutes.
 
 ### 2. Admin/PM Experience
@@ -24,10 +24,10 @@ Read `PRD.md` in this folder first. It has the full problem statement, metrics, 
 - This is how a PM iterates on prompts without touching code
 
 ### 3. AI Pipeline (3-4 endpoints)
-- **Endpoint 1: Business Classifier** — business description + location → category, subcategory, tags. Cheap/fast model.
-- **Endpoint 2: Market Intelligence** — category + location + prices → recommended discount, pricing, deal structure. Can be heuristic (lookup) or LLM-assisted.
-- **Endpoint 3: Deal Generator** — all inputs + market data → complete deal as structured JSON. Stronger model.
-- **Endpoint 4: Deal Optimizer** (optional) — when Sofia edits a field, gently suggest if her edit might hurt performance.
+- **Endpoint 1: Business Classifier** - business description + location → category, subcategory, tags. Cheap/fast model.
+- **Endpoint 2: Market Intelligence** - category + location + prices → recommended discount, pricing, deal structure. Can be heuristic (lookup) or LLM-assisted.
+- **Endpoint 3: Deal Generator** - all inputs + market data → complete deal as structured JSON. Stronger model.
+- **Endpoint 4: Deal Optimizer** (optional) - when Sofia edits a field, gently suggest if her edit might hurt performance.
 
 ### 4. Synthetic Market Data
 - JSON file with benchmark data for Beauty & Spas in Chicago
@@ -61,11 +61,11 @@ Read `../../_archive/0ne-app/Pipeline - KT 303fd05c8f73805b9cc3c9a5b6010d45.md` 
 
 ## Build order
 
-1. **Admin panel first** — endpoint list, prompt editor, test panel. This is the PM's workbench.
-2. **Merchant intake flow** — 5-question form, clean UI
-3. **Pipeline integration** — connect intake to LLM endpoints, generate deal JSON
-4. **Deal preview** — show Sofia the generated deal, let her edit, publish
-5. **Polish** — make it look professional enough for a video demo
+1. **Admin panel first** - endpoint list, prompt editor, test panel. This is the PM's workbench.
+2. **Merchant intake flow** - 5-question form, clean UI
+3. **Pipeline integration** - connect intake to LLM endpoints, generate deal JSON
+4. **Deal preview** - show Sofia the generated deal, let her edit, publish
+5. **Polish** - make it look professional enough for a video demo
 
 ## Voice and tone
 
@@ -79,4 +79,4 @@ Read `../../_archive/0ne-app/Pipeline - KT 303fd05c8f73805b9cc3c9a5b6010d45.md` 
 - Don't build photo upload or AI image generation
 - Don't build post-publish optimization
 - Don't build multi-language support
-- Don't over-engineer the backend — this is a prototype, not production infrastructure
+- Don't over-engineer the backend - this is a prototype, not production infrastructure

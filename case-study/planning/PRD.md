@@ -6,7 +6,7 @@
 
 ## 1. Problem Statement
 
-Groupon's merchant onboarding funnel has a critical drop-off at deal creation. A merchant like Sofia — small business owner, 12 years experience, loyal regulars, slow mid-week — finds Groupon, starts the sign-up flow, and stalls. She needs to choose services, set pricing, write copy, pick categories, and upload photos. She's not a marketer. She has 20 minutes between clients. She doesn't know what works on Groupon.
+Groupon's merchant onboarding funnel has a critical drop-off at deal creation. A merchant like Sofia - small business owner, 12 years experience, loyal regulars, slow mid-week - finds Groupon, starts the sign-up flow, and stalls. She needs to choose services, set pricing, write copy, pick categories, and upload photos. She's not a marketer. She has 20 minutes between clients. She doesn't know what works on Groupon.
 
 Sofia drops off. Groupon lost the merchant. She never fills her Tuesdays.
 
@@ -16,14 +16,14 @@ The problem isn't the form. The problem is that Sofia is being asked to make dec
 
 ## 2. Job To Be Done
 
-"Help me get new customers in my chair this week — without me having to figure out how Groupon works."
+"Help me get new customers in my chair this week - without me having to figure out how Groupon works."
 
 ---
 
 ## 3. Success Metrics (defined BEFORE the solution)
 
 ### Primary Metric
-**Deal creation completion rate** — % of merchants who start deal creation and successfully publish a live deal.
+**Deal creation completion rate** - % of merchants who start deal creation and successfully publish a live deal.
 
 - **Assumed baseline:** ~30% (most merchants stall at deal creation based on the problem description)
 - **Target:** 60%+ with AI-assisted flow
@@ -39,7 +39,7 @@ The problem isn't the form. The problem is that Sofia is being asked to make dec
 | Merchant return rate | Unknown | 40%+ create a second deal within 60 days | If the first deal works, she comes back. If not, we lost her anyway. |
 
 ### What we explicitly do NOT measure
-- Form field completion rate (vanity — completing a form is not success)
+- Form field completion rate (vanity - completing a form is not success)
 - Time spent on platform (more time = more friction, not engagement)
 - Number of AI suggestions shown (activity metric, not outcome metric)
 
@@ -55,8 +55,8 @@ The problem isn't the form. The problem is that Sofia is being asked to make dec
 | Sofia can answer simple questions about her own business in under 2 minutes | She's been running this business for 12 years. She knows her services and prices. |
 | If Sofia sees a complete deal that looks professional, she'll trust it more than a blank form | Reducing decisions reduces friction. A strong default she can edit is better than a blank canvas. |
 | The biggest drop-off is at the "what do I write / what price do I set" decision point, not at account creation | The brief says she "gets to the point where she needs to create her first deal" then stalls |
-| Deals that match category benchmarks (discount depth, title format, description length) outperform generic ones | Standard marketplace pattern — data-informed defaults outperform user guesses |
-| Sofia needs to feel in control — AI generates, she approves | Merchants won't trust a system that publishes automatically. Review step is non-negotiable. |
+| Deals that match category benchmarks (discount depth, title format, description length) outperform generic ones | Standard marketplace pattern - data-informed defaults outperform user guesses |
+| Sofia needs to feel in control - AI generates, she approves | Merchants won't trust a system that publishes automatically. Review step is non-negotiable. |
 
 ---
 
@@ -79,7 +79,7 @@ Step 2: Business Intake (5 questions, ~2 minutes)
    2. What do you do? (e.g., "waxing and lash services")
    3. Where are you located? (city/neighborhood)
    4. What services do you want to offer? What do you normally charge?
-   5. Anything else customers should know? (optional — hours, experience, specialties)
+   5. Anything else customers should know? (optional - hours, experience, specialties)
 
 Step 3: AI generates complete deal (~5-10 seconds)
    - Deal title
@@ -88,7 +88,7 @@ Step 3: AI generates complete deal (~5-10 seconds)
    - Category (auto-detected)
    - Fine print (generated from templates + business context)
    - Scheduling recommendation ("Best for: Tuesday & Wednesday bookings")
-   - Photo guidance ("Upload a photo of your studio — deals with photos convert 2x better")
+   - Photo guidance ("Upload a photo of your studio - deals with photos convert 2x better")
 
 Step 4: Deal Preview & Review
    Sofia sees her deal exactly as customers would see it.
@@ -144,7 +144,7 @@ Sofia's input (5 fields)
 [Sofia reviews in Deal Preview UI]
         |
         v
-[Optional — Endpoint 4: Deal Optimizer]
+[Optional - Endpoint 4: Deal Optimizer]
    Triggered when Sofia edits a field
    Input: Sofia's edit + original AI recommendation + benchmarks
    Output: gentle suggestion if her edit might hurt performance
@@ -164,7 +164,7 @@ A separate admin interface for the product team to manage the AI pipeline:
 | Test panel | Run any endpoint with sample input and see the output. Iterate without deploying code. |
 | Benchmark data editor | View and update the market intelligence data (category benchmarks, city data) |
 
-This is not just a developer tool. It's designed so a PM can tweak prompts and test outputs without touching code. Shows operational maturity — the system is maintainable, not a black box.
+This is not just a developer tool. It's designed so a PM can tweak prompts and test outputs without touching code. Shows operational maturity - the system is maintainable, not a black box.
 
 ---
 
@@ -201,7 +201,7 @@ This is not just a developer tool. It's designed so a PM can tweak prompts and t
 - AI generates a complete deal with all fields populated
 - Sofia can review and edit the deal in a preview that looks like a real deal listing
 - The admin can see and edit prompts, test endpoints, and see outputs
-- The pipeline is configurable — changing a prompt in the admin changes the output
+- The pipeline is configurable - changing a prompt in the admin changes the output
 
 ---
 

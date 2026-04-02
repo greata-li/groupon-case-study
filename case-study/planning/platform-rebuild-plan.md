@@ -1,4 +1,4 @@
-# Platform Rebuild Plan — Complete Merchant Portal
+# Platform Rebuild Plan - Complete Merchant Portal
 
 *Based on screenshot-by-screenshot analysis of Groupon's actual Merchant Center.*
 
@@ -29,7 +29,7 @@ Manage deals, view activity, access all platform features.
 ### A2. Booking Platform
 - Connect Mindbody, Booker, or Square
 - "Continue without a booking platform" option
-- AI enhancement: "Which booking system do you use?" — auto-detect from business description
+- AI enhancement: "Which booking system do you use?" - auto-detect from business description
 
 ### A3. Category Selection
 Three methods (matching Groupon):
@@ -43,7 +43,7 @@ Categories: Health/Beauty/Wellness, Things to Do, Home & Auto, Restaurants, Reta
 - **"Inspire Me" button**: AI generates description from business name + category
 - **"Share More Details" button**: AI expands/improves what's written
 - Example shown below the editor
-- AI enhancement: Voice dictation — "Tell us about your business in your own words"
+- AI enhancement: Voice dictation - "Tell us about your business in your own words"
 
 ### A5. Business Website
 - URL input with validation
@@ -61,7 +61,7 @@ Categories: Health/Beauty/Wellness, Things to Do, Home & Auto, Restaurants, Reta
 ### A8. Payment Info
 - Bank name, institution number, transit number, account number
 - "Where can I find this?" help section
-- Note: For prototype, we show the form but don't process. Mark as "prototype — payment processing simulated."
+- Note: For prototype, we show the form but don't process. Mark as "prototype - payment processing simulated."
 
 ### A9. Profile Review
 - Summary of all business info
@@ -144,7 +144,7 @@ Categories: Health/Beauty/Wellness, Things to Do, Home & Auto, Restaurants, Reta
 ### Home
 - Welcome message
 - Active campaigns summary
-- Quick stats (views, purchases, revenue — mock data for prototype)
+- Quick stats (views, purchases, revenue - mock data for prototype)
 - "Create New Campaign" CTA
 - Unfinished drafts with "Resume" button
 

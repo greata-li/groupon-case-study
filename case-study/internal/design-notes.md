@@ -4,8 +4,8 @@
 
 ## Color Palette (from consumer site)
 
-- **Groupon Green (primary CTA):** ~#53A318 — search buttons, "Buy Now", "Buy Again", links
-- **Dark purple/indigo (header):** ~#2B1A6B — top promo banner, navigation background
+- **Groupon Green (primary CTA):** ~#53A318 - search buttons, "Buy Now", "Buy Again", links
+- **Dark purple/indigo (header):** ~#2B1A6B - top promo banner, navigation background
 - **White:** page backgrounds, card backgrounds
 - **Light gray:** borders, dividers, secondary backgrounds
 - **Dark gray/black:** heading text, primary text
@@ -73,7 +73,7 @@ Left sidebar stepper:
 10. Review
 11. Submit 🔒
 
-**This is exactly the friction** — 11 steps, many fields Sofia doesn't know how to fill.
+**This is exactly the friction** - 11 steps, many fields Sofia doesn't know how to fill.
 
 ## Design Principles for Our Prototype
 
@@ -81,7 +81,7 @@ Left sidebar stepper:
 - Use Groupon green as the primary action color
 - White backgrounds, clean cards
 - Match the deal detail page layout for the preview
-- Warm, professional tone — not clinical
+- Warm, professional tone - not clinical
 
 ### Admin panel (PM's workbench):
 - Keep neutral/functional (already built this way)
@@ -90,4 +90,4 @@ Left sidebar stepper:
 ### What NOT to do:
 - Don't replicate the full Groupon header/nav (we're not building the platform)
 - Don't use the old Campaign Builder aesthetic (that's what we're improving)
-- Don't over-brand — the prototype should feel like a natural extension, not a copycat
+- Don't over-brand - the prototype should feel like a natural extension, not a copycat
