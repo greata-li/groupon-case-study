@@ -25,3 +25,5 @@ __pycache__/
 # Raw research materials (screenshots, etc.)
 _raw/
 backend/uploads/
+case-study/internal/video-script.md
+case-study/internal/demo-reference.md
