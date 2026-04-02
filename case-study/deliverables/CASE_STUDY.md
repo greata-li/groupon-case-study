@@ -177,21 +177,32 @@ The entire platform is mobile responsive: hamburger menus on small screens, resp
 ## 5. What We Would Change or Kill After Production
 
 ### Kill (with conditions)
-- **Force-classified categories** if accuracy is below 80%. Switch to hybrid: AI suggests top 3, merchant picks.
-- **One-shot story extraction** if follow-up rate exceeds 50%. May need a more structured conversational flow for certain business types.
-- **Client-side intent parsing** if the conversation becomes freeform. Replace with LLM intent classifier upstream. (Decision 017)
+
+- **Auto-assigned business category.** During onboarding, the AI auto-classifies the merchant's business into a category (e.g., "Health, Beauty & Wellness > Massage") based on their description. The prototype generates this freeform. In production, this must map to Groupon's actual category taxonomy. If classification accuracy drops below 80% against the real taxonomy, kill auto-assignment and switch to: AI suggests top 3 categories, merchant picks. (The review screen already shows the category with a confidence score and lets the merchant edit it — the fallback UX is already in place.)
+
+- **Single-call profile extraction.** The Story Extractor makes one LLM call to extract the full business profile. If the follow-up question rate exceeds 50% (meaning the AI can't get enough info from the first message more than half the time), the single-call approach isn't working. Switch to a more guided conversational flow with explicit steps for certain business types that are harder to extract from freeform text. (Decision 020)
+
+- **Client-side intent parsing in deal chat.** The deal creation chat uses JavaScript regex and keyword matching to detect what the merchant is saying (discount percentages, day names, restriction keywords). This works because the conversation is guided and the merchant is self-selecting. If the conversation becomes more freeform or the parsing causes too many misreads, replace with an LLM intent classifier (Haiku, ~$0.001/message) that categorizes each message before extracting fields. (Decision 017)
 
 ### Change
-- **Discount recommendations** based on actual deal performance data, not synthetic benchmarks.
-- **Description variety**: current Inspire Me produces similar openings across services. Pass all existing descriptions as context so each is unique.
-- **Photo handling**: server-side upload is functional; next step is AI-powered suggestions for positioning and quality.
-- **Output validation**: add business rule checks between LLM output and merchant review — price range guardrails, category-service alignment, fine print compliance templates. (Decision 019)
-- **Input sanitization**: add length limits, content policy classifier, and structured error messages before LLM calls. (Decision 018)
-- **Extraction approach**: add per-field confidence scores and progressive display as volume grows. (Decision 020)
+
+- **Discount recommendations.** Currently based on synthetic benchmark data (hardcoded Chicago/Beauty & Spas averages). Replace with Groupon's actual deal performance data so discount depth recommendations are grounded in real conversion rates, not assumptions.
+
+- **AI-generated description variety.** The "Inspire Me" copywriting feature can produce similar openings across services when called multiple times. We mitigated this by passing existing descriptions as context so the AI avoids repetition. Production should add a quality scoring step that scores each description for uniqueness before returning it to the merchant.
+
+- **Photo guidance.** Server-side photo upload is functional. Next step: AI-powered suggestions for photo positioning, quality, and which types of photos convert best for the merchant's category.
+
+- **LLM output validation.** Add business rule checks between LLM output and the merchant review screen. Price range guardrails (flag discounts outside 20-70%), category-service alignment, fine print compliance templates per jurisdiction. The 7-step builder already has the right architecture for this — validation slots in before field pre-fill. (Decision 019)
+
+- **Input sanitization.** Add length limits on all text inputs, a content policy classifier to flag prohibited business types, and structured error messages ("We couldn't understand your description. Here are some tips...") instead of generic errors. (Decision 018)
+
+- **Per-field confidence in extraction.** The Story Extractor currently returns a `category_confidence` score but doesn't score confidence on other fields. Production should add per-field confidence so the system only asks follow-ups for fields it's uncertain about, not binary present/absent checks. (Decision 020)
 
 ### Watch
-- **High acceptance + low conversion** = the most dangerous failure mode. The AI writes deals that sound good to Sofia but don't convert. Need to correlate acceptance rate with actual deal performance.
-- **Conversational intake abandonment**: if merchants start the chat but don't finish, the conversational approach may not work for all personality types. Keep the manual "Set up manually" option prominent.
+
+- **High acceptance + low conversion.** The most dangerous failure mode. The AI writes deals that sound good to Sofia but don't convert for customers. If acceptance rate is high but deal performance (redemption rate, customer acquisition) is low, the AI is optimizing for the wrong thing. Need to correlate merchant acceptance rate with actual deal performance in production.
+
+- **Conversational intake abandonment.** If merchants start the onboarding chat but don't finish, the conversational approach may not work for all personality types or business complexities. The "Set up manually" fallback option is already in the UI. Monitor its usage rate. If more than 30% of merchants switch to manual, the conversational UX needs iteration.
 
 ### Prototype → Production Migration
 
