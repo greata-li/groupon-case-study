@@ -33,7 +33,7 @@
 
 **Setup cost:** One-time ~15 minutes. Daily workflow is `make dev` - no ongoing friction.
 
-**What we'd say in the video:** "We chose Python for the backend because this is an AI pipeline, not a web BFF. Python gives us the strongest LLM SDK support, auto-generated API docs via FastAPI, and positions the tool alongside Groupon's AI/data team practices."
+**Key takeaway:** This is an AI pipeline, not a web BFF. Python provides the strongest LLM SDK ecosystem, auto-generated API docs via FastAPI, and aligns with Groupon's AI/data team practices.
 
 ---
 
@@ -62,7 +62,7 @@ Why Claude specifically:
 
 **Cost estimate:** ~$3-6 for entire prototype development (~100-200 pipeline runs during dev + testing). Under $15 worst case.
 
-**What we'd say in the video:** "The architecture supports swapping providers per endpoint - you can see the dropdown in the admin panel. For the prototype, we defaulted to Claude because structured JSON output is reliable and pricing is competitive for a tiered pipeline (cheap model for classification, stronger model for generation)."
+**Key takeaway:** Architecture supports provider swapping per endpoint (visible in admin dropdown). Claude chosen for reliable structured JSON and competitive tiered pricing — cheap model for classification, stronger model for generation.
 
 ---
 
@@ -93,7 +93,7 @@ Why Claude specifically:
 
 **What we trade:** MUI's out-of-box breadth. Mitigated by shadcn/ui covering all the components we actually need (tables, forms, tabs, dialogs, cards).
 
-**What we'd say in the video:** "We needed two distinct UI personalities - a warm, approachable merchant portal and a clean, data-dense admin panel. Tailwind lets us compose both from the same utility system without fighting a design framework's opinions."
+**Key takeaway:** Two distinct UI personalities (warm merchant portal + clean admin panel) composed from the same utility system, without fighting a design framework's opinions.
 
 ---
 
@@ -192,7 +192,7 @@ groupon-case-study/
 - **Processing:** Lambda or Sharp middleware to resize/compress on upload (thumbnails, optimized web formats). Don't serve raw 10MB phone photos.
 - **Cost:** S3 + CloudFront is ~$0.02/GB stored + $0.085/GB transferred. Negligible at Groupon's scale.
 
-**What we'd say in the video:** "Images are stored locally for the prototype. Production would use S3 with CloudFront CDN and pre-signed upload URLs so the browser uploads directly - no backend proxy needed."
+**Key takeaway:** Local storage is transparent to the frontend — it receives URL paths regardless of where files live. Swapping to S3 + CDN requires zero frontend changes.
 
 ---
 
@@ -356,7 +356,7 @@ Key insight: small business owners don't think in form fields. They think in sto
 1. **Onboarding chat** — "Tell me about your business" → AI extracts profile (name, services, prices, location, category)
 2. **Deal creation chat** — 5 follow-up questions (services, discount, duration, scheduling, terms) → AI generates complete deal
 
-**What we'd say in the video:** "Instead of 21 screens of form fields, the merchant tells us their story in plain language. The AI extracts everything we need - business name, services, pricing, location, category - and the merchant reviews it before saving. Under 5 minutes from first input to published deal."
+**Key takeaway:** 21 screens of form fields replaced by natural language input. The AI extracts everything — business name, services, pricing, location, category — and the merchant reviews before saving. Under 5 minutes from first input to published deal.
 
 ---
 
@@ -381,7 +381,7 @@ The separation mirrors how merchants actually think:
 - Profile can be edited independently from the portal
 - After onboarding, the flow routes directly to deal creation with profile context pre-loaded
 
-**What we'd say in the video:** "Profile and deals are separate concerns. You tell us about your business once. Every deal after that inherits your services, pricing, and location automatically - the AI already knows who you are."
+**Key takeaway:** Tell us about your business once. Every deal after that inherits services, pricing, and location automatically — the AI already knows who you are. Eliminates the redundancy that causes drop-off in Groupon's current flow.
 
 ---
 
@@ -410,7 +410,7 @@ A standalone deal creator demonstrates one feature. A complete portal demonstrat
 
 **What we trade:** Development time on pages that aren't the core thesis. Mitigated by keeping mock pages lightweight (static data, minimal interactivity).
 
-**What we'd say in the video:** "We didn't just build the AI deal creator in isolation. We built the full merchant portal so you can see how this feature fits into the merchant's daily workflow - onboarding, campaigns, vouchers, payments, all in one place."
+**Key takeaway:** The AI deal creator doesn't exist in isolation. The full merchant portal shows how this feature fits into the merchant's daily workflow — onboarding, campaigns, vouchers, payments, all in one place.
 
 ---
 
@@ -454,7 +454,7 @@ These require an LLM intent classifier upstream — a cheap, fast model (Haiku) 
 - **Graceful fallback** — "I didn't quite catch that. Could you tell me the discount you'd like to offer?" instead of silently filling the wrong field
 - **Cost:** ~$0.001 per Haiku classification call. At Groupon's merchant volume, negligible vs. the cost of a bad deal going live.
 
-**What we'd say in the video:** "The deal chat uses client-side parsing for the prototype — it's fast and predictable for a guided conversation. In production, you'd add an intent classifier upstream, especially as the conversation becomes more freeform. We've seen this pattern in production AI products where the intent space is much wider — the classifier is what keeps garbage out of your expensive generation endpoints."
+**Key takeaway:** Client-side parsing is fast and predictable for a guided conversation with a narrow intent space. Production with freeform input requires an LLM intent classifier upstream — the classifier is what keeps garbage out of expensive generation endpoints.
 
 ---
 
@@ -493,7 +493,7 @@ The onboarding flow sends the merchant's entire story to Sonnet in a single call
 - Content policy classifier (Haiku call, ~$0.0005) to flag prohibited business types
 - Structured error responses: "We couldn't understand your description. Here are some tips..." instead of a generic error
 
-**What we'd say in the video:** "The prototype trusts the guided flow — merchants reach this page intentionally and the LLM handles incomplete input by asking follow-up questions. In production, you'd add input validation, length limits, and a content policy classifier upstream. The architecture supports it — the extraction endpoint is already a single chokepoint where you'd add that layer."
+**Key takeaway:** The guided flow reduces the input risk surface significantly. The extraction endpoint is a natural chokepoint where input validation, length limits, and content policy checks would be added in production without architectural changes.
 
 ---
 
@@ -532,7 +532,7 @@ The LLM generates structured JSON that maps directly to deal fields. We trust th
 - Duplicate deal detection against existing active campaigns
 - Quality scoring on generated descriptions (optional Haiku call)
 
-**What we'd say in the video:** "The merchant always reviews before publishing — that's our validation layer in the prototype. In production, you'd add business rule validation between the LLM output and the review screen: price range checks, category alignment, fine print compliance. The 7-step builder is already the right architecture for this — you'd just add server-side validation before pre-filling the fields."
+**Key takeaway:** The merchant is the validation layer in the prototype — they review every field before publishing. The 7-step builder is already the right architecture for production validation; business rule checks slot in between LLM output and field pre-fill without changing the UX.
 
 ---
 
@@ -571,4 +571,4 @@ The single-call approach works because:
 - Partial extraction persistence (database-backed, tied to merchant account)
 - A/B test single-call vs multi-pass to measure completion rate impact
 
-**What we'd say in the video:** "One LLM call extracts the full profile. If anything's missing, the AI asks follow-ups and re-extracts with the additional context. This keeps the experience fast — 3-5 seconds per round, not 15 seconds for a multi-pass pipeline. In production, you'd add per-field confidence scoring and progressive display, but the single-call approach gets 70%+ complete profiles on the first try."
+**Key takeaway:** Single-call extraction keeps latency at 3-5 seconds vs 12-20 seconds for a multi-pass pipeline. The follow-up mechanism is self-correcting — each round accumulates context and improves extraction. Production would add per-field confidence scoring and progressive display, but the single-call approach achieves ~70% complete profiles on the first try.
