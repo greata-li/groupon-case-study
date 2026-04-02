@@ -126,7 +126,7 @@ export function Home() {
   }
 
   return (
-    <div className="animate-fade-in-up p-4 sm:p-6 max-w-5xl">
+    <div className="animate-fade-in-up p-4 sm:p-6 max-w-7xl">
       {/* Welcome banner */}
       <div className="rounded-xl bg-gradient-to-r from-groupon-green to-groupon-green-dark p-6 text-white mb-8">
         <div className="flex items-center gap-2 mb-2">
@@ -283,7 +283,7 @@ export function Home() {
               <CardTitle className="text-base font-bold">Your Progress</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="relative pl-6">
+              <div className="relative pl-8">
                 {/* Vertical line */}
                 <div className="absolute left-3 top-2 bottom-2 w-0.5 bg-gray-200" />
 
@@ -291,7 +291,7 @@ export function Home() {
                   {progressSteps.map((step, i) => (
                     <div key={step.label} className="relative flex items-start gap-3">
                       {/* Dot */}
-                      <div className="absolute -left-6 top-0.5">
+                      <div className="absolute -left-8 top-0">
                         {step.done ? (
                           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-groupon-green">
                             <CheckCircle2 className="h-3.5 w-3.5 text-white" />

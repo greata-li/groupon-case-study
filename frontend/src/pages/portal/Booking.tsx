@@ -63,7 +63,7 @@ const FEATURES = [
 
 export function Booking() {
   return (
-    <div className="p-4 sm:p-6 max-w-5xl animate-fade-in-up">
+    <div className="p-4 sm:p-6 max-w-7xl animate-fade-in-up">
       <div className="mb-6">
         <h1 className="font-heading text-xl font-bold text-gray-900">Booking</h1>
         <p className="mt-1 text-sm text-gray-500">

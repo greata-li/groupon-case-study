@@ -210,7 +210,7 @@ function renderTable(reports: MockReport[]) {
 
 export function Reports() {
   return (
-    <div className="p-4 sm:p-6 max-w-5xl animate-fade-in-up">
+    <div className="p-4 sm:p-6 max-w-7xl animate-fade-in-up">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-heading text-xl font-bold text-gray-900">Reports</h1>
