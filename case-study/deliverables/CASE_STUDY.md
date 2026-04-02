@@ -203,6 +203,55 @@ The entire platform is mobile responsive: hamburger menus on small screens, resp
 | Returning merchant optimization flow | This solves first deal creation. Returning merchants who want to modify deals use the edit flow. |
 | Real-time deal analytics | Would require Groupon's actual performance data pipeline. Showed mock analytics to demonstrate the concept. |
 
+### Assumptions and Constraints
+
+> **All assumptions in this prototype are derived from Groupon's public-facing merchant UI. We had no access to internal documentation, API specifications, or backend architecture.**
+
+This prototype was built from 27 screenshots of the campaign builder and 12 screenshots of the merchant portal. We reverse-engineered data structures, required fields, and backend behavior from the UI alone. Specific assumptions include:
+
+- **Deal structure**: The complete deal object (services, pricing, highlights, descriptions, fine print, voucher instructions) was inferred from what the campaign builder collects across its 21 screens. We don't know Groupon's actual data model or field validation rules.
+- **Required vs. optional fields**: We inferred which fields are mandatory based on UI indicators (asterisks, validation messages, form progression gates). The actual backend requirements may differ.
+- **"Can't edit published deals" constraint**: We observed "Once you submit, you won't be able to change it" warnings in the current UI. This may be a legacy technical constraint rather than an intentional product decision. Our prototype allows status toggling (Active/Draft/Inactive) as a design exploration of what a more flexible model could look like.
+- **Category taxonomy**: Categories and subcategories were assumed from what's visible in the UI. Groupon's actual taxonomy is likely deeper and governed by internal classification systems we don't have access to.
+- **Pricing and commission logic**: Discount depths and pricing structures were inferred from the campaign builder's pricing step. Actual commission rates, minimum margins, and pricing rules are proprietary.
+
+### What's Functional vs. Mock vs. Not Built
+
+The table in Section 3.5 provides a feature-by-feature breakdown. Here we clarify the boundaries more explicitly, because understanding what is real code with real data flow versus realistic-looking UI is critical for evaluating this prototype.
+
+**Functional (real code, real data flow):**
+- Conversational onboarding with live Claude API calls and structured data extraction
+- Deal creation with full CRUD operations (create, read, update, delete) persisted to file store
+- Profile management with editable fields and persistence across sessions
+- Photo uploads to server with static file serving
+- Admin panel: prompt editing, model selection, test panel with real API calls, pipeline analytics
+- Campaign status management (Active/Draft/Inactive toggling via PATCH endpoint)
+- CSV report generation (produces real downloadable files, though from mock source data)
+- Smart routing logic (new vs. returning merchant detection)
+
+**Mock with realistic UI (static or simulated data, fully interactive interface):**
+- Voucher list: realistic table with filtering and status badges, backed by static data
+- Payments and payouts: payout tracking with expandable drill-down rows, backed by static data
+- Customer reviews: rating distributions and review cards with AI-suggested response button (generates responses but not connected to a real review system)
+- Booking integrations: credential dialogs with realistic API key fields for Booker, Mindbody, and Square (simulate connection flow but make no real vendor API calls)
+- Support page: static knowledge base articles and simulated AI chatbot
+
+**Not built (out of scope for this prototype):**
+- Real payment processing or merchant payout infrastructure
+- Actual vendor API integrations (Booker, Mindbody, Square OAuth flows)
+- SMS or email notifications
+- Multi-language support
+- Multi-merchant authentication and authorization
+- Real analytics tracking or event instrumentation
+- Search and discovery (consumer-facing marketplace)
+- Actual Groupon marketplace integration or deal syndication
+
+### Why Mock Pages Exist
+
+A merchant portal with only a deal creation flow feels incomplete and makes it difficult to evaluate the product holistically. The mock pages serve a specific purpose: they demonstrate that we understand the full merchant journey, not just the onboarding moment.
+
+When a PM evaluates a prototype, the question isn't just "does deal creation work?" It's "does this feel like a product a merchant would use daily?" Mock pages for vouchers, payments, reviews, and support establish the context in which deal creation lives. They also make prioritization visible: we built the AI-assisted flows with real functionality and represented the rest of the portal at the UI level, which is itself a prioritization decision that reflects where we believe the highest-leverage investment is.
+
 ---
 
 ## 7. Technical Decisions and Reasoning

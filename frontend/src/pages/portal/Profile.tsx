@@ -16,6 +16,8 @@ import {
   Phone,
   Globe,
   CreditCard,
+  Camera,
+  Upload,
 } from 'lucide-react';
 
 export function Profile() {
@@ -28,10 +30,11 @@ export function Profile() {
     business_name: '',
     business_description: '',
     category: 'Health, Beauty & Wellness > Spas',
-    address: '',
+    full_address: '',
     phone: '',
     website: '',
     business_type: 'sole_provider',
+    photos: [] as string[],
     bank_name: '',
     institution_number: '',
     transit_number: '',
@@ -47,10 +50,11 @@ export function Profile() {
             business_name: (p.business_name as string) ?? '',
             business_description: (p.business_description as string) ?? '',
             category: (p.category as string) ?? prev.category,
-            address: (p.address as string) ?? '',
+            full_address: (p.full_address as string) ?? (p.address as string) ?? '',
             phone: (p.phone as string) ?? '',
             website: (p.website as string) ?? '',
             business_type: (p.business_type as string) ?? 'sole_provider',
+            photos: (Array.isArray(p.photos) ? p.photos : []) as string[],
             bank_name: (p.bank_name as string) ?? '',
             institution_number: (p.institution_number as string) ?? '',
             transit_number: (p.transit_number as string) ?? '',
@@ -192,6 +196,76 @@ export function Profile() {
           </CardContent>
         </Card>
 
+        {/* Business Photos */}
+        <Card>
+          <CardHeader className="border-b">
+            <div className="flex items-center gap-2">
+              <Camera className="h-4 w-4 text-gray-400" />
+              <CardTitle className="text-sm font-bold">Business Photos</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-gray-500 mb-3">
+              These photos are used as defaults when creating new deals. Deals with photos get up to 3x more views.
+            </p>
+            {form.photos.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-4">
+                {form.photos.map((photo, i) => (
+                  <div key={i} className="relative group rounded-lg overflow-hidden border border-gray-200">
+                    {photo.startsWith('/uploads/') ? (
+                      <img src={photo} alt={`Business photo ${i + 1}`} className="w-full h-24 object-cover" />
+                    ) : (
+                      <div className="w-full h-24 bg-gray-100 flex items-center justify-center">
+                        <Camera className="h-6 w-6 text-gray-300" />
+                      </div>
+                    )}
+                    <button
+                      onClick={() => {
+                        const updated = form.photos.filter((_, idx) => idx !== i);
+                        setForm((prev) => ({ ...prev, photos: updated }));
+                        setSaved(false);
+                      }}
+                      className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/60 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      x
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div
+              className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 p-6 text-center cursor-pointer hover:border-groupon-green/30 hover:bg-groupon-green/[0.02] transition-all"
+              onClick={() => {
+                const inp = document.createElement('input');
+                inp.type = 'file';
+                inp.accept = 'image/*';
+                inp.multiple = true;
+                inp.onchange = async (e) => {
+                  const files = (e.target as HTMLInputElement).files;
+                  if (!files) return;
+                  for (const file of Array.from(files)) {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    const res = await fetch('/api/upload', { method: 'POST', body: fd });
+                    if (res.ok) {
+                      const { url } = await res.json();
+                      setForm((prev) => ({ ...prev, photos: [...prev.photos, url] }));
+                      setSaved(false);
+                    }
+                  }
+                };
+                inp.click();
+              }}
+            >
+              <Upload className="mx-auto h-8 w-8 text-gray-300 mb-2" />
+              <p className="text-sm font-medium text-gray-600">
+                {form.photos.length > 0 ? 'Add more photos' : 'Upload business photos'}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">JPG, PNG up to 10MB</p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Contact */}
         <Card>
           <CardHeader className="border-b">
@@ -203,11 +277,11 @@ export function Profile() {
           <CardContent>
             <div className="space-y-4">
               <div>
-                <Label>Address</Label>
+                <Label>Full Address</Label>
                 <Input
-                  value={form.address}
-                  onChange={(e) => updateField('address', (e.target as HTMLInputElement).value)}
-                  placeholder="123 Main Street, Chicago, IL 60601"
+                  value={form.full_address}
+                  onChange={(e) => updateField('full_address', (e.target as HTMLInputElement).value)}
+                  placeholder="123 Main Street, Suite 4, Chicago, IL 60601"
                   className="mt-1.5"
                 />
               </div>

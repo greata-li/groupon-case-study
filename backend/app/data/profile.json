@@ -1,3 +1,7 @@
 {
-  "onboarded": false
+  "onboarded": false,
+  "checklist_completed": {
+    "payments": true,
+    "voucher": true
+  }
 }
