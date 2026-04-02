@@ -19,9 +19,12 @@ export function FeatureTooltip({ id, message, children, position = 'top' }: Feat
 
   useEffect(() => {
     if (!localStorage.getItem(storageKey)) {
-      // Small delay so it appears after page renders
-      const timer = setTimeout(() => setVisible(true), 800);
-      return () => clearTimeout(timer);
+      const showTimer = setTimeout(() => setVisible(true), 800);
+      const hideTimer = setTimeout(() => {
+        setVisible(false);
+        localStorage.setItem(storageKey, '1');
+      }, 6000);
+      return () => { clearTimeout(showTimer); clearTimeout(hideTimer); };
     }
   }, [storageKey]);
 
