@@ -21,7 +21,7 @@
 | 02 | Booking platform choice | Determines if deals auto-sync with Mindbody/Booker/Square | **Skip** | Integration feature, not deal content. Mention as V2. |
 | 04-06 | Campaign category (3-level) | Determines where the deal surfaces in search, affects pricing benchmarks, commission rates | **AI** | Our classifier already does this from business description. Category → subcategory → service level. |
 | 07-10 | Category manual selection | Fallback if auto-assign fails | **AI** (with fallback) | If confidence < 80%, show top 3 and let Sofia pick. Already in our classifier design. |
-| 11 | Template selection | Pre-fills deal options, provides starting structure, stock photos | **AI** | Our generator creates from scratch — better than a template because it's tailored to Sofia's specific business, not generic. |
+| 11 | Template selection | Pre-fills deal options, provides starting structure, stock photos | **AI** | Our generator creates from scratch - better than a template because it's tailored to Sofia's specific business, not generic. |
 | 12 | "Submit and continue" warning | Locks initial setup choices | **Skip** | We have no irreversible states. Everything is editable. |
 
 **Assessment: No new questions needed.** Our intake already captures what this step needs (business description → category, services → deal structure).
@@ -41,7 +41,7 @@
 | Monthly voucher cap | Limits how many deals sell per month | **Default** → Sofia override | Currently NOT in our flow. Groupon recommends higher cap = more promotion. We should default to 50 and let Sofia adjust. |
 | Number of options | Multiple service tiers | **AI** | Already generates multiple options + bundle. |
 
-**Gap found: Monthly voucher cap.** This is a business decision — how many new customers can Sofia handle? We should add this to the preview as an editable default, not a new intake question. Default: 50 per option (Groupon's recommendation).
+**Gap found: Monthly voucher cap.** This is a business decision - how many new customers can Sofia handle? We should add this to the preview as an editable default, not a new intake question. Default: 50 per option (Groupon's recommendation).
 
 ### Photos (screens 16-18)
 
@@ -60,7 +60,7 @@
 | Highlights text (450 char) | Short bullet points shown prominently on deal page. "All-day access to dry and wet Russian and Turkish saunas, hot tubs, and cold plunge pools" | **AI** | NOT currently generated. Should be. These are the "at a glance" selling points. |
 | "Inspire Me" button | Helps merchant write highlights | **AI** | Our entire flow IS "Inspire Me." |
 
-**Gap found: Highlights.** This is a distinct field from the description — shorter, punchier, shown more prominently. Our deal generator should output this.
+**Gap found: Highlights.** This is a distinct field from the description - shorter, punchier, shown more prominently. Our deal generator should output this.
 
 ### Description (screen 20)
 
@@ -77,7 +77,7 @@
 |-------|---------------------|-------------|-------|
 | Max vouchers per purchase | Limits abuse | **Default: 1** | Standard. |
 | Expiry period | Legal requirement, creates urgency | **Default: 90 days** (Groupon recommends "Every 30 days") | AI should pick based on service type. |
-| Voucher expiry value | What happens when voucher expires — customer can still use toward full price | **Default** | Standard clause, AI generates. |
+| Voucher expiry value | What happens when voucher expires - customer can still use toward full price | **Default** | Standard clause, AI generates. |
 | Amount paid never expires | Legal requirement | **Default: Yes** | Always true. |
 | Cancellation/refund policy | Required for service businesses | **AI** | Generate based on service type. "Consultation required; cancellation and other refund requests will be honored before service provided." |
 | Optional restrictions | "Not valid with other offers", "One per booking/visit", "Must sign waiver", "Not valid toward gratuity" | **AI selects relevant ones** | Currently free text. Should be structured checkboxes that AI pre-selects based on service type. |
@@ -89,13 +89,13 @@
 | Field | Why Groupon Needs It | Our Approach | Notes |
 |-------|---------------------|-------------|-------|
 | Redemption method | Physical location / travel to customer / online | **Default: Physical location** | For beauty/spa, always physical. AI can infer from service type. |
-| Business address | Where customers go | **Sofia** (intake step 3) | Already captured as "location." But we don't have the full street address — just city/neighborhood. |
+| Business address | Where customers go | **Sofia** (intake step 3) | Already captured as "location." But we don't have the full street address - just city/neighborhood. |
 | Appointment required? | Affects how customers book | **Default: Yes** | For appointment-based businesses (beauty, spa), always yes. AI infers. |
 | Phone number | Shown on voucher for booking | **Sofia** | NOT currently captured. |
 
 **Gap found: Phone number.** Sofia needs to provide a contact number for voucher redemption. We also only capture city/neighborhood, not a full address.
 
-**Decision needed:** Do we add a phone number question, or make it optional in the preview? My recommendation: make it an optional field in the preview, not a new intake step. Sofia can add it before publishing. Same for full address.
+**Resolution (implemented):** Phone number and full street address are now REQUIRED fields. The AI prompt generates targeted follow-up questions during onboarding if they are missing. This ensures voucher redemption info is always captured before deal creation, without adding manual form steps.
 
 ---
 
@@ -116,7 +116,7 @@
 
 | Step | Why It Exists | Our Approach |
 |------|-------------|-------------|
-| Tax compliance (DAC 7) | EU regulatory requirement | **Skip** — Not deal content. Should be parallel onboarding. |
+| Tax compliance (DAC 7) | EU regulatory requirement | **Skip** - Not deal content. Should be parallel onboarding. |
 | Review | Final check before submission | **Our preview IS the review.** Sofia sees everything before publishing. |
 | Submit | Sends to Groupon for approval | **Our "Publish" button.** |
 
@@ -124,46 +124,38 @@
 
 ## Summary: What Changes
 
-### Gaps Found — Need to Add to Our AI Output
+### Gaps Found - Need to Add to Our AI Output
 
 | Gap | Where It Appears | Impact | Add to Intake? |
 |-----|-----------------|--------|---------------|
-| Highlights | Prominent on deal page | High — missing a key selling section | No — AI generates from existing intake |
-| Per-option descriptions | Under each service option | Medium — adds detail | No — AI generates |
-| Monthly voucher cap | Controls deal volume | Medium — business decision | No — default in preview, Sofia adjusts |
-| Structured fine print | Legal/compliance fields | High — Groupon requires structured data | No — AI pre-selects relevant restrictions |
-| Voucher redemption method | How customers use the deal | Low — defaults work for 90% of cases | No — default: physical, appointment required |
-| Phone number | On voucher for booking | Medium — needed for real deal | Optional in preview |
+| Highlights | Prominent on deal page | High - missing a key selling section | No - AI generates from existing intake |
+| Per-option descriptions | Under each service option | Medium - adds detail | No - AI generates |
+| Monthly voucher cap | Controls deal volume | Medium - business decision | No - default in preview, Sofia adjusts |
+| Structured fine print | Legal/compliance fields | High - Groupon requires structured data | No - AI pre-selects relevant restrictions |
+| Voucher redemption method | How customers use the deal | Low - defaults work for 90% of cases | No - default: physical, appointment required |
+| Phone number | On voucher for booking | High - needed for real deal | **Required** - AI follow-up if missing |
 | Business website | Merchant verification | Low for prototype | Optional in preview |
-| Full street address | On voucher / map | Medium — needed for real deal | Optional in preview |
+| Full street address | On voucher / map | High - needed for real deal | **Required** - AI follow-up if missing |
 
 ### Do We Need New Intake Questions?
 
 **No.** Every gap can be handled by:
 1. Expanding the AI generator output (highlights, per-option descriptions, structured fine print)
 2. Adding smart defaults in the preview (voucher cap, redemption method, expiry)
-3. Adding optional fields in the preview that Sofia fills before publishing (phone, website, full address)
+3. AI-driven follow-up questions during the conversational intake for required fields (phone, full address)
+4. Adding optional fields in the preview that Sofia fills before publishing (website)
 
-The intake stays at 5 questions. The AI does more work. The preview gets richer with more editable sections. Sofia's effort doesn't increase.
+The intake stays conversational. The AI does more work - including asking for phone and full address if Sofia doesn't mention them. The preview gets richer with more editable sections. Sofia's effort doesn't increase.
 
-### One Exception to Consider
+### Phone Number / Full Address (Resolved)
 
-**Phone number / full address** — these are genuinely needed for a real Groupon deal. We have two options:
-
-**Option A: Add to intake Step 3 (Location)**
-Currently: "Where are you located?" → "Lincoln Park, Chicago"
-Expanded: Add sub-fields for full address and phone. This makes Step 3 slightly longer but captures real business contact info.
-
-**Option B: Add to preview as "Complete before publishing" section**
-The preview shows a section at the bottom: "Before publishing, add your contact details" with optional phone/address fields. Deal generates without them, but they're flagged as needed.
-
-**Recommendation: Option B.** It keeps the intake fast (Sofia's first impression) and moves the operational details to the preview (where she's already engaged and committed). The AI generates the deal without these fields; they're supplementary.
+These are required for voucher redemption. **Implemented: the AI prompt treats phone and full_address as required fields and generates follow-up questions if they are missing from the merchant's initial description.** This keeps the conversational flow natural while ensuring critical contact info is always captured before deal creation.
 
 ---
 
 ## How This Maps to Our Prototype Changes
 
-### Deal Generator Prompt — Expand Output
+### Deal Generator Prompt - Expand Output
 ```json
 {
   "title": "...",
@@ -198,12 +190,12 @@ The preview shows a section at the bottom: "Before publishing, add your contact 
 }
 ```
 
-### Deal Preview — Add Sections
+### Deal Preview - Add Sections
 1. Highlights (editable bullet list)
 2. Per-option "What's included" (editable per service)
 3. Structured fine print (toggles/chips instead of free text)
 4. Voucher instructions (defaulted, editable)
-5. "Contact details" section (phone, address — optional, flagged as needed)
+5. "Contact details" section (phone, address - optional, flagged as needed)
 
 ### No Changes
 - Intake form (stays at 5 questions)

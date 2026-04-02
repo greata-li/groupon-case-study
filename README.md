@@ -1,6 +1,6 @@
-# AI Merchant Deal Creator — Groupon Case Study
+# AI Merchant Deal Creator - Groupon Case Study
 
-A complete AI-powered merchant platform that replaces Groupon's 21-screen deal creation flow with a conversational AI experience. Merchants describe their business in natural language — the AI extracts everything, builds the deal, and lets them review and publish in under 5 minutes.
+A complete AI-powered merchant platform that replaces Groupon's 21-screen deal creation flow with a conversational AI experience. Merchants describe their business in natural language - the AI extracts everything, builds the deal, and lets them review and publish in under 5 minutes.
 
 ## Quick Start
 
@@ -57,7 +57,7 @@ Use the **Reset Profile** button in the Admin panel to simulate a new merchant. 
 
 ## What This Solves
 
-Sofia owns a waxing and lash studio. She has 20 minutes between clients. Groupon's current campaign builder asks her to fill out **21 screens** of forms — booking platform, 3-level categories, pricing, copy, photos, highlights, descriptions, fine print, voucher instructions, business info, payment, tax compliance. She drops off.
+Sofia owns a waxing and lash studio. She has 20 minutes between clients. Groupon's current campaign builder asks her to fill out **21 screens** of forms - booking platform, 3-level categories, pricing, copy, photos, highlights, descriptions, fine print, voucher instructions, business info, payment, tax compliance. She drops off.
 
 **Our approach:** Sofia tells us about her business in her own words (text or voice). The AI extracts her profile, creates a complete deal, and lets her review. Under 5 minutes, no marketing expertise needed.
 
@@ -112,7 +112,7 @@ groupon-case-study/
 | Deal Generator | Sonnet | Create complete deal as structured JSON |
 | Text Enhancer | Haiku | "Inspire Me" copywriting for any field |
 
-All prompts, models, and temperatures are configurable via the admin panel — no code changes needed.
+All prompts, models, and temperatures are configurable via the admin panel - no code changes needed.
 
 ### Tech Stack
 
@@ -129,7 +129,7 @@ All prompts, models, and temperatures are configurable via the admin panel — n
 ### Conversational AI Onboarding
 - Chat/voice interface: "Tell me about your business"
 - AI extracts: name, category, services, prices, location, highlights
-- Follow-up questions for missing info
+- Follow-up questions for missing info (address and phone are required - AI asks if missing)
 - Profile review with live customer preview
 - Flows directly into first deal creation
 
@@ -153,6 +153,13 @@ All prompts, models, and temperatures are configurable via the admin panel — n
 - **Support**: Knowledge base + AI chatbot
 - **Connections**: Credential management (Booker, Mindbody, Square, Google, Yelp)
 
+### Mobile Responsive Design
+- Hamburger menus on small screens, responsive grids, collapsible sidebar
+- Works on phone, tablet, and desktop
+
+### Photo Upload
+- Drag-and-drop or file picker, uploads to server, persists in profile, served as static files
+
 ### Pipeline Admin Panel
 - 7 configurable LLM endpoints with model dropdown (Haiku/Sonnet/Opus)
 - Prompt editor with temperature and token controls
@@ -171,5 +178,5 @@ All prompts, models, and temperatures are configurable via the admin panel — n
 | [video-script.md](case-study/deliverables/video-script.md) | 10-minute walkthrough script |
 | [findings.md](case-study/deliverables/findings.md) | Real bugs found in Groupon's merchant flow |
 | [flow-mapping.md](case-study/deliverables/flow-mapping.md) | Their 21 screens mapped to our AI approach |
-| [decisions.md](decisions.md) | Technical decisions with reasoning |
+| [decisions.md](case-study/deliverables/decisions.md) | Technical decisions with reasoning |
 | [PRD.md](case-study/planning/PRD.md) | Product requirements and success metrics |

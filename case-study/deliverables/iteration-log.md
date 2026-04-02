@@ -1,4 +1,4 @@
-# Iteration Log — What Changed, What Broke, What We Learned
+# Iteration Log - What Changed, What Broke, What We Learned
 
 *Documenting the evolution from initial concept to final prototype.*
 
@@ -16,14 +16,14 @@ Read the case study brief. Identified the core problem: Sofia drops off at deal 
 - Simple deal preview
 
 ### What Worked
-- The pipeline architecture was sound — each endpoint has one job
-- Admin panel concept was strong — PM can iterate without code changes
+- The pipeline architecture was sound - each endpoint has one job
+- Admin panel concept was strong - PM can iterate without code changes
 - Claude's structured JSON output was reliable
 
 ### What Didn't Work
-- **The intake form was still a form** — we reduced 21 screens to 5, but Sofia still had to fill out every field manually
-- **No real comparison to Groupon** — we hadn't studied their actual flow yet
-- **Deal preview was too simple** — didn't cover all the fields Groupon actually needs
+- **The intake form was still a form** - we reduced 21 screens to 5, but Sofia still had to fill out every field manually
+- **No real comparison to Groupon** - we hadn't studied their actual flow yet
+- **Deal preview was too simple** - didn't cover all the fields Groupon actually needs
 
 ---
 
@@ -35,12 +35,12 @@ Signed up as an actual Groupon merchant. Documented 27 screenshots of the entire
 ### Key Discoveries
 1. Groupon's onboarding email link is broken (404)
 2. Backend returns 502 errors on Step 4 with no user feedback
-3. The campaign builder has 21 screens — far more than our initial 5 questions covered
-4. Groupon already has "Inspire Me" buttons — basic AI assistance exists
-5. The merchant portal has 12 sidebar pages — a full management platform
+3. The campaign builder has 21 screens - far more than our initial 5 questions covered
+4. Groupon already has "Inspire Me" buttons - basic AI assistance exists
+5. The merchant portal has 12 sidebar pages - a full management platform
 
 ### Impact on Our Approach
-- Realized our prototype was too minimal — it didn't cover what Groupon actually collects
+- Realized our prototype was too minimal - it didn't cover what Groupon actually collects
 - Created a field-by-field mapping: every field from their 21 screens mapped to our AI approach
 - Expanded scope: from "deal generator" to "complete merchant platform"
 
@@ -57,9 +57,9 @@ Initially built a traditional step-by-step form matching Groupon's structure:
 1. Welcome → Booking Platform → Category → Description → Website → Business Type → Address → Payment → Review
 
 ### What Didn't Work
-- **Still too many forms** — we replaced 21 screens with 9 screens. Better, but still fundamentally the same UX pattern.
-- **Business setup mixed with deal creation** — the first-time flow combined profile setup and deal creation, which was confusing for returning merchants.
-- **No AI in the onboarding** — "Inspire Me" buttons were nice but the core experience was still manual data entry.
+- **Still too many forms** - we replaced 21 screens with 9 screens. Better, but still fundamentally the same UX pattern.
+- **Business setup mixed with deal creation** - the first-time flow combined profile setup and deal creation, which was confusing for returning merchants.
+- **No AI in the onboarding** - "Inspire Me" buttons were nice but the core experience was still manual data entry.
 
 ---
 
@@ -82,9 +82,9 @@ New Claude Sonnet endpoint that takes free-form text and returns structured JSON
 - Missing fields + targeted follow-up questions
 
 ### What We Learned
-- **Voice input is natural** — Sofia can describe her business faster by talking than typing
-- **Follow-up questions matter** — the AI shouldn't just extract what's there; it should ask for what's missing
-- **Profile is permanent** — once extracted, the data is saved. She never fills it out again.
+- **Voice input is natural** - Sofia can describe her business faster by talking than typing
+- **Follow-up questions matter** - the AI shouldn't just extract what's there; it should ask for what's missing
+- **Profile is permanent** - once extracted, the data is saved. She never fills it out again.
 
 ---
 
@@ -99,16 +99,16 @@ If onboarding works via chat, deal creation should too.
 Uses the saved profile as context. When Sofia says "all of them at 35% off," the AI knows what "all of them" means because it has her services.
 
 ### Issues Identified
-1. **One-shot extraction didn't ask enough** — AI extracted after one message, missing discount preferences, duration, scheduling.
+1. **One-shot extraction didn't ask enough** - AI extracted after one message, missing discount preferences, duration, scheduling.
    - Fix: Added 5-step conversational flow (services → discount → duration → scheduling → terms)
 
-2. **Description repetition** — "Melt away tension" appeared in every service description.
+2. **Description repetition** - "Melt away tension" appeared in every service description.
    - Fix: Added "never repeat openings" to prompt, bumped temperature to 0.8.
 
-3. **Highlights returned as JSON** — LLM wrapped bullet points in markdown code fences.
+3. **Highlights returned as JSON** - LLM wrapped bullet points in markdown code fences.
    - Fix: Added `cleanHighlights()` parser that strips fences and parses JSON arrays.
 
-4. **Auto-publish without review** — deals went straight to Active with no merchant review.
+4. **Auto-publish without review** - deals went straight to Active with no merchant review.
    - Fix: Redirected to 7-step builder with all fields pre-filled. Draft/Publish options.
 
 ---
@@ -142,13 +142,13 @@ Uses the saved profile as context. When Sofia says "all of them at 35% off," the
 > "Return JSON with fields: business_name, description, location..."
 - Result: Better extraction but poor follow-up questions ("What is your business name?" when she already said it).
 
-**V3** (current — contextual and adaptive):
+**V3** (current - contextual and adaptive):
 > Detailed schema + rules for inference + "only ask for critically missing fields" + "be conversational, not formal"
 - Result: Accurate extraction, natural follow-ups, generates highlights and description even from brief input.
 
 ### Deal Generator Prompt
 
-**V1**: Basic template — "Generate a deal with title, description, services."
+**V1**: Basic template - "Generate a deal with title, description, services."
 - Result: Generic titles, no market context, descriptions all sounded the same.
 
 **V2**: Added market benchmark context and rules for pricing.
@@ -174,8 +174,8 @@ Expanded from deal generator to complete merchant platform matching Groupon's ac
 - Campaign management with Active/Draft/Inactive status toggle
 
 ### What We Learned
-- **Completeness matters for credibility** — a half-built portal undermines the AI features. Every page Groupon has needs a counterpart.
-- **Mock data should look realistic** — voucher codes, payment amounts, customer names, dates all need to feel real.
+- **Completeness matters for credibility** - a half-built portal undermines the AI features. Every page Groupon has needs a counterpart.
+- **Mock data should look realistic** - voucher codes, payment amounts, customer names, dates all need to feel real.
 
 ---
 
@@ -184,12 +184,12 @@ Expanded from deal generator to complete merchant platform matching Groupon's ac
 ### Comprehensive QA Round
 Tested every flow end-to-end. Key bugs found and fixed:
 
-1. **Discount % not displaying** — pre-filled services from AI didn't calculate discount. Added `recalcAllDiscounts()` helper applied to all prefill paths.
-2. **Edit creates duplicates** — clicking Edit → Publish created new deals. Added PUT `/api/deals/:id` endpoint, builder now detects edit mode.
-3. **Highlights as raw JSON** — LLM returned JSON arrays in markdown fences. Added `cleanHighlights()` parser.
-4. **Photo upload non-functional** — wired up file picker and drag-drop with visual feedback.
-5. **No save feedback** — added success message + auto-redirect after saving.
-6. **Checklist items never complete** — added completion tracking via profile API, marks items when pages visited.
+1. **Discount % not displaying** - pre-filled services from AI didn't calculate discount. Added `recalcAllDiscounts()` helper applied to all prefill paths.
+2. **Edit creates duplicates** - clicking Edit → Publish created new deals. Added PUT `/api/deals/:id` endpoint, builder now detects edit mode.
+3. **Highlights as raw JSON** - LLM returned JSON arrays in markdown fences. Added `cleanHighlights()` parser.
+4. **Photo upload non-functional** - wired up file picker and drag-drop with visual feedback.
+5. **No save feedback** - added success message + auto-redirect after saving.
+6. **Checklist items never complete** - added completion tracking via profile API, marks items when pages visited.
 
 ### Smart Routing
 Added profile-aware routing throughout:
@@ -208,6 +208,30 @@ Campaigns page now has status toggle per deal:
 - Active / Draft / Inactive
 - PATCH endpoint for status changes
 - Edit shows "Save Changes", new deals show "Save as Draft" / "Publish"
+
+---
+
+## Phase 9: Validation, Responsiveness, and Photo Upload (Day 8)
+
+### Address/Phone Validation
+Made full street address and phone number required fields in onboarding. Updated the Story Extractor prompt to generate targeted follow-up questions if these are missing from the merchant's initial description. This ensures voucher redemption info is always captured during the conversational flow rather than as an afterthought in the preview.
+
+### Mobile Responsive Design
+Added full mobile responsiveness across the platform:
+- Hamburger menus replace sidebar navigation on small screens
+- Responsive grids reflow from multi-column to single-column
+- Collapsible sidebar with mobile overlay
+- Touch-friendly controls and spacing throughout
+
+### Photo Upload (Server-Side)
+Completed the photo upload pipeline end-to-end:
+- Frontend: drag-and-drop + file picker (already existed)
+- Backend: upload endpoint saves files to server, serves as static files
+- Profile: uploaded photos persist and display in the profile and deal preview
+
+### What We Learned
+- **Required fields in conversational AI need explicit prompt rules** - without telling the AI that phone/address are mandatory, it treated them as optional like any other field.
+- **Mobile responsiveness is table stakes** - a merchant platform that doesn't work on Sofia's phone between clients misses the core use case.
 
 ---
 
