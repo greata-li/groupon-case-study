@@ -5,7 +5,7 @@ export function MerchantLayout() {
     <div className="min-h-screen bg-[#fafaf8]">
       {/* Slim prototype indicator */}
       <div className="bg-groupon-purple py-1.5 text-center text-xs font-medium text-white/70">
-        Prototype Demo
+        AI Merchant Experience &middot; Case Study Prototype
       </div>
 
       {/* Groupon merchant header */}
@@ -20,7 +20,7 @@ export function MerchantLayout() {
 
           <nav className="flex items-center gap-6 text-sm font-medium text-gray-500">
             <Link to="/" className="transition-colors hover:text-gray-900">Home</Link>
-            <Link to="/portal/create" className="transition-colors hover:text-gray-900">Create Deal</Link>
+            <Link to="/onboarding" className="transition-colors hover:text-gray-900">Create Deal</Link>
             <Link to="/portal" className="transition-colors hover:text-gray-900">Merchant Portal</Link>
             <Link
               to="/admin"

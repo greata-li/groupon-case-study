@@ -1,15 +1,31 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { fetchProfile } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Clock, CheckCircle2, ArrowRight, TrendingUp, Users } from 'lucide-react';
+import { Sparkles, MessageCircle, CheckCircle2, ArrowRight, TrendingUp, Zap, Target, Clock } from 'lucide-react';
 
 export function Welcome() {
   const navigate = useNavigate();
+  const [isOnboarded, setIsOnboarded] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetchProfile()
+      .then((p) => setIsOnboarded(Boolean(p?.onboarded)))
+      .catch(() => setIsOnboarded(false));
+  }, []);
+
+  function handleCreateDeal() {
+    if (isOnboarded) {
+      navigate('/portal/create');
+    } else {
+      navigate('/onboarding');
+    }
+  }
 
   return (
     <div className="animate-fade-in-up">
       {/* Hero section */}
       <section className="relative overflow-hidden bg-white">
-        {/* Decorative gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-groupon-green-light/40 via-transparent to-groupon-purple/[0.03]" />
 
         <div className="relative mx-auto max-w-6xl px-6 py-20 md:py-28">
@@ -17,34 +33,43 @@ export function Welcome() {
             {/* Eyebrow */}
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-groupon-green/10 px-4 py-1.5 text-sm font-medium text-groupon-green">
               <Sparkles className="h-3.5 w-3.5" />
-              AI-Powered Deal Creation
+              AI-Powered Merchant Platform
             </div>
 
             {/* Headline */}
             <h1 className="font-heading text-[2.75rem] font-extrabold leading-[1.1] tracking-[-0.03em] text-gray-900 md:text-[3.5rem]">
               Get your first deal live
               <br />
-              in <span className="text-groupon-green">5 minutes</span>
+              in <span className="text-groupon-green">under 5 minutes</span>
             </h1>
 
             <p className="mt-5 text-lg leading-relaxed text-gray-500 md:text-xl">
-              Tell us about your business. Our AI handles the rest &mdash;
-              pricing, copy, category, everything. You review and publish.
+              Just describe your business. Our AI builds your complete Groupon deal
+              — pricing, copy, categories, fine print, everything. You review and publish.
             </p>
 
             {/* CTA */}
             <div className="mt-10 flex flex-col items-center gap-3">
               <Button
-                onClick={() => navigate('/onboarding')}
+                onClick={handleCreateDeal}
                 size="lg"
                 className="group h-14 rounded-full bg-groupon-green px-10 text-base font-bold text-white shadow-lg shadow-groupon-green/20 transition-all hover:bg-groupon-green-dark hover:shadow-xl hover:shadow-groupon-green/30"
               >
-                Create My Deal
+                {isOnboarded ? 'Create a New Deal' : 'Get Started'}
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
               <p className="text-sm text-gray-400">
                 Free to create &middot; You only pay when customers buy
               </p>
+              {isOnboarded && (
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/portal')}
+                  className="text-sm text-gray-400 hover:text-gray-600"
+                >
+                  Go to Merchant Portal
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -60,48 +85,48 @@ export function Welcome() {
           <div className="stagger-children mt-12 grid gap-8 md:grid-cols-3">
             <StepCard
               number="01"
-              title="Answer 5 questions"
-              description="Your business name, what you do, location, services & prices. Takes about 2 minutes."
-              icon={<Clock className="h-5 w-5" />}
+              title="Tell us your story"
+              description="Describe your business in your own words — type or use voice. Our AI captures your name, services, prices, and everything else."
+              icon={<MessageCircle className="h-5 w-5" />}
             />
             <StepCard
               number="02"
-              title="AI creates your deal"
-              description="We analyze your market, set the right discount, write the copy, and structure everything."
+              title="AI builds your deal"
+              description="We classify your business, analyze your market, set optimal pricing, and write professional copy — all in seconds."
               icon={<Sparkles className="h-5 w-5" />}
             />
             <StepCard
               number="03"
               title="Review & publish"
-              description="See exactly how customers will see your deal. Edit anything you want. One click to go live."
+              description="See exactly how customers will see your deal. Edit anything. Save as draft or go live with one click."
               icon={<CheckCircle2 className="h-5 w-5" />}
             />
           </div>
         </div>
       </section>
 
-      {/* Social proof / stats (synthetic) */}
+      {/* Stats */}
       <section className="border-t border-gray-100 bg-noise bg-gradient-to-b from-gray-50 to-white">
         <div className="mx-auto max-w-5xl px-6 py-14">
           <div className="grid gap-8 md:grid-cols-3 text-center">
             <StatBlock
-              icon={<TrendingUp className="h-5 w-5 text-groupon-green" />}
-              value="2x"
-              label="Faster than manual deal creation"
+              icon={<Zap className="h-5 w-5 text-groupon-green" />}
+              value="Under 5 min"
+              label="From signup to published deal"
             />
             <StatBlock
-              icon={<Users className="h-5 w-5 text-groupon-green" />}
-              value="35-40%"
-              label="Recommended discount for Beauty & Spas"
+              icon={<Target className="h-5 w-5 text-groupon-green" />}
+              value="AI-optimized"
+              label="Pricing based on market benchmarks"
             />
             <StatBlock
               icon={<CheckCircle2 className="h-5 w-5 text-groupon-green" />}
               value="70%+"
-              label="AI fields accepted without edits"
+              label="Target: AI content accepted without edits"
             />
           </div>
           <p className="mt-6 text-center text-xs text-gray-400">
-            Based on synthetic benchmark data for Beauty & Spas in Chicago
+            Compared to 45+ minutes for manual deal creation on Groupon's current platform
           </p>
         </div>
       </section>
