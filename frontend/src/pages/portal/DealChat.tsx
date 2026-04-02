@@ -18,17 +18,34 @@ interface ChatMessage {
   text: string;
 }
 
+interface ProfileService {
+  name: string;
+  price: number;
+}
+
 interface DealChatProps {
   businessName: string;
+  services: ProfileService[];
   onDealExtracted: (deal: ExtractedDeal) => void;
   onSkip: () => void;
 }
 
-export function DealChat({ businessName, onDealExtracted, onSkip }: DealChatProps) {
+function buildGreeting(businessName: string, services: ProfileService[]): string {
+  const name = businessName || 'there';
+  if (services.length === 0) {
+    return `Hi ${name}! What deal would you like to create? Tell me which services you want to offer, any pricing preferences, and how long you'd like it to run.`;
+  }
+  const serviceList = services
+    .map((s) => `${s.name} ($${s.price})`)
+    .join(', ');
+  return `Hi ${name}! I can see you offer: ${serviceList}.\n\nWhich of these would you like to include in your deal? And what discount are you thinking? For example: "all of them at 35% off for 3 months" or "just the deep tissue at 40% off."`;
+}
+
+export function DealChat({ businessName, services, onDealExtracted, onSkip }: DealChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      text: `Hi ${businessName || 'there'}! What deal would you like to create? Tell me which services you want to offer, any pricing preferences, and how long you'd like it to run. I'll set everything up for you.`,
+      text: buildGreeting(businessName, services),
     },
   ]);
   const [input, setInput] = useState('');

@@ -1475,6 +1475,7 @@ export function CreateDeal() {
     return (
       <DealChat
         businessName={form.businessName}
+        services={form.services.map((s) => ({ name: s.name, price: s.regularPrice }))}
         onDealExtracted={handleDealExtracted}
         onSkip={() => setPhase('builder')}
       />
