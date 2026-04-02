@@ -1,6 +1,6 @@
 # Decision Log - AI Merchant Deal Creator
 
-*Running document tracking architectural and product decisions, reasoning, and tradeoffs.*
+*Architectural and product decisions with reasoning, tradeoffs, and production migration paths.*
 
 ---
 
@@ -24,14 +24,16 @@
 | LLM SDK support | First-class Anthropic + OpenAI SDKs | First-class Anthropic + OpenAI SDKs | Tie |
 | Performance (I/O-bound) | Excellent async | FastAPI async is comparable | Tie |
 | Auto-generated API docs | Requires additional setup | FastAPI generates Swagger UI free at `/docs` | Python |
-| Builder fluency | Familiar | Deeply familiar - used for data analysis, Jupyter | Python |
+| Team fluency | Familiar | Strong - established workflows for data analysis, Jupyter | Python |
 | Groupon ecosystem signal | Groupon uses Node.js for BFF layer | Groupon's AI/data teams use Python | Python |
 
-**What we gain:** Data analytics capabilities for evaluation features, auto-generated API docs for the demo, builder confidence for the video walkthrough.
+**What we gain:** Data analytics capabilities for evaluation features, auto-generated API docs for the demo, deep fluency for rapid iteration.
 
 **What we trade:** Stack consistency (two languages). Mitigated by the fact that this is a 3-4 endpoint prototype, not a 30-endpoint system. The type-sync cost (Pydantic models + TS interfaces) is manageable at this scale.
 
 **Setup cost:** One-time ~15 minutes. Daily workflow is `make dev` - no ongoing friction.
+
+**What we'd say in the video:** "We chose Python for the backend because this is an AI pipeline, not a web BFF. Python gives us the strongest LLM SDK support, auto-generated API docs via FastAPI, and positions the tool alongside Groupon's AI/data team practices."
 
 ---
 
@@ -81,17 +83,17 @@ Why Claude specifically:
 | Factor | Tailwind + shadcn/ui | Material UI | Winner |
 |--------|---------------------|-------------|--------|
 | Two distinct UIs (warm merchant + clean admin) | Easy - same utility system, different compositions | Hard - fighting Material Design language | Tailwind |
-| AI-assisted coding quality | Best-in-class - AI tools generate reliable Tailwind | Inconsistent - MUI API changes across versions | Tailwind |
+| Code generation reliability | Consistent, well-documented utility classes | API surface changes across versions cause inconsistencies | Tailwind |
 | Component availability | Tables, tabs, dialogs, forms - all admin needs covered | More comprehensive out-of-box | MUI (slight) |
 | Customization depth | Full control, components in our codebase | Theming system fights you on deep changes | Tailwind |
 | Bundle size | Lightweight | Heavy | Tailwind |
 | Ecosystem momentum | Current standard (2024-2026) | Established but aging | Tailwind |
 
-**Groupon's actual stack:** React + TypeScript with SCSS/LESS. They don't use Tailwind or MUI. We're not matching their internal stack - we're building a prototype that optimizes for speed, polish, and demo quality.
-
-**The vibe coding factor:** Our entire build process is AI-assisted. Tailwind + shadcn is the stack that AI tools produce the most reliable output for. This directly affects build speed and output quality.
+**Groupon's actual stack:** React + TypeScript with SCSS/LESS. We're not matching their internal stack - we're building a prototype that optimizes for speed, polish, and demo quality. The styling layer is the easiest thing to swap in a production migration.
 
 **What we trade:** MUI's out-of-box breadth. Mitigated by shadcn/ui covering all the components we actually need (tables, forms, tabs, dialogs, cards).
+
+**What we'd say in the video:** "We needed two distinct UI personalities - a warm, approachable merchant portal and a clean, data-dense admin panel. Tailwind lets us compose both from the same utility system without fighting a design framework's opinions."
 
 ---
 
@@ -109,11 +111,10 @@ Why Claude specifically:
 **Structure:**
 ```
 groupon-case-study/
-├── case-study/           # Docs (PRD, CLAUDE.md, case study PDF, decisions)
+├── case-study/           # Docs (PRD, decisions, deliverables)
 ├── frontend/             # React + Vite + TypeScript + Tailwind + shadcn/ui
 ├── backend/              # FastAPI + Python
-├── Makefile              # `make dev` runs both servers
-└── decisions.md          # This document
+└── Makefile              # `make dev` runs both servers
 ```
 
 **Reasoning:** Given Decision 001 (Python backend), the frontend and backend are necessarily separate projects. Vite is the modern React build tool (Create React App is deprecated). A Makefile provides a single `make dev` command that starts both servers with hot-reload - the developer experience is effectively identical to a single-project setup.
@@ -144,7 +145,7 @@ groupon-case-study/
 - Python backend: aligns with AI/data team practices (not their web BFF layer)
 - Our prototype sits in the "AI-first" space that Groupon is actively investing in
 
-**What this means for the case study:** Our stack choices are defensible. React + TypeScript matches their frontend. Python for the AI pipeline is the industry standard for AI/ML work. We're not trying to replicate their production architecture - we're prototyping an AI feature.
+**What this means for the case study:** Our stack choices are defensible. React + TypeScript matches their frontend. Python for the AI pipeline is the industry standard for AI/ML work, and aligns with the direction Groupon is heading.
 
 ---
 
@@ -294,6 +295,8 @@ groupon-case-study/
 - **Number ranges:** `temperature` 0.0-2.0, `max_tokens` 1-4096, `expiryDays` 1-365, prices non-negative
 - **Sanitization:** Strip HTML tags from all text inputs at the API boundary
 
+---
+
 ## Decision 013: Required Fields in AI Onboarding - Full Address & Phone
 
 **Date:** 2026-04-02
@@ -341,9 +344,9 @@ Phone is required because:
 
 **Reasoning:**
 
-The whole point of this case study is proving that AI can replace Groupon's 21-screen form flow. Building another form — even a shorter one — misses the thesis. The conversational approach lets merchants describe their business naturally (text or voice), and the AI handles the translation to structured data.
+The core thesis is that AI can replace Groupon's 21-screen form flow. Building another form — even a shorter one — doesn't prove that thesis. The conversational approach lets merchants describe their business naturally, and the AI handles the translation to structured data.
 
-Key insight from user research: small business owners don't think in form fields. They think in stories — "I run a spa in Barrie, we do hot stone massages for $90." Forcing that into 21 screens of dropdowns and text inputs is where Groupon loses them.
+Key insight: small business owners don't think in form fields. They think in stories — "I run a spa in Barrie, we do hot stone massages for $90." Forcing that into 21 screens of dropdowns and text inputs is where Groupon loses them.
 
 **What we gain:** A fundamentally different UX that demonstrates the AI value proposition clearly. Under 5 minutes from "tell me about your business" to published deal.
 
@@ -352,6 +355,8 @@ Key insight from user research: small business owners don't think in form fields
 **Implementation:** Two conversational phases:
 1. **Onboarding chat** — "Tell me about your business" → AI extracts profile (name, services, prices, location, category)
 2. **Deal creation chat** — 5 follow-up questions (services, discount, duration, scheduling, terms) → AI generates complete deal
+
+**What we'd say in the video:** "Instead of 21 screens of form fields, the merchant tells us their story in plain language. The AI extracts everything we need - business name, services, pricing, location, category - and the merchant reviews it before saving. Under 5 minutes from first input to published deal."
 
 ---
 
@@ -364,17 +369,19 @@ Key insight from user research: small business owners don't think in form fields
 
 **Reasoning:**
 
-Early versions asked for business info during deal creation every time. This was redundant — if a merchant already told us their name, services, and location, asking again for each deal is friction Groupon's current flow already suffers from.
+Coupling business info to deal creation means re-entering the same data for every deal — exactly the kind of friction Groupon's current flow already suffers from.
 
 The separation mirrors how merchants actually think:
 - "I am Sakura Spa" (set once, update rarely) → **Profile**
 - "I want to run a 20% off massage deal this month" (repeatable, seasonal) → **Deal**
 
 **Implementation:**
-- Onboarding creates and saves the profile (`profile.json`)
+- Onboarding creates and saves the profile
 - Deal creation reads from the saved profile to pre-fill services, pricing, location, contact info
-- Profile can be edited independently from `/portal/profile`
-- After onboarding, the flow routes directly to deal creation with profile data pre-loaded via `sessionStorage`
+- Profile can be edited independently from the portal
+- After onboarding, the flow routes directly to deal creation with profile context pre-loaded
+
+**What we'd say in the video:** "Profile and deals are separate concerns. You tell us about your business once. Every deal after that inherits your services, pricing, and location automatically - the AI already knows who you are."
 
 ---
 
@@ -403,4 +410,4 @@ A standalone deal creator demonstrates one feature. A complete portal demonstrat
 
 **What we trade:** Development time on pages that aren't the core thesis. Mitigated by keeping mock pages lightweight (static data, minimal interactivity).
 
-*Decisions below this line are pending or will be added as we build.*
+**What we'd say in the video:** "We didn't just build the AI deal creator in isolation. We built the full merchant portal so you can see how this feature fits into the merchant's daily workflow - onboarding, campaigns, vouchers, payments, all in one place."
