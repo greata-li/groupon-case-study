@@ -304,6 +304,36 @@ export async function extractStory(
   return res.json();
 }
 
+// --- Deal Story Extractor ---
+
+export interface ExtractedDeal {
+  selected_services: Array<{
+    name: string;
+    regular_price: number;
+    groupon_price: number;
+    discount_pct: number;
+    voucher_cap: number;
+  }>;
+  highlights: string;
+  descriptions: Record<string, string>;
+  expiry_days: number;
+  scheduling_suggestion: string;
+  deal_title: string;
+  restrictions: string[];
+  photo_guidance: string;
+  parse_error?: boolean;
+}
+
+export async function extractDeal(story: string): Promise<ExtractedDeal> {
+  const res = await fetch(`${API_BASE}/pipeline/extract-deal`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ story }),
+  });
+  if (!res.ok) throw new Error(`Deal extraction failed: ${res.statusText}`);
+  return res.json();
+}
+
 // --- Enhance Text (Inspire Me) ---
 
 export interface EnhanceTextResult {

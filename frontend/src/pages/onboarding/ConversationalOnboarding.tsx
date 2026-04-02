@@ -26,6 +26,7 @@ import {
   Calendar,
   DollarSign,
   Star,
+  Camera,
 } from 'lucide-react';
 
 type Phase = 'chat' | 'extracting' | 'review' | 'saved';
@@ -351,6 +352,75 @@ export function ConversationalOnboarding() {
                       Add service
                     </Button>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Business Photos */}
+              <Card>
+                <CardContent className="py-5 space-y-4">
+                  <h3 className="font-heading text-base font-bold text-gray-900 flex items-center gap-2">
+                    <Camera className="h-4 w-4 text-groupon-green" />
+                    Business Photos
+                    <Badge variant="outline" className="text-[10px] text-gray-400 border-gray-200">Optional</Badge>
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Photos help customers see what to expect. Deals with photos get 2x more views.
+                  </p>
+
+                  {/* Upload area */}
+                  <div
+                    className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 p-6 text-center cursor-pointer hover:border-groupon-green/30 hover:bg-groupon-green/[0.02] transition-all"
+                    onClick={() => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = 'image/*';
+                      input.multiple = true;
+                      input.onchange = (e) => {
+                        const files = (e.target as HTMLInputElement).files;
+                        if (files) {
+                          // In production, upload to server. For prototype, store file names.
+                          const names = Array.from(files).map(f => f.name);
+                          setEditProfile({
+                            ...editProfile,
+                            photos: [...(editProfile.photos || []), ...names],
+                          } as any);
+                        }
+                      };
+                      input.click();
+                    }}
+                  >
+                    <Camera className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm font-medium text-gray-600">
+                      Click to upload photos
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      JPG, PNG up to 10MB. Landscape orientation recommended.
+                    </p>
+                  </div>
+
+                  {/* Uploaded files display */}
+                  {(editProfile as any).photos && (editProfile as any).photos.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {((editProfile as any).photos as string[]).map((photo, i) => (
+                        <Badge key={i} variant="secondary" className="text-xs gap-1">
+                          {photo}
+                          <button
+                            onClick={() => {
+                              const updated = ((editProfile as any).photos as string[]).filter((_, idx) => idx !== i);
+                              setEditProfile({ ...editProfile, photos: updated } as any);
+                            }}
+                            className="ml-1 hover:text-red-500"
+                          >
+                            ×
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  <p className="text-xs text-gray-400">
+                    You can also add photos later when creating individual deals.
+                  </p>
                 </CardContent>
               </Card>
 

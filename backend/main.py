@@ -403,6 +403,63 @@ async def extract_story(request: StoryRequest):
     return extracted
 
 
+# --- Deal Story Extractor (conversational deal creation) ---
+
+class DealStoryRequest(BaseModel):
+    story: str
+
+
+@app.post("/api/pipeline/extract-deal")
+async def extract_deal(request: DealStoryRequest):
+    """
+    Takes a merchant's free-form description of what deal they want to run
+    and extracts structured deal data. Uses the saved profile for context.
+    """
+    from app.endpoints.pipeline import call_claude, parse_json_response
+
+    profile = load_profile()
+
+    config = {
+        "model": "claude-sonnet-4-20250514",
+        "max_tokens": 2048,
+        "temperature": 0.4,
+        "system_prompt": (
+            "You are a deal creation specialist for Groupon.\n\n"
+            "A merchant is describing what deal they want to run. Using their saved business profile "
+            "and their description, extract everything needed to create a complete Groupon deal.\n\n"
+            f"Merchant profile: {json.dumps(profile)}\n\n"
+            "Return ONLY valid JSON:\n"
+            "{\n"
+            '  "selected_services": [\n'
+            '    { "name": "Service Name", "regular_price": 65, "groupon_price": 39, "discount_pct": 40, "voucher_cap": 50 }\n'
+            '  ],\n'
+            '  "highlights": "3-5 bullet points separated by newlines",\n'
+            '  "descriptions": { "0": "What is included in option 1", "1": "What is included in option 2" },\n'
+            '  "expiry_days": 90,\n'
+            '  "scheduling_suggestion": "Best for Tuesday/Wednesday bookings",\n'
+            '  "deal_title": "Service at Business Name (Up to X% Off)",\n'
+            '  "restrictions": ["New customers only", "Appointment required"],\n'
+            '  "photo_guidance": "Suggestion for what photos would work best"\n'
+            "}\n\n"
+            "Rules:\n"
+            "- Use services from the merchant's profile. If they mention specific ones, use those. "
+            "If they say 'all my services' or are vague, include all profile services.\n"
+            "- Set Groupon prices at 35-40% off regular unless they specify a discount.\n"
+            "- Generate compelling highlights and per-service descriptions.\n"
+            "- If they mention timing (e.g., 'for 3 months', 'Tuesdays'), capture in scheduling_suggestion and expiry_days.\n"
+            "- Generate a professional deal title.\n"
+            "- Include sensible restrictions based on service type."
+        ),
+    }
+
+    raw = await call_claude(config, request.story)
+
+    try:
+        return parse_json_response(raw)
+    except (json.JSONDecodeError, ValueError):
+        return {"raw_response": raw, "parse_error": True}
+
+
 # --- AI Text Enhancement ---
 
 class EnhanceTextRequest(BaseModel):
