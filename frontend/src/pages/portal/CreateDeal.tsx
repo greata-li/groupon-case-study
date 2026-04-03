@@ -234,14 +234,18 @@ export function CreateDeal() {
         }
 
         if (Array.isArray(p.services) && p.services.length > 0) {
-          updates.services = p.services.map((s) => ({
-            included: true,
-            name: s.name || '',
-            regularPrice: s.price || 0,
-            grouponPrice: '',
-            discountPct: 0,
-            voucherCap: '50',
-            description: '',
+          updates.services = recalcAllDiscounts(p.services.map((s) => {
+            const price = s.price || 0;
+            const suggestedGroupon = price > 0 ? String(Math.round(price * 0.63)) : '';
+            return {
+              included: true,
+              name: s.name || '',
+              regularPrice: price,
+              grouponPrice: suggestedGroupon,
+              discountPct: 0,
+              voucherCap: '50',
+              description: '',
+            };
           }));
         } else {
           setNoServices(true);
