@@ -1,1 +1,107 @@
-[]
+[
+  {
+    "id": "a4e0fbdb-b207-41d4-ab8a-4dcc6bec8be2",
+    "deal": {
+      "title": "Regular Massage (60 minutes) at Massage Addict Aurora",
+      "description": "60-minute regular massage session focusing on relaxation and tension relief using traditional massage techniques",
+      "highlights": [
+        "Professional massage therapy with multiple treatment options",
+        "Choose from regular, deep tissue, or hot stone massage",
+        "Flexible 30 or 60-minute sessions to fit your schedule",
+        "Convenient Aurora location with experienced therapists",
+        "Perfect for stress relief and muscle recovery"
+      ],
+      "services": [
+        {
+          "name": "Regular Massage (60 minutes)",
+          "description": "60-minute regular massage session focusing on relaxation and tension relief using traditional massage techniques",
+          "original_price": 120,
+          "discount_pct": 30,
+          "deal_price": 84,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Deep Tissue Massage (60 minutes)",
+          "description": "60-minute deep tissue massage targeting muscle knots and chronic tension with firm pressure and specialized techniques",
+          "original_price": 120,
+          "discount_pct": 30,
+          "deal_price": 84,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Hot Stone Massage (60 minutes)",
+          "description": "60-minute hot stone massage combining heated stones with massage therapy for deep relaxation and improved circulation",
+          "original_price": 120,
+          "discount_pct": 30,
+          "deal_price": 84,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Regular Massage (30 minutes)",
+          "description": "30-minute regular massage session providing quick stress relief and muscle relaxation using traditional massage techniques",
+          "original_price": 80,
+          "discount_pct": 35,
+          "deal_price": 52,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Deep Tissue Massage (30 minutes)",
+          "description": "30-minute deep tissue massage focusing on specific problem areas with firm pressure to release muscle tension",
+          "original_price": 80,
+          "discount_pct": 35,
+          "deal_price": 52,
+          "voucher_cap": 50
+        },
+        {
+          "name": "Hot Stone Massage (30 minutes)",
+          "description": "30-minute hot stone massage using heated stones to warm muscles and promote relaxation in a shorter session",
+          "original_price": 80,
+          "discount_pct": 35,
+          "deal_price": 52,
+          "voucher_cap": 50
+        }
+      ],
+      "fine_print": {
+        "expiry_days": 90,
+        "max_per_person": 1,
+        "appointment_required": true,
+        "new_customers_only": true,
+        "restrictions": [
+          "Not valid with other offers"
+        ],
+        "cancellation_policy": "24-hour cancellation policy. No-shows will forfeit their voucher."
+      },
+      "voucher_instructions": {
+        "redemption_method": "physical",
+        "appointment_required": true,
+        "instructions": "Visit at 265 Edward St Unit 18, Aurora, ON L4G 3M7"
+      },
+      "category": "Health, Beauty & Wellness > Massage Therapy",
+      "scheduling_recommendation": "",
+      "photo_guidance": "",
+      "confidence": {
+        "title": 0.85,
+        "description": 0.85,
+        "pricing": 0.9,
+        "category": 0.92
+      }
+    },
+    "intake": {
+      "business_name": "Massage Addict Aurora",
+      "business_description": "Massage Addict Aurora is a professional massage therapy clinic offering a variety of therapeutic massage services. We specialize in regular massage, deep tissue massage, and hot stone massage treatments to help clients relax and recover.",
+      "location": "Aurora, ON",
+      "services": "Regular Massage (60 minutes), Deep Tissue Massage (60 minutes), Hot Stone Massage (60 minutes), Regular Massage (30 minutes), Deep Tissue Massage (30 minutes), Hot Stone Massage (30 minutes)",
+      "additional_info": "",
+      "phone": "+19059000760",
+      "address": "265 Edward St Unit 18, Aurora, ON L4G 3M7",
+      "website": ""
+    },
+    "contact": {
+      "phone": "+19059000760",
+      "address": "265 Edward St Unit 18, Aurora, ON L4G 3M7",
+      "website": ""
+    },
+    "published_at": "2026-04-03T02:11:10.617837",
+    "status": "active"
+  }
+]
