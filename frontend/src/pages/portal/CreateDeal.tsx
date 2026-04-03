@@ -286,6 +286,16 @@ export function CreateDeal() {
       });
   }, []);
 
+  // Safety net: recalculate discounts after form is loaded (catches any timing issues)
+  useEffect(() => {
+    if (!profileLoading && form.services.some((s) => s.grouponPrice && !s.discountPct)) {
+      setForm((prev) => ({
+        ...prev,
+        services: recalcAllDiscounts(prev.services),
+      }));
+    }
+  }, [profileLoading]);
+
   // Load existing deal when editing
   useEffect(() => {
     if (!editDealId) return;
