@@ -40,7 +40,7 @@ export function PipelineAnalytics() {
 
   // Mock analytics data (in production, these would come from actual pipeline logs)
   const pipelineStats = {
-    totalRuns: dealCount * 3 + 12, // 3 endpoints per deal + test runs
+    totalRuns: dealCount * 5 + 22, // ~5 endpoints per deal flow + test runs
     avgLatency: 4200,
     successRate: 94.2,
     tokensUsed: dealCount * 2800 + 5600,
@@ -48,10 +48,13 @@ export function PipelineAnalytics() {
   };
 
   const endpointMetrics = [
+    { name: 'Story Extractor', model: 'Sonnet', avgLatency: 4200, calls: dealCount + 6, successRate: 93 },
+    { name: 'Deal Extractor', model: 'Sonnet', avgLatency: 3600, calls: dealCount + 4, successRate: 90 },
     { name: 'Business Classifier', model: 'Haiku', avgLatency: 1200, calls: dealCount + 4, successRate: 97 },
     { name: 'Service Suggester', model: 'Haiku', avgLatency: 1800, calls: dealCount + 3, successRate: 91 },
     { name: 'Market Intelligence', model: 'Haiku', avgLatency: 1400, calls: dealCount + 3, successRate: 95 },
     { name: 'Deal Generator', model: 'Sonnet', avgLatency: 3800, calls: dealCount + 2, successRate: 89 },
+    { name: 'Text Enhancer', model: 'Haiku', avgLatency: 1100, calls: dealCount + 8, successRate: 96 },
   ];
 
   const fieldAcceptanceRates = [
