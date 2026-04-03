@@ -496,6 +496,7 @@ export function CreateDeal() {
   );
 
   async function handlePublish(status: 'draft' | 'active' = 'draft') {
+    if (publishing) return; // prevent double-click
     setPublishing(true);
     try {
       const includedServices = form.services.filter((s) => s.included && s.name);
@@ -572,13 +573,10 @@ export function CreateDeal() {
         await publishDeal(deal, intake, contact);
       }
 
-      // Show success briefly before redirecting
-      setPublishing(false);
+      // Show success briefly before redirecting — keep publishing=true to prevent double-click
       setSaveSuccess(true);
       setTimeout(() => navigate('/portal/campaigns'), 1200);
     } catch {
-      // show error inline if needed
-    } finally {
       setPublishing(false);
     }
   }
